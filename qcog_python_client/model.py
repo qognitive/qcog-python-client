@@ -7,7 +7,7 @@ from typing_extensions import NotRequired
 import pandas as pd
 import numpy as np
 
-from client import QcogClient
+from .client import QcogClient
 
 
 class Model(Enum):

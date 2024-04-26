@@ -79,6 +79,14 @@ class TrainingParameters(TypedDict):
     state_kwargs: StateParams
 
 
+def encode_base64(data: pd.DataFrame) -> str:
+    raw_string: str = data.to_csv(index=False)
+    raw_bytes: bytes = raw_string.encode("ascii")
+    base64_bytes = base64.b64encode(raw_bytes)
+    base64_string = base64_bytes.decode("ascii")
+    return base64_string
+
+
 class DataSerializer:
     def __init__(
         self,
@@ -95,15 +103,11 @@ class DataSerializer:
 
     @property
     def payload(self) -> dict:
-        raw_string: str = self.data.to_csv(index=False)
-        raw_bytes: bytes = raw_string.encode("ascii")
-        base64_bytes = base64.b64encode(raw_bytes)
-        base64_string = base64_bytes.decode("ascii")
 
         return {
             "format": "csv",
             "source": "client",
-            "data": base64_string,
+            "data": encode_base64(self.data),
             "project_guid": self.client.project["guid"],
         }
 
@@ -237,7 +241,7 @@ class ModelClient:
         return self.client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
-                "data": data,
+                "data": encode_base64(data),
                 "parameters": parameters
             },
         )

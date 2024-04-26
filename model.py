@@ -238,6 +238,14 @@ class ModelClient:
         data: pd.DataFrame,
         parameters: dict,
     ) -> pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
+        print("deprecated, please use \"inference\" method instead")
+        return self.inference(data, parameters)
+
+    def inference(
+        self,
+        data: pd.DataFrame,
+        parameters: dict,
+    ) -> pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
         return self.client.post(
             f"model/{self.trained_model['guid']}/inference",
             {

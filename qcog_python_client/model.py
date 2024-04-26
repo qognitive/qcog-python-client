@@ -141,7 +141,7 @@ class ModelClient:
     def __init__(
         self,
         client: QcogClient | None = None,
-        version: str = "0.0.41"
+        version: str = "0.0.43"
     ):
         self.model: Model = Model("NOT_SET")
         self.params: Interface = EMPTY_MODEL_PARAMS()
@@ -213,7 +213,7 @@ class ModelClient:
         training_parameters_guid = self.trained_model['training_parameters_guid']
         dataset_guid = self.trained_model["dataset_guid"]
         project_guid = self.trained_model["project_guid"]  # TODO review this
-        self.version = self.trained_model["location"].split("output/")[-1].split("-")[1]
+        self.version = self.trained_model["training_package_location"].split("packages/")[-1].split("-")[1]
 
         self.preloaded_training_parameters(training_parameters_guid)._rebuild_model_params()
         if with_data:
@@ -233,12 +233,15 @@ class ModelClient:
         )
         return self
 
+    def status(self):
+        return self.client.get(f"model/{self.trained_model['guid']}")
+
     def forecast(
         self,
         data: pd.DataFrame,
         parameters: dict,
     ) -> pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
-        print("deprecated, please use \"inference\" method instead")
+        print("\"forecast\" is deprecated, please use \"inference\" method instead")
         return self.inference(data, parameters)
 
     def inference(

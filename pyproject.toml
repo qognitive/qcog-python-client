@@ -5,6 +5,10 @@ requires = [
 ]
 
 [project]
+name = "qcog_python_client"
+version = "0.0.1"
+readme = "README.md"
+description = "qcog python client"
 dependencies = [
   "requests",
   "pandas",
@@ -13,6 +17,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "mypy",
+  "flake8",
   "pandas-stubs",
   "types-requests"
 ]

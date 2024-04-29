@@ -135,7 +135,9 @@ class ModelClient:
         --------
         ModelClient instance from trained model
         """
-        qcog_client: QcogClient = client if client is not None else QcogClient()
+        qcog_client: QcogClient = (
+            client if client is not None else QcogClient()
+        )
         return cls(qcog_client).preloaded_model(guid, with_data=with_data)
 
     def __init__(
@@ -201,21 +203,36 @@ class ModelClient:
         self.dataset = self._preload("dataset", guid)
         return self
 
-    def preloaded_training_parameters(self, guid: str, rebuild: bool = False) -> ModelClient:
-        self.training_parameters: dict = self._preload("training_parameters", guid)
+    def preloaded_training_parameters(
+        self, guid: str,
+        rebuild: bool = False
+    ) -> ModelClient:
+        self.training_parameters: dict = self._preload(
+            "training_parameters",
+            guid,
+        )
         if rebuild:
             return self._rebuild_model_params()
         return self
 
-    def preloaded_model(self, guid: str, with_data: bool = False) -> ModelClient:
+    def preloaded_model(
+        self, guid: str,
+        with_data: bool = False,
+    ) -> ModelClient:
         self.trained_model = self.client.get(f"model/{guid}")
 
-        training_parameters_guid = self.trained_model['training_parameters_guid']
+        training_parameters_guid = self.trained_model[
+            'training_parameters_guid'
+        ]
         dataset_guid = self.trained_model["dataset_guid"]
-        project_guid = self.trained_model["project_guid"]  # TODO review this
-        self.version = self.trained_model["training_package_location"].split("packages/")[-1].split("-")[1]
+        # project_guid = self.trained_model["project_guid"]  # TODO review this
+        self.version = self.trained_model[
+            "training_package_location"
+        ].split("packages/")[-1].split("-")[1]
 
-        self.preloaded_training_parameters(training_parameters_guid)._rebuild_model_params()
+        self.preloaded_training_parameters(
+            training_parameters_guid
+        )._rebuild_model_params()
         if with_data:
             return self.preloaded_data(dataset_guid)
         return self
@@ -241,7 +258,9 @@ class ModelClient:
         data: pd.DataFrame,
         parameters: dict,
     ) -> pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
-        print("\"forecast\" is deprecated, please use \"inference\" method instead")
+        print(
+                "\"forecast\" is deprecated, please use \"inference\" method instead"  # noqa: 503
+        )
         return self.inference(data, parameters)
 
     def inference(

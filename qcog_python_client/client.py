@@ -61,7 +61,12 @@ class QcogClient:
         return resp
 
     def _post(self, uri: str, data: dict) -> requests.Response:
-        resp = requests.post(uri, headers=self.headers, json=data, verify=self.verify)
+        resp = requests.post(
+            uri,
+            headers=self.headers,
+            json=data,
+            verify=self.verify,
+        )
 
         try:
             resp.raise_for_status()
@@ -96,5 +101,8 @@ class QcogClient:
         return retval
 
     def post(self, endpoint: str, data: dict) -> dict:
-        retval: dict = self._post(f"{self.url}/{endpoint}/", data=data).json()
+        retval: dict = self._post(
+            f"{self.url}/{endpoint}/",
+            data=data
+        ).json()
         return retval

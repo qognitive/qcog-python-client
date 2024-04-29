@@ -4,6 +4,19 @@ requires = [
     "wheel",
 ]
 
+[project]
+dependencies = [
+  "requests",
+  "pandas",
+  "numpy",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pandas-stubs",
+  "types-requests"
+]
+
 [tool.mypy]
 warn_redundant_casts = true
 warn_unused_ignores = true

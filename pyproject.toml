@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "setuptools",
-    "wheel",
+  "setuptools",
+  "build",
 ]
 
 [project]
@@ -17,6 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "build",
   "mypy",
   "flake8",
   "pandas-stubs",

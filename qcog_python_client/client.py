@@ -3,6 +3,10 @@ import requests
 
 
 class QcogClient:
+    """
+    This class is the https API client
+    It holds the project information at the moment
+    """
 
     TOKEN: str = os.environ.get("QCOG_API_TOKEN", "N/A")
     HOSTNAME: str = os.environ.get("QCOG_HOSTNAME", "0.0.0.0")
@@ -49,6 +53,20 @@ class QcogClient:
         self._resolve_project(test_project)
 
     def _get(self, uri: str) -> requests.Response:
+        """
+        Execute the get "requests" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+
+        Returns:
+        --------
+        requests.Response object
+            will raise_for_status so caller
+            may use .json()
+        """
         resp = requests.get(uri, headers=self.headers, verify=self.verify)
 
         try:
@@ -61,6 +79,22 @@ class QcogClient:
         return resp
 
     def _post(self, uri: str, data: dict) -> requests.Response:
+        """
+        Execute the posts "requests" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+        requests.Response object
+            will raise_for_status so caller
+            may use .json()
+        """
         resp = requests.post(
             uri,
             headers=self.headers,
@@ -78,11 +112,28 @@ class QcogClient:
         return resp
 
     def _test_connection(self) -> None:
+        """
+        Run health checks at class creation
+        """
         if self.safe_mode:
             for uri in self.checks:
                 self._get(uri)
 
     def _resolve_project(self, test_project: bool) -> None:
+        """
+        NOTE: CURRENTLY A STUB
+        This method is a utility method of the class __init__
+        method that resolves the project(s) accessible for this
+        "token-as-proxy-for-org/user"
+
+        Implements a "test mode" that will create a project
+
+        Parameters:
+        -----------
+        test_project: bool
+            If true, the class creation will create a new project and
+            store its GUID in the PROJECT_GUID_TEMPORARY variable
+        """
 
         if test_project:
             self.PROJECT_GUID_TEMPORARY = self.post(
@@ -97,10 +148,38 @@ class QcogClient:
         self.project: dict[str, str] = resp.json()
 
     def get(self, endpoint: str) -> dict:
+        """
+        Convenience wrapper around requests.get (called via _get method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
         retval: dict = self._get(f"{self.url}/{endpoint}/").json()
         return retval
 
     def post(self, endpoint: str, data: dict) -> dict:
+        """
+        Convenience wrapper around requests.post (called via _post method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
         retval: dict = self._post(
             f"{self.url}/{endpoint}/",
             data=data

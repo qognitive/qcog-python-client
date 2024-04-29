@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Type, TypedDict, TypeAlias, Any
 from typing_extensions import NotRequired
 import pandas as pd
-import numpy as np
+#  import numpy as np
 
 from .client import QcogClient
 
@@ -116,7 +116,7 @@ class ModelClient:
 
     @classmethod
     def from_model_guid(
-        cls: ModelClient,
+        cls: Type[ModelClient],
         guid: str,
         client: QcogClient | None = None,
         with_data: bool = False
@@ -153,7 +153,7 @@ class ModelClient:
         self.training_parameters: dict = {}
         self.trained_model: dict = {}
 
-    def _preload(self, ep: str, guid: str):
+    def _preload(self, ep: str, guid: str) -> dict:
         return self.client.get(f"{ep}/{guid}")
 
     def _training_parameters(self, params: TrainingParameters) -> None:
@@ -170,8 +170,11 @@ class ModelClient:
 
     def _rebuild_model_params(self) -> ModelClient:
         self._model(self.training_parameters["model"])
+        copy_params: dict = self.training_parameters[
+            "parameters"
+        ]["model"].copy()
         model_params: Interface = VALID_MODEL_PARAMS[self.model](
-            self.training_parameters["parameters"]["model"].copy()
+            **copy_params
         )
 
         return self._params(model_params)
@@ -207,7 +210,7 @@ class ModelClient:
         self, guid: str,
         rebuild: bool = False
     ) -> ModelClient:
-        self.training_parameters: dict = self._preload(
+        self.training_parameters = self._preload(
             "training_parameters",
             guid,
         )
@@ -250,14 +253,14 @@ class ModelClient:
         )
         return self
 
-    def status(self):
+    def status(self) -> dict:
         return self.client.get(f"model/{self.trained_model['guid']}")
 
     def forecast(
         self,
         data: pd.DataFrame,
         parameters: dict,
-    ) -> pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
+    ) -> dict:  # pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
         print(
                 "\"forecast\" is deprecated, please use \"inference\" method instead"  # noqa: 503
         )
@@ -267,11 +270,12 @@ class ModelClient:
         self,
         data: pd.DataFrame,
         parameters: dict,
-    ) -> pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
-        return self.client.post(
+    ) -> dict:  # pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
+        resp: dict = self.client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
                 "data": encode_base64(data),
                 "parameters": parameters
             },
         )
+        return resp

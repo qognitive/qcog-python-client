@@ -2,19 +2,18 @@ import os
 import json
 import pandas
 
-from qcog_python_client import QcogClient, ModelClient, PauliInterface, TrainingParameters
+from qcog_python_client import QcogClient, ModelClient, EnsembleInterface, PauliInterface, TrainingParameters
 
 
 HOSTNAME = replace me
 API_TOKEN = replace me
-TRAINED_MODEL_GUID = replace me
 
 
 df = pandas.read_json("small0.json")
 
-qcog_client = QcogClient(token, hostname, verify=False)
+qcog_client = QcogClient(API_TOKEN, HOSTNAME, verify=False)
 
-model_params = PauliInterface(
+model_params = EnsembleInterface(
     {
         "operators": ["X", "Y", "Z"],
         "dim": 16,

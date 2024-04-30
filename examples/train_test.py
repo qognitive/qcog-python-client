@@ -5,27 +5,11 @@ import pandas
 from qcog_python_client import QcogClient, ModelClient, EnsembleInterface, PauliInterface, TrainingParameters
 
 
-HOSTNAME = replace me
-API_TOKEN = replace me
+HOSTNAME = os.environ["HOSTNAME"]
+API_TOKEN = os.environ["API_TOKEN"]
 
 
 df = pandas.read_json("small0.json")
-
-qcog_client = QcogClient(API_TOKEN, HOSTNAME, verify=False)
-
-model_params = EnsembleInterface(
-    {
-        "operators": ["X", "Y", "Z"],
-        "dim": 16,
-        "num_axes": 4,
-        "sigma_sq": {},
-        "sigma_sq_optimization_kwargs": {},
-        "seed": 42,
-        "target_operators": []
-    }
-)
-
-print(model_params)
 
 training_parameters = TrainingParameters(
     {
@@ -54,16 +38,20 @@ training_parameters = TrainingParameters(
     }
 )
 
-print(training_parameters)
 
-print(df)
+qcog_client = QcogClient(API_TOKEN, HOSTNAME, verify=False)
+hsm = QcogClient(API_TOKEN, HOSTNAME, verify=False, verbose=True).EnsembleHSM(operators=["X", "Y", "Z"]).data(df).train(training_parameters)
 
-hsm = ModelClient(client=qcog_client).model_params("ensemble", model_params).data(df)
+print(hsm.trained_model)
 
-#hsm.preloaded_data(data guid)
-
-print("data uploaded")
-
-print(hsm.train(training_parameters).trained_model)
-
-print("done")
+# model_params = EnsembleInterface(
+#     {
+#         "operators": ["X", "Y", "Z"],
+#         "dim": 16,
+#         "num_axes": 4,
+#         "sigma_sq": {},
+#         "sigma_sq_optimization_kwargs": {},
+#         "seed": 42,
+#         "target_operators": []
+#     }
+# )

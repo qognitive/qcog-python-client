@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-import base64
 from enum import Enum
-from typing import Type, TypedDict, TypeAlias, Any
-from typing_extensions import NotRequired
-import pandas as pd
-#  import numpy as np
+from typing import Type, TypedDict, TypeAlias, Any, Protocol
 
-from .client import QcogClient
+import pandas as pd
 
 
 class Model(Enum):
@@ -16,52 +12,15 @@ class Model(Enum):
     NOT_SET = "NOT_SET"
 
 
-class EMPTY_MODEL_PARAMS(TypedDict):
-    """
-    Typed empty dictionary as a default a value
-    You can think or it as a Typed "None"
-    """
+class EMPTY_DICTIONARY(TypedDict):
     pass
 
 
-class PauliInterface(TypedDict):
-    """
-    Definition of Pauli parameters
-    must match the schema Input
-    from orchestration API
-    """
-    operators: list
-    qbits: int
-    pauli_weight: int
-    sigma_sq: NotRequired[dict[str, float]]
-    sigma_sq_optimization_kwargs: NotRequired[dict[str, Any]]
-    seed: NotRequired[int]
-    target_operators: NotRequired[list]
-
-
-class EnsembleInterface(TypedDict):
-    """
-    Definition of Ensemble parameters
-    must match the schema Input
-    from orchestration API
-    """
-    operators: list
-    dim: int
-    num_axes: int
-    sigma_sq: NotRequired[dict[str, float]]
-    sigma_sq_optimization_kwargs: NotRequired[dict[str, Any]]
-    seed: NotRequired[int]
-    target_operators: NotRequired[list]
-
-
-Interface: TypeAlias = PauliInterface | EnsembleInterface | EMPTY_MODEL_PARAMS
-TypeInterface: TypeAlias = Type[PauliInterface] | Type[EnsembleInterface]
-
-
-VALID_MODEL_PARAMS: dict[Model, TypeInterface] = {
-    Model.pauli: PauliInterface,
-    Model.ensemble: EnsembleInterface,
-}
+class Dataset(TypedDict):
+    format: str
+    source:str
+    data: str
+    project_guid: str
 
 
 class WeightParams(TypedDict):
@@ -101,82 +60,160 @@ class StateParams(TypedDict):
     fisher_state_kwargs: FisherParams
 
 
+NotRequiredWeightParams: TypeAlias = WeightParams | EMPTY_DICTIONARY
+NotRequiredStateParams: TypeAlias = StateParams | EMPTY_DICTIONARY
+
+
 class TrainingParameters(TypedDict):
+    batch_size: int,
+    num_passes: int,
+    weight_optimization: NotRequiredWeightParams,
+    get_states_extra: NotRequiredStateParams,
+
+
+class TrainProtocol(Protocol):
+    def train(
+        self,
+        batch_size: int,
+        num_passes: int,
+        weight_optimization: NotRequiredWeightParams,
+        get_states_extra: NotRequiredStateParams,
+    ) -> Any:  # NOTE: we could make this a generic
+        raise NotImplementedError("Train class must implement train")
+
+
+class InferenceProtocol(Protocol):
+    def inference(
+        self,
+        data: pd.DataFrame,
+        operators_to_forecast: list[Operator]
+    ) -> pd.DataFrame:
+        raise NotImplementedError("Inference class must implement inference")
+
+
+Operator: TypeAlias = str | int
+
+
+class PauliSchema(Protocol, TrainProtocol, InferenceProtocol):
     """
-    Definition of train fct parameters
-    must match the schema Input
+    Definition of Pauli parameters
+    must match the "schema" validation
     from orchestration API
-    """
-    batch_size: int
-    num_passes: int
-    weight_optimization_kwargs: WeightParams
-    state_kwargs: StateParams
-
-
-def encode_base64(data: pd.DataFrame) -> str:
-    """
-    take a normal pandas dataframe and encode as
-    base64 "string" of csv export
-
-    Parameters:
-    -----------
-    data: pd.DataFrame
-
-    Returns:
-    str
-    """
-    raw_string: str = data.to_csv(index=False)
-    raw_bytes: bytes = raw_string.encode("ascii")
-    base64_bytes = base64.b64encode(raw_bytes)
-    base64_string = base64_bytes.decode("ascii")
-    return base64_string
-
-
-class DataSerializer:
-    """
-    Convenience wrapper class for uploading dataset
     """
     def __init__(
         self,
-        model: ModelClient,
-        data: pd.DataFrame,
+        operators: list[Operator],
+        qbits: int,
+        pauli_weight: int,
+        sigma_sq: dict[str, float],
+        sigma_sq_optimization: dict[str, float],
+        seed: int,
+        target_operator: list[Operator],
     ):
-        """
-        Create a DataSerializer instance from a pandas DataFrame
+        raise NotImplementedError("Pauli class must implement init")
 
-        Parameters:
-        -----------
-        model: ModelClient
-            the parent model client
-        data: pd.DataFrame:
-            the dataset as a DataFrame
 
-        Returns:
-        --------
-        DataSerializer instance
-        """
-        self.model: ModelClient = model
-        self.client: QcogClient = model.client
-        self.data: pd.DataFrame = data
+class EnsembleSchema(Protocol, TrainProtocol, InferenceProtocol):
+    """
+    Definition of Ensemble parameters
+    must match the "schema" validation
+    from orchestration API
+    """
+    def __init__(
+        self,
+        operators: list[str],
+        dim: int,
+        num_axes: int,
+        sigma_sq: dict[str, float],
+        sigma_sq_optimization: dict[str, float],
+        seed: int,
+        target_operator: list
+    ):
+        raise NotImplementedError("Pauli class must implement init")
 
-    def upload(self) -> dict:
+    def inference(
+        self,
+        data: pd.DataFrame,
+        operators_to_forecast: list[Operator]
+    ) -> pd.DataFrame:
         """
-        upload the dataset via API call
+        We could create a InferenceProtocol class since both Ensemble and Pauli
+        share the same interface, but quantum is different. individual
+        implementations is more future proof
         """
-        self.dataset: dict = self.client.post("dataset", self.payload)
-        return self.dataset
+        raise NotImplementedError("Pauli class must implement inference")
+
+
+class ValueMixin:
+    model: Model
 
     @property
-    def payload(self) -> dict:
-        """
-        encode dataframe as expected blob format:
-        """
-        return {
-            "format": "csv",
-            "source": "client",
-            "data": encode_base64(self.data),
-            "project_guid": self.client.project["guid"],
-        }
+    def value(self) -> str:
+        return self.model.value
+
+
+class PauliModel(PauliSchema, ValueMixin):
+    class payload(TypedDict):
+        operators: list[Operator]
+        qbits: int
+        pauli_weight: int
+        sigma_sq: dict[str, float]
+        sigma_sq_optimization: dict[str, float]
+        seed: int
+        target_operator: list[Operator]
+
+    def __init__(
+        self,
+        operators: list[Operator],
+        qbits: int,
+        pauli_weight: int,
+        sigma_sq: dict[str, float],
+        sigma_sq_optimization: dict[str, float],
+        seed: int,
+        target_operator: list[Operator],
+    ):
+        self.model = Model.pauli
+        self.params = payload(
+            operators,
+            qbits,
+            pauli_weight,
+            sigma_sq,
+            sigma_sq_optimization,
+            seed,
+            target_operator,
+        )
+
+
+class EnsembleModel(EnsembleSchema, ValueMixin):
+    class payload(TypedDict):
+        operators: list[Operator]
+        dim: int
+        num_axes: int
+        sigma_sq: dict[str, float]
+        sigma_sq_optimization: dict[str, float]
+        seed: int
+        target_operator: list[Operator]
+
+    def __init__(
+        self,
+        operators: list[Operator],
+        dim: int,
+        num_axes: int,
+        sigma_sq: dict[str, float],
+        sigma_sq_optimization: dict[str, float],
+        seed: int,
+        target_operator: list[Operator],
+    ):
+        self._model = Model.ensemble
+        self.params = payload(
+            operators,
+            dim,
+            num_axes,
+            sigma_sq,
+            sigma_sq_optimization,
+            seed,
+            target_operator,
+        )
 
 
 class ModelClient:
@@ -209,7 +246,7 @@ class ModelClient:
 
     def __init__(
         self,
-        client: QcogClient | None = None,
+        client: QcogClient,
         version: str = "0.0.43"
     ):
         """
@@ -229,48 +266,11 @@ class ModelClient:
         """
         self.model: Model = Model("NOT_SET")
         self.params: Interface = EMPTY_MODEL_PARAMS()
-        self.client: QcogClient = QcogClient() if client is None else client
+        self.client: QcogClient = client
         self.version: str = version
         self.dataset: dict = {}
         self.training_parameters: dict = {}
         self.trained_model: dict = {}
-
-    def _preload(self, ep: str, guid: str) -> dict:
-        """
-        Utility function
-
-        Parameters:
-        -----------
-        ep: str
-            endpoint name (ex: dataset)
-        guid: str
-            endpoint name (ex: dataset)
-
-        Returns:
-        --------
-        dict response from api call
-        """
-        return self.client.get(f"{ep}/{guid}")
-
-    def _training_parameters(self, params: TrainingParameters) -> None:
-        """
-        Upload training parameters
-
-        Parameters:
-        -----------
-        params: TrainingParameters
-            Valid TypedDict of the training parameters
-        """
-        self.training_parameters = self.client.post(
-            "training_parameters",
-            {
-                "project_guid": self.client.project["guid"],
-                "model": self.model.value,
-                "parameters": {
-                    "model": self.params
-                } | params
-            }
-        )
 
     def _rebuild_model_params(self) -> ModelClient:
         """
@@ -327,7 +327,8 @@ class ModelClient:
         if not params:
             raise ValueError("Invalid empty model parameters")
         if not isinstance(params, VALID_MODEL_PARAMS[self.model]):
-            raise ValueError(f"Invalid type of model parameters got {type(params)} expected {VALID_MODEL_PARAMS[self.model])}")  # noqa: 503
+            raise ValueError()
+#            raise ValueError(f"Invalid type of model parameters got {type(params)} expected {VALID_MODEL_PARAMS[self.model])}")  # noqa: 503
         self.params = params
         return self
 
@@ -354,77 +355,6 @@ class ModelClient:
         ModelClient itself
         """
         return self._model(model)._params(params)
-
-    def data(self, data: pd.DataFrame, upload: bool = True) -> ModelClient:
-        """
-        For a fresh "to train" model and properly initialized model
-        upload a pandas DataFrame dataset.
-
-        Parameters:
-        -----------
-        data: pd.DataFrame:
-            the dataset as a DataFrame
-        upload: bool:
-            if true post the dataset
-
-        Returns:
-        --------
-        ModelClient itself
-        """
-        self.data_serializer: DataSerializer = DataSerializer(self, data)
-        if upload:
-            return self.data_upload()
-        return self
-
-    def data_upload(self) -> ModelClient:
-        """
-        Use dataserializer to upload a dataset
-        """
-        self.dataset = self.data_serializer.upload()
-        return self
-
-    def preloaded_data(self, guid: str) -> ModelClient:
-        """
-        retrieve a dataset that was previously uploaded from guid.
-
-        Parameters:
-        -----------
-        guid: str:
-            guid of a previously uploaded dataset
-
-        Returns:
-        --------
-        ModelClient itself
-        """
-        self.dataset = self._preload("dataset", guid)
-        return self
-
-    def preloaded_training_parameters(
-        self, guid: str,
-        rebuild: bool = False
-    ) -> ModelClient:
-        """
-        Retrieve preexisting training parameters payload.
-
-        Parameters:
-        -----------
-        guid: str
-            model guid
-        rebuild: bool
-            if True, will initialize the class "model"
-            (ex: pauli or ensemble) from the payload
-
-        Returns:
-        --------
-        ModelClient itself
-        """
-        self.training_parameters = self._preload(
-            "training_parameters",
-            guid,
-        )
-        if rebuild:
-            return self._rebuild_model_params()
-        return self
 
     def preloaded_model(
         self, guid: str,
@@ -465,73 +395,3 @@ class ModelClient:
         if with_data:
             return self.preloaded_data(dataset_guid)
         return self
-
-    def train(self, params: TrainingParameters) -> ModelClient:
-        """
-        For a fresh "to train" model properly configured and initialized
-        trigger a training request.
-
-        Parameters:
-        -----------
-        params: TrainingParameters
-
-        Returns:
-        --------
-        ModelClient itself
-        """
-        self._training_parameters(params)
-        self.trained_model = self.client.post(
-            "model",
-            {
-                "training_parameters_guid": self.training_parameters["guid"],
-                "dataset_guid": self.dataset["guid"],
-                "project_guid": self.client.project["guid"],
-                "training_package_location": f"s3://ubiops-qognitive-default/packages/qcog-{self.version}-cp310-cp310-linux_x86_64/training_package.zip"  # noqa: 503
-            },
-        )
-        return self
-
-    def status(self) -> dict:
-        return self.client.get(f"model/{self.trained_model['guid']}")
-
-    def forecast(
-        self,
-        data: pd.DataFrame,
-        parameters: dict,
-    ) -> dict:  # pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
-        """
-        see inference
-        """
-        print(
-                "\"forecast\" is deprecated, please use \"inference\" method instead"  # noqa: 503
-        )
-        return self.inference(data, parameters)
-
-    def inference(
-        self,
-        data: pd.DataFrame,
-        parameters: dict,
-    ) -> dict:  # pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
-        """
-        From a trained model query an inference.
-
-        Parameters:
-        -----------
-        data: pd.DataFrame:
-            the dataset as a DataFrame
-        parameters: dict:
-            inference parameters
-
-        Returns:
-        --------
-        dict: the API call response as dict json
-
-        """
-        resp: dict = self.client.post(
-            f"model/{self.trained_model['guid']}/inference",
-            {
-                "data": encode_base64(data),
-                "parameters": parameters
-            },
-        )
-        return resp

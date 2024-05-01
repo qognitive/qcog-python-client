@@ -1,4 +1,5 @@
 import base64
+import io
 import os
 import requests
 
@@ -40,7 +41,7 @@ def base642dataframe(encoded_string: str) -> pd.DataFrame:
     --------
     pd.DataFrame: parsed csv dataframe
     """
-    decoded_string: str = decode_base64(base64_string)
+    decoded_string: str = decode_base64(encoded_string)
     s = io.StringIO(decoded_string)
     return pd.read_csv(s)
 
@@ -67,7 +68,7 @@ def encode_base64(data: pd.DataFrame) -> str:
 class QcogClient(TrainProtocol, InferenceProtocol):
 
     OLDEST_VERSION = "0.0.43"
-    NEWEST_VERISON = "0.0.44"
+    NEWEST_VERSION = "0.0.44"
     PROJECT_GUID_TEMPORARY: str = "45ec9045-3d50-46fb-a82c-4aa0502801e9"
 
 #   @classmethod
@@ -101,7 +102,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
 #       model 
 
 
-    class RequestsClient
+    class RequestsClient:
         """
         This class is the https API client
         """
@@ -129,7 +130,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             self.hostname: str = hostname if isinstance(
                 hostname, str
             ) else self.HOSTNAME
-            self.port: str | ont = str(port) if isinstance(
+            self.port: str | int = str(port) if isinstance(
                 port, str | int
             ) else self.PORT
             self.api_version: str = api_version
@@ -262,7 +263,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         token: str | None = None,
         hostname: str | None = None,
         port: str | int | None = None,
-        api_version: str = "v1"
+        api_version: str = "v1",
         secure: bool = True,
         safe_mode: bool = True,  # NOTE will make False default later
         verify: bool = True,  # for debugging until ssl is fixed
@@ -281,10 +282,10 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         )
         self.model: PauliModel | EnsembleModel
         # TODO: versions string needs unpacking to test
-        # if version < self.OLDEST_VERSION:
-        #     raise ValueError(f"qcog version can't be older than {self.OLDEST_VERSION}")
-        # if version > self.NEWEST_VERSION:
-        #     raise ValueError(f"qcog version can't be older than {self.NEWEST_VERSION}")
+        # if version < OLDEST_VERSION:
+        #     raise ValueError(f"qcog version can't be older than {OLDEST_VERSION}")
+        # if version > NEWEST_VERSION:
+        #     raise ValueError(f"qcog version can't be older than {NEWEST_VERSION}")
         self.version: str = version
         self.project: dict[str, str]
         self.dataset: dict = {}
@@ -515,7 +516,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         self,
         data: pd.DataFrame,
         operators_to_forcast: list[Operator],
-    ) -> pd.DataFrame::
+    ) -> pd.DataFrame:
         """
         From a trained model query an inference.
 

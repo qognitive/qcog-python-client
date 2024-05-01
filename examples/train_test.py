@@ -2,7 +2,7 @@ import os
 import json
 import pandas
 
-from qcog_python_client import QcogClient, ModelClient, EnsembleInterface, PauliInterface, TrainingParameters
+from qcog_python_client import QcogClient, TrainingParameters
 
 
 HOSTNAME = os.environ["HOSTNAME"]
@@ -40,7 +40,7 @@ training_parameters = TrainingParameters(
 
 
 qcog_client = QcogClient(API_TOKEN, HOSTNAME, verify=False)
-hsm = QcogClient(API_TOKEN, HOSTNAME, verify=False, verbose=True).EnsembleHSM(operators=["X", "Y", "Z"]).data(df).train(training_parameters)
+hsm = QcogClient(API_TOKEN, HOSTNAME, verify=False, verbose=True).EnsembleHSM(operators=["X", "Y", "Z"]).data(df).train(**training_parameters)
 
 print(hsm.trained_model)
 

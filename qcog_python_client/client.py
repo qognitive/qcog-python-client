@@ -5,7 +5,17 @@ import requests
 
 import pandas as pd
 
-from .model import PauliModel, EnsembleSchema, TrainProtocol, InferenceProtocol
+from .model import (
+    Dataset,
+    PauliModel,
+    EnsembleModel,
+    TrainProtocol,
+    TrainingParameters,
+    InferenceProtocol,
+    Operator,
+    NotRequiredWeightParams,
+    NotRequiredStateParams,
+)
 
 
 def decode_base64(encoded_string: str) -> str:
@@ -65,6 +75,162 @@ def encode_base64(data: pd.DataFrame) -> str:
     return base64_string
 
 
+class RequestsClient:
+    """
+    This class is the https API client
+    """
+
+    TOKEN: str = os.environ.get("QCOG_API_TOKEN", "N/A")
+    HOSTNAME: str = os.environ.get("QCOG_HOSTNAME", "0.0.0.0")
+    PORT: str = os.environ.get("QCOG_PORT", "443")
+
+    def __init__(
+        self,
+        *,
+        token: str | None = None,
+        hostname: str | None = None,
+        port: str | int | None = None,
+        api_version: str = "v1",
+        secure: bool = True,
+        safe_mode: bool = True,  # NOTE will make False default later
+        verify: bool = True,  # for debugging until ssl is fixed
+    ):
+
+        self.token: str = token if isinstance(token, str) else self.TOKEN
+        if self.token == "N/A":
+            raise RuntimeError("missing token")
+
+        self.hostname: str = hostname if isinstance(
+            hostname, str
+        ) else self.HOSTNAME
+        self.port: str | int = str(port) if isinstance(
+            port, str | int
+        ) else self.PORT
+        self.api_version: str = api_version
+
+        self.headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+        prefix: str = "https://" if secure else "http://"
+        base_url: str = f"{prefix}{self.hostname}:{self.port}"
+        self.url: str = f"{base_url}/api/{self.api_version}"
+        self.checks: list[str] = [
+            f"{base_url}/status/",
+            f"{base_url}/health/db/",
+            f"{base_url}/health/s3/",
+        ]
+        self.safe_mode: bool = safe_mode
+        self.verify: bool = verify
+
+        self._test_connection()
+
+    def _get(self, uri: str) -> requests.Response:
+        """
+        Execute the get "requests" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+
+        Returns:
+        --------
+        requests.Response object
+            will raise_for_status so caller
+            may use .json()
+        """
+        resp = requests.get(uri, headers=self.headers, verify=self.verify)
+
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            print(resp.status_code)
+            print(resp.text)
+            raise e
+
+        return resp
+
+    def _post(self, uri: str, data: dict) -> requests.Response:
+        """
+        Execute the posts "requests" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+        requests.Response object
+            will raise_for_status so caller
+            may use .json()
+        """
+        resp = requests.post(
+            uri,
+            headers=self.headers,
+            json=data,
+            verify=self.verify,
+        )
+
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            print(resp.status_code)
+            print(resp.text)
+            raise e
+
+        return resp
+
+    def _test_connection(self) -> None:
+        """
+        Run health checks at class creation
+        """
+        if self.safe_mode:
+            for uri in self.checks:
+                self._get(uri)
+
+    def get(self, endpoint: str) -> dict:
+        """
+        Convenience wrapper around requests.get (called via _get method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
+        retval: dict = self._get(f"{self.url}/{endpoint}/").json()
+        return retval
+
+    def post(self, endpoint: str, data: dict) -> dict:
+        """
+        Convenience wrapper around requests.post (called via _post method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
+        retval: dict = self._post(
+            f"{self.url}/{endpoint}/",
+            data=data
+        ).json()
+        return retval
+
+
 class QcogClient(TrainProtocol, InferenceProtocol):
 
     OLDEST_VERSION = "0.0.43"
@@ -101,162 +267,6 @@ class QcogClient(TrainProtocol, InferenceProtocol):
 
 #       model 
 
-
-    class RequestsClient:
-        """
-        This class is the https API client
-        """
-
-        TOKEN: str = os.environ.get("QCOG_API_TOKEN", "N/A")
-        HOSTNAME: str = os.environ.get("QCOG_HOSTNAME", "0.0.0.0")
-        PORT: str = os.environ.get("QCOG_PORT", "443")
-
-        def __init__(
-            self,
-            *,
-            token: str | None = None,
-            hostname: str | None = None,
-            port: str | int | None = None,
-            api_version: str = "v1",
-            secure: bool = True,
-            safe_mode: bool = True,  # NOTE will make False default later
-            verify: bool = True,  # for debugging until ssl is fixed
-        ):
-
-            self.token: str = token if isinstance(token, str) else self.TOKEN
-            if self.token == "N/A":
-                raise RuntimeError("missing token")
-
-            self.hostname: str = hostname if isinstance(
-                hostname, str
-            ) else self.HOSTNAME
-            self.port: str | int = str(port) if isinstance(
-                port, str | int
-            ) else self.PORT
-            self.api_version: str = api_version
-
-            self.headers = {
-                "Authorization": f"Bearer {self.token}"
-            }
-            prefix: str = "https://" if secure else "http://"
-            base_url: str = f"{prefix}{self.hostname}:{self.port}"
-            self.url: str = f"{base_url}/api/{self.api_version}"
-            self.checks: list[str] = [
-                f"{base_url}/status/",
-                f"{base_url}/health/db/",
-                f"{base_url}/health/s3/",
-            ]
-            self.safe_mode: bool = safe_mode
-            self.verify: bool = verify
-
-            self._test_connection()
-
-        def _get(self, uri: str) -> requests.Response:
-            """
-            Execute the get "requests" by adding class-level settings
-
-            Parameters:
-            -----------
-            uri: str
-                Full http url
-
-            Returns:
-            --------
-            requests.Response object
-                will raise_for_status so caller
-                may use .json()
-            """
-            resp = requests.get(uri, headers=self.headers, verify=self.verify)
-
-            try:
-                resp.raise_for_status()
-            except Exception as e:
-                print(resp.status_code)
-                print(resp.text)
-                raise e
-
-            return resp
-
-        def _post(self, uri: str, data: dict) -> requests.Response:
-            """
-            Execute the posts "requests" by adding class-level settings
-
-            Parameters:
-            -----------
-            uri: str
-                Full http url
-            data: dict
-                json-able data payload
-
-            Returns:
-            --------
-            requests.Response object
-                will raise_for_status so caller
-                may use .json()
-            """
-            resp = requests.post(
-                uri,
-                headers=self.headers,
-                json=data,
-                verify=self.verify,
-            )
-
-            try:
-                resp.raise_for_status()
-            except Exception as e:
-                print(resp.status_code)
-                print(resp.text)
-                raise e
-
-            return resp
-
-        def _test_connection(self) -> None:
-            """
-            Run health checks at class creation
-            """
-            if self.safe_mode:
-                for uri in self.checks:
-                    self._get(uri)
-
-        def get(self, endpoint: str) -> dict:
-            """
-            Convenience wrapper around requests.get (called via _get method)
-
-            Parameters:
-            -----------
-            endpoint: str
-                a valid prefix to the orchestration API (including guid
-                if applicable) and will add to the dns prefix
-
-            Returns:
-            --------
-                dict: unpacked json dict
-            """
-            retval: dict = self._get(f"{self.url}/{endpoint}/").json()
-            return retval
-
-        def post(self, endpoint: str, data: dict) -> dict:
-            """
-            Convenience wrapper around requests.post (called via _post method)
-
-            Parameters:
-            -----------
-            endpoint: str
-                a valid prefix to the orchestration API (including guid
-                if applicable) and will add to the dns prefix
-            data: dict
-                json-able data payload
-
-            Returns:
-            --------
-                dict: unpacked json dict
-            """
-            retval: dict = self._post(
-                f"{self.url}/{endpoint}/",
-                data=data
-            ).json()
-            return retval
-
     def __init__(
         self,
         *,
@@ -291,7 +301,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         self.dataset: dict = {}
         self.training_parameters: dict = {}
         self.trained_model: dict = {}
-        self.inference: dict = {}
+        self.inference_result: dict = {}
         self._resolve_project(test_project)
 
     def _resolve_project(self, test_project: bool) -> None:
@@ -424,10 +434,11 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             data=encode_base64(data),
             project_guid=self.project["guid"],
         )
-        self.dataset: dict = self.http_client.post("dataset", data_payload)
+        valid_data: dict = {k: v for k, v in data_payload.items()}  # type cast
+        self.dataset = self.http_client.post("dataset", valid_data)
         return self
 
-    def preloaded_data(self, guid: str) -> ModelClient:
+    def preloaded_data(self, guid: str) -> QcogClient:
         """
         retrieve a dataset that was previously uploaded from guid.
 
@@ -438,7 +449,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
 
         Returns:
         --------
-        ModelClient itself
+        QcogClient itself
         """
         self.dataset = self._preload("dataset", guid)
         return self
@@ -446,7 +457,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
     def preloaded_training_parameters(
         self, guid: str,
         rebuild: bool = False
-    ) -> ModelClient:
+    ) -> QcogClient:
         """
         Retrieve preexisting training parameters payload.
 
@@ -460,7 +471,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
 
         Returns:
         --------
-        ModelClient itself
+        QcogClient itself
         """
         self.training_parameters = self._preload(
             "training_parameters",
@@ -489,10 +500,10 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         """
 
         params: TrainingParameters = TrainingParameters(
-            batch_size,
-            num_passes,
-            weight_optimization,
-            get_states_extra,
+            batch_size=batch_size,
+            num_passes=num_passes,
+            weight_optimization=weight_optimization,
+            get_states_extra=get_states_extra,
         )
 
         self._training_parameters(params)
@@ -532,7 +543,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         pd.DataFrame: the predictions
 
         """
-        self.inference: dict = self.http_client.post(
+        self.inference_result = self.http_client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
                 "data": encode_base64(data),
@@ -540,4 +551,4 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             },
         )
 
-        return base642dataframe(self.inference["response"]["data"])
+        return base642dataframe(self.inference_result["response"]["data"])

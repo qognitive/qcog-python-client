@@ -506,7 +506,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             batch_size=batch_size,
             num_passes=num_passes,
             weight_optimization_kwargs=weight_optimization,
-            states_kwargs=get_states_extra,
+            state_kwargs=get_states_extra,
         )
 
         self._training_parameters(params)

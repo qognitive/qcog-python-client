@@ -70,7 +70,7 @@ class TrainingParameters(TypedDict):
     # weight_optimization: NotRequiredWeightParams
     # get_states_extra: NotRequiredStateParams
     weight_optimization_kwargs: NotRequiredWeightParams
-    states_kwargs: NotRequiredStateParams
+    state_kwargs: NotRequiredStateParams
 
 
 class TrainProtocol(Protocol):
@@ -110,7 +110,7 @@ class PauliSchema(TrainProtocol, InferenceProtocol):
         sigma_sq: dict[str, float],
         sigma_sq_optimization: dict[str, float],
         seed: int,
-        target_operator: list[Operator],
+        target_operators: list[Operator],
     ):
         raise NotImplementedError("Pauli class must implement init")
 
@@ -129,7 +129,7 @@ class EnsembleSchema(TrainProtocol, InferenceProtocol):
         sigma_sq: dict[str, float],
         sigma_sq_optimization: dict[str, float],
         seed: int,
-        target_operator: list
+        target_operators: list
     ):
         raise NotImplementedError("Pauli class must implement init")
 
@@ -160,9 +160,9 @@ class PauliModel(PauliSchema, ValueMixin):
         qbits: int
         pauli_weight: int
         sigma_sq: dict[str, float]
-        sigma_sq_optimization: dict[str, float]
+        sigma_sq_optimization_kwargs: dict[str, float]
         seed: int
-        target_operator: list[Operator]
+        target_operators: list[Operator]
 
     def __init__(
         self,
@@ -172,7 +172,7 @@ class PauliModel(PauliSchema, ValueMixin):
         sigma_sq: dict[str, float],
         sigma_sq_optimization: dict[str, float],
         seed: int,
-        target_operator: list[Operator],
+        target_operators: list[Operator],
     ):
         self.model = Model.pauli
         self.params = self.payload(
@@ -180,9 +180,9 @@ class PauliModel(PauliSchema, ValueMixin):
             qbits=qbits,
             pauli_weight=pauli_weight,
             sigma_sq=sigma_sq,
-            sigma_sq_optimization=sigma_sq_optimization,
+            sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,
-            target_operator=target_operator,
+            target_operators=target_operators,
         )
 
 
@@ -192,9 +192,9 @@ class EnsembleModel(EnsembleSchema, ValueMixin):
         dim: int
         num_axes: int
         sigma_sq: dict[str, float]
-        sigma_sq_optimization: dict[str, float]
+        sigma_sq_optimization_kwargs: dict[str, float]
         seed: int
-        target_operator: list[Operator]
+        target_operators: list[Operator]
 
     def __init__(
         self,
@@ -204,7 +204,7 @@ class EnsembleModel(EnsembleSchema, ValueMixin):
         sigma_sq: dict[str, float],
         sigma_sq_optimization: dict[str, float],
         seed: int,
-        target_operator: list[Operator],
+        target_operators: list[Operator],
     ):
         self.model = Model.ensemble
         self.params = self.payload(
@@ -212,7 +212,7 @@ class EnsembleModel(EnsembleSchema, ValueMixin):
             dim=dim,
             num_axes=num_axes,
             sigma_sq=sigma_sq,
-            sigma_sq_optimization=sigma_sq_optimization,
+            sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,
-            target_operator=target_operator,
+            target_operators=target_operators,
         )

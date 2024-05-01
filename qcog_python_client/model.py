@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Type, TypedDict, TypeAlias, Any, Protocol
+from typing import TypedDict, TypeAlias, Any, Protocol
 
 import pandas as pd
 
@@ -18,7 +18,7 @@ class EMPTY_DICTIONARY(TypedDict):
 
 class Dataset(TypedDict):
     format: str
-    source:str
+    source: str
     data: str
     project_guid: str
 

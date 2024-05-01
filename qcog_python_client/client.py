@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import io
 import os
@@ -265,7 +267,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
 #           version=version
 #       )
 
-#       model 
+#       model
 
     def __init__(
         self,

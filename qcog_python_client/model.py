@@ -67,8 +67,10 @@ NotRequiredStateParams: TypeAlias = StateParams | EMPTY_DICTIONARY
 class TrainingParameters(TypedDict):
     batch_size: int
     num_passes: int
-    weight_optimization: NotRequiredWeightParams
-    get_states_extra: NotRequiredStateParams
+    # weight_optimization: NotRequiredWeightParams
+    # get_states_extra: NotRequiredStateParams
+    weight_optimization_kwargs: NotRequiredWeightParams
+    states_kwargs: NotRequiredStateParams
 
 
 class TrainProtocol(Protocol):
@@ -94,7 +96,7 @@ class InferenceProtocol(Protocol):
 Operator: TypeAlias = str | int
 
 
-class PauliSchema(Protocol, TrainProtocol, InferenceProtocol):
+class PauliSchema(TrainProtocol, InferenceProtocol):
     """
     Definition of Pauli parameters
     must match the "schema" validation
@@ -113,7 +115,7 @@ class PauliSchema(Protocol, TrainProtocol, InferenceProtocol):
         raise NotImplementedError("Pauli class must implement init")
 
 
-class EnsembleSchema(Protocol, TrainProtocol, InferenceProtocol):
+class EnsembleSchema(TrainProtocol, InferenceProtocol):
     """
     Definition of Ensemble parameters
     must match the "schema" validation
@@ -204,7 +206,7 @@ class EnsembleModel(EnsembleSchema, ValueMixin):
         seed: int,
         target_operator: list[Operator],
     ):
-        self._model = Model.ensemble
+        self.model = Model.ensemble
         self.params = self.payload(
             operators=operators,
             dim=dim,

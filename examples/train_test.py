@@ -2,7 +2,8 @@ import os
 import json
 import pandas
 
-from qcog_python_client import QcogClient, TrainingParameters
+from qcog_python_client import QcogClient
+from qcog_python_client.model import TrainingParameters
 
 
 HOSTNAME = os.environ["HOSTNAME"]
@@ -15,7 +16,7 @@ training_parameters = TrainingParameters(
     {
         "batch_size": 1000,
         "num_passes": 10,
-        "weight_optimization_kwargs": {
+        "weight_optimization": {
             "learning_rate": 1e-3,
             "iterations": 10,
             "optimization_method": "GRAD",
@@ -24,7 +25,7 @@ training_parameters = TrainingParameters(
             "second_moment_decay": 0.7,
             "epsilon": 1e-6
         },
-        "state_kwargs": {
+        "get_states_extra": {
             "state_method": "LOBPCG_FAST",
             "iterations": 10,
             "learning_rate_axes": 0.01,
@@ -39,8 +40,7 @@ training_parameters = TrainingParameters(
 )
 
 
-qcog_client = QcogClient(API_TOKEN, HOSTNAME, verify=False)
-hsm = QcogClient(API_TOKEN, HOSTNAME, verify=False, verbose=True).EnsembleHSM(operators=["X", "Y", "Z"]).data(df).train(**training_parameters)
+hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).ensemble(operators=["X", "Y", "Z"]).data(df).train(**training_parameters)
 
 print(hsm.trained_model)
 

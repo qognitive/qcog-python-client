@@ -358,6 +358,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         params: TrainingParameters
             Valid TypedDict of the training parameters
         """
+        print(self.model.params)
         self.training_parameters = self.http_client.post(
             "training_parameters",
             {
@@ -372,12 +373,12 @@ class QcogClient(TrainProtocol, InferenceProtocol):
     def pauli(
         self,
         operators: list[Operator],
-        qbits: int,
-        pauli_weight: int,
-        sigma_sq: dict[str, float],
-        sigma_sq_optimization: dict[str, float],
-        seed: int,
-        target_operator: list[Operator],
+        qbits: int = 2,
+        pauli_weight: int = 2,
+        sigma_sq: dict[str, float] = {},
+        sigma_sq_optimization: dict[str, float] = {},
+        seed: int = 42,
+        target_operator: list[Operator] = [],
     ) -> QcogClient:
         self.model = PauliModel(
             operators,
@@ -393,12 +394,12 @@ class QcogClient(TrainProtocol, InferenceProtocol):
     def ensemble(
         self,
         operators: list[Operator],
-        dim: int,
-        num_axes: int,
-        sigma_sq: dict[str, float],
-        sigma_sq_optimization: dict[str, float],
-        seed: int,
-        target_operator: list[Operator],
+        dim: int = 16,
+        num_axes: int = 4,
+        sigma_sq: dict[str, float] = {},
+        sigma_sq_optimization: dict[str, float] = {},
+        seed: int = 42,
+        target_operator: list[Operator] = [],
     ) -> QcogClient:
         self.model = EnsembleModel(
             operators,
@@ -504,8 +505,8 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         params: TrainingParameters = TrainingParameters(
             batch_size=batch_size,
             num_passes=num_passes,
-            weight_optimization=weight_optimization,
-            get_states_extra=get_states_extra,
+            weight_optimization_kwargs=weight_optimization,
+            states_kwargs=get_states_extra,
         )
 
         self._training_parameters(params)

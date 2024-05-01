@@ -208,3 +208,9 @@ class EnsembleModel(EnsembleSchema, ValueMixin):
             seed=seed,
             target_operators=target_operators,
         )
+
+
+MODEL_MAP: dict[str, Type[PauliSchema]] = {
+    Model.pauli.value: PauliModel,
+    Model.ensemble.value: EnsembleModel,
+}

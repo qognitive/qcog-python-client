@@ -8,6 +8,7 @@ import requests
 import pandas as pd
 
 from .model import (
+    MODEL_MAP,
     Dataset,
     PauliModel,
     EnsembleModel,
@@ -246,37 +247,6 @@ class QcogClient(TrainProtocol, InferenceProtocol):
     NEWEST_VERSION = "0.0.44"
     PROJECT_GUID_TEMPORARY: str = "45ec9045-3d50-46fb-a82c-4aa0502801e9"
 
-    @classmethod
-    def from_model_guid(
-        cls: Type[ModelClient],
-        guid: str,
-        with_data: bool = False,
-        *,
-        token: str | None = None,
-        hostname: str | None = None,
-        port: str | int | None = None,
-        api_version: str = "v1",
-        secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
-        verify: bool = True,  # for debugging until ssl is fixed
-        test_project: bool = False,
-        version: str = NEWEST_VERSION,
-    ) -> QcogClient:
-        qcog_client: QcogClient = cls(
-            token=token,
-            hostname=hostname,
-            port=port,
-            api_version=api_version,
-            secure=secure,
-            safe_mode=safe_mode,
-            verify=verify,
-            test_project=test_project,
-            version=version
-        ).preload_model()
-
-        return qcog_client
-
-
     def __init__(
         self,
         *,
@@ -488,9 +458,22 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         )
         return self
 
-    def preload_model(self, guid: str) -> QcogClient:
+    def preloaded_model(self, guid: str) -> QcogClient:
         self.trained_model = self._preload("model", guid)
+
+        self._preload("project", self.trained_model["project_guid"])
+        self.version = self.trained_model[
+            "training_package_location"
+        ].split("packages/")[-1].split("-")[1]
+
         self.preloaded_training_parameters(self.trained_model["training_parameters_guid"])
+
+        model_params = {
+            k.replace("_kwargs", ""): v for k, v in self.training_parameters["parameters"]["model"].items()
+            if k != "model"
+        }
+
+        self.model = MODEL_MAP[self.training_parameters["model"]](**model_params)
         return self
 
     def train(

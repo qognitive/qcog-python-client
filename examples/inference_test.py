@@ -4,13 +4,13 @@ import pandas
 import time
 import numpy as np
 
-from qcog_python_client import QcogClient, ModelClient
+from qcog_python_client import QcogClient
 
 HOSTNAME = os.environ["HOSTNAME"]
 API_TOKEN = os.environ["API_TOKEN"]
 TRAINED_MODEL_GUID = "b9cb6828-9aca-44c8-991e-19581487e1fc"  # "20c0353d-05f1-43f4-864d-4ab9f8e659c1" # replace me
 
-hsm = QcogClient(API_TOKEN, HOSTNAME, verify=False, verbose=True).ModelClient.from_model_guid(TRAINED_MODEL_GUID, with_data=True)
+hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).preloaded_model(TRAINED_MODEL_GUID)
 print(hsm.status())
 
 while True:

@@ -133,18 +133,6 @@ class EnsembleSchema(TrainProtocol, InferenceProtocol):
     ):
         raise NotImplementedError("Pauli class must implement init")
 
-    def inference(
-        self,
-        data: pd.DataFrame,
-        operators_to_forecast: list[Operator]
-    ) -> pd.DataFrame:
-        """
-        We could create a InferenceProtocol class since both Ensemble and Pauli
-        share the same interface, but quantum is different. individual
-        implementations is more future proof
-        """
-        raise NotImplementedError("Pauli class must implement inference")
-
 
 class ValueMixin:
     model: Model
@@ -155,6 +143,9 @@ class ValueMixin:
 
 
 class PauliModel(PauliSchema, ValueMixin):
+
+    model = Model.pauli
+
     class payload(TypedDict):
         operators: list[Operator]
         qbits: int
@@ -174,7 +165,6 @@ class PauliModel(PauliSchema, ValueMixin):
         seed: int,
         target_operators: list[Operator],
     ):
-        self.model = Model.pauli
         self.params = self.payload(
             operators=operators,
             qbits=qbits,
@@ -187,6 +177,9 @@ class PauliModel(PauliSchema, ValueMixin):
 
 
 class EnsembleModel(EnsembleSchema, ValueMixin):
+
+    model = Model.ensemble
+
     class payload(TypedDict):
         operators: list[Operator]
         dim: int
@@ -206,7 +199,6 @@ class EnsembleModel(EnsembleSchema, ValueMixin):
         seed: int,
         target_operators: list[Operator],
     ):
-        self.model = Model.ensemble
         self.params = self.payload(
             operators=operators,
             dim=dim,

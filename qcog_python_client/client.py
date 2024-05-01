@@ -77,6 +77,13 @@ def encode_base64(data: pd.DataFrame) -> str:
     return base64_string
 
 
+def is_version_v1_gt_v2(v1, v2):
+    major1, minor1, fix1 = [int(w) for w in v1.split(".")]
+    major2, minor2, fix2 = [int(w) for w in v2.split(".")]
+
+    return major1 > major2 or minor1 > minor2 or fix1 > fix2
+
+
 class RequestsClient:
     """
     This class is the https API client
@@ -239,35 +246,36 @@ class QcogClient(TrainProtocol, InferenceProtocol):
     NEWEST_VERSION = "0.0.44"
     PROJECT_GUID_TEMPORARY: str = "45ec9045-3d50-46fb-a82c-4aa0502801e9"
 
-#   @classmethod
-#   def from_model_guid(
-#       cls: Type[ModelClient],
-#       guid: str,
-#       with_data: bool = False
-#       *,
-#       token: str | None = None,
-#       hostname: str | None = None,
-#       port: str | int | None = None,
-#       api_version: str = "v1"
-#       secure: bool = True,
-#       safe_mode: bool = True,  # NOTE will make False default later
-#       verify: bool = True,  # for debugging until ssl is fixed
-#       test_project: bool = False,
-#       version: str = NEWEST_VERSION,
-#   ) -> QcogClient:
-#       qcog_client: QcogClient = cls(
-#           token=token,
-#           hostname=hostname,
-#           port=port,
-#           api_version=api_version,
-#           secure=secure,
-#           safe_mode=safe_mode,
-#           verify=verify,
-#           test_project=test_project,
-#           version=version
-#       )
+    @classmethod
+    def from_model_guid(
+        cls: Type[ModelClient],
+        guid: str,
+        with_data: bool = False,
+        *,
+        token: str | None = None,
+        hostname: str | None = None,
+        port: str | int | None = None,
+        api_version: str = "v1",
+        secure: bool = True,
+        safe_mode: bool = True,  # NOTE will make False default later
+        verify: bool = True,  # for debugging until ssl is fixed
+        test_project: bool = False,
+        version: str = NEWEST_VERSION,
+    ) -> QcogClient:
+        qcog_client: QcogClient = cls(
+            token=token,
+            hostname=hostname,
+            port=port,
+            api_version=api_version,
+            secure=secure,
+            safe_mode=safe_mode,
+            verify=verify,
+            test_project=test_project,
+            version=version
+        ).preload_model()
 
-#       model
+        return qcog_client
+
 
     def __init__(
         self,
@@ -293,11 +301,10 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             verify=verify,
         )
         self.model: PauliModel | EnsembleModel
-        # TODO: versions string needs unpacking to test
-        # if version < OLDEST_VERSION:
-        #     raise ValueError(f"qcog version can't be older than {OLDEST_VERSION}")
-        # if version > NEWEST_VERSION:
-        #     raise ValueError(f"qcog version can't be older than {NEWEST_VERSION}")
+        if is_version_v1_gt_v2(self.OLDEST_VERSION, version):
+             raise ValueError(f"qcog version can't be older than {self.OLDEST_VERSION}")
+        if is_version_v1_gt_v2(version, self.NEWEST_VERSION):
+             raise ValueError(f"qcog version can't be older than {self.NEWEST_VERSION}")
         self.version: str = version
         self.project: dict[str, str]
         self.dataset: dict = {}
@@ -358,7 +365,6 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         params: TrainingParameters
             Valid TypedDict of the training parameters
         """
-        print(self.model.params)
         self.training_parameters = self.http_client.post(
             "training_parameters",
             {
@@ -480,6 +486,11 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             "training_parameters",
             guid,
         )
+        return self
+
+    def preload_model(self, guid: str) -> QcogClient:
+        self.trained_model = self._preload("model", guid)
+        self.preloaded_training_parameters(self.trained_model["training_parameters_guid"])
         return self
 
     def train(

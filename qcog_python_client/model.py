@@ -25,11 +25,6 @@ class Dataset(TypedDict):
 
 
 class WeightParams(TypedDict):
-    """
-    Definition of weight parameters
-    must match the schema Input
-    from orchestration API
-    """
     learning_rate: float
     iterations: int
     optimization_method: str
@@ -40,20 +35,10 @@ class WeightParams(TypedDict):
 
 
 class FisherParams(TypedDict):
-    """
-    Definition of fisher parameters
-    must match the schema Input
-    from orchestration API
-    """
     learning_rate: float
 
 
 class StateParams(TypedDict):
-    """
-    Definition of states parameters
-    must match the schema Input
-    from orchestration API
-    """
     state_method: str
     iterations: int
     learning_rate_axes: float
@@ -105,11 +90,6 @@ Operator: TypeAlias = str | int
 
 
 class PauliProtocol(Protocol):
-    """
-    Definition of Pauli parameters
-    must match the "schema" validation
-    from orchestration API
-    """
     def __init__(
         self,
         operators: list[Operator],
@@ -124,11 +104,6 @@ class PauliProtocol(Protocol):
 
 
 class EnsembleProtocol(Protocol):
-    """
-    Definition of Ensemble parameters
-    must match the "schema" validation
-    from orchestration API
-    """
     def __init__(
         self,
         operators: list[str],
@@ -158,7 +133,7 @@ class ValueMixin:
         return self.model.value
 
 
-class PauliModel(PauliSchema, ValueMixin):
+class PauliModel(PauliProtocol, ValueMixin):
 
     model = Model.pauli
 
@@ -192,7 +167,7 @@ class PauliModel(PauliSchema, ValueMixin):
         )
 
 
-class EnsembleModel(EnsembleSchema, ValueMixin):
+class EnsembleModel(EnsembleProtocol, ValueMixin):
 
     model = Model.ensemble
 

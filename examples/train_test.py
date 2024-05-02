@@ -40,15 +40,3 @@ training_parameters = {
 hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).ensemble(operators=["X", "Y", "Z"]).data(df).train(**training_parameters)
 
 print(hsm.trained_model)
-
-# model_params = EnsembleInterface(
-#     {
-#         "operators": ["X", "Y", "Z"],
-#         "dim": 16,
-#         "num_axes": 4,
-#         "sigma_sq": {},
-#         "sigma_sq_optimization_kwargs": {},
-#         "seed": 42,
-#         "target_operators": []
-#     }
-# )

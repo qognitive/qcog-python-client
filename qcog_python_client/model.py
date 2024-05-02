@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TypedDict, TypeAlias, Any, Protocol
+from typing import Type, TypedDict, TypeAlias, Any, Protocol
 
+import numpy as np
 import pandas as pd
 
 
@@ -60,8 +61,16 @@ class StateParams(TypedDict):
     fisher_state_kwargs: FisherParams
 
 
+class InferenceParameters(TypedDict):
+    operators_to_forecast: list[str] | None
+    states: np.ndarray | None
+    return_states: bool
+    kwargs: NotRequiredInferenceKwargs
+
+
 NotRequiredWeightParams: TypeAlias = WeightParams | EMPTY_DICTIONARY
 NotRequiredStateParams: TypeAlias = StateParams | EMPTY_DICTIONARY
+NotRequiredInferenceKwargs: TypeAlias = InferenceParameters | EMPTY_DICTIONARY
 
 
 class TrainingParameters(TypedDict):
@@ -88,7 +97,7 @@ class InferenceProtocol(Protocol):
     def inference(
         self,
         data: pd.DataFrame,
-        operators_to_forecast: list[Operator]
+        parameters: InferenceParameters,
     ) -> pd.DataFrame:
         raise NotImplementedError("Inference class must implement inference")
 
@@ -96,7 +105,7 @@ class InferenceProtocol(Protocol):
 Operator: TypeAlias = str | int
 
 
-class PauliSchema(TrainProtocol, InferenceProtocol):
+class PauliProtocol(Protocol):
     """
     Definition of Pauli parameters
     must match the "schema" validation
@@ -115,7 +124,7 @@ class PauliSchema(TrainProtocol, InferenceProtocol):
         raise NotImplementedError("Pauli class must implement init")
 
 
-class EnsembleSchema(TrainProtocol, InferenceProtocol):
+class EnsembleProtocol(Protocol):
     """
     Definition of Ensemble parameters
     must match the "schema" validation
@@ -132,6 +141,14 @@ class EnsembleSchema(TrainProtocol, InferenceProtocol):
         target_operators: list
     ):
         raise NotImplementedError("Pauli class must implement init")
+
+
+class PauliSchema(PauliProtocol, TrainProtocol, InferenceProtocol):
+    pass
+
+
+class EnsembleSchema(EnsembleProtocol, TrainProtocol, InferenceProtocol):
+    pass
 
 
 class ValueMixin:
@@ -210,7 +227,10 @@ class EnsembleModel(EnsembleSchema, ValueMixin):
         )
 
 
-MODEL_MAP: dict[str, Type[PauliSchema]] = {
+TrainingModel: TypeAlias = PauliModel | EnsembleModel
+
+
+MODEL_MAP: dict[str, Type[TrainingModel]] = {
     Model.pauli.value: PauliModel,
     Model.ensemble.value: EnsembleModel,
 }

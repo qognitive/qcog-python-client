@@ -4,7 +4,7 @@ import pandas as pd
 
 from .client import (
     RequestsClient,
-    decode_base64,
+    # decode_base64,  # for when inference returns dataframe
     base642dataframe,
     encode_base64,
 )
@@ -17,13 +17,14 @@ from .model import (
     TrainProtocol,
     TrainingParameters,
     InferenceProtocol,
+    InferenceParameters,
     Operator,
     NotRequiredWeightParams,
     NotRequiredStateParams,
 )
 
 
-def is_version_v1_gt_v2(v1, v2):
+def is_version_v1_gt_v2(v1: str, v2: str) -> bool:
     major1, minor1, fix1 = [int(w) for w in v1.split(".")]
     major2, minor2, fix2 = [int(w) for w in v2.split(".")]
 
@@ -61,9 +62,13 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         )
         self.model: PauliModel | EnsembleModel
         if is_version_v1_gt_v2(self.OLDEST_VERSION, version):
-             raise ValueError(f"qcog version can't be older than {self.OLDEST_VERSION}")
+            raise ValueError(
+                f"qcog version can't be older than {self.OLDEST_VERSION}"
+            )
         if is_version_v1_gt_v2(version, self.NEWEST_VERSION):
-             raise ValueError(f"qcog version can't be older than {self.NEWEST_VERSION}")
+            raise ValueError(
+                f"qcog version can't be older than {self.NEWEST_VERSION}"
+            )
         self.version: str = version
         self.project: dict[str, str]
         self.dataset: dict = {}
@@ -255,14 +260,24 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             "training_package_location"
         ].split("packages/")[-1].split("-")[1]
 
-        self.preloaded_training_parameters(self.trained_model["training_parameters_guid"])
+        self.preloaded_training_parameters(
+            self.trained_model["training_parameters_guid"]
+        )
 
         model_params = {
-            k.replace("_kwargs", ""): v for k, v in self.training_parameters["parameters"]["model"].items()
+            k.replace(
+                "_kwargs", ""
+            ): v for k, v in self.training_parameters[
+                "parameters"
+            ][
+                "model"
+            ].items()
             if k != "model"
         }
 
-        self.model = MODEL_MAP[self.training_parameters["model"]](**model_params)
+        self.model = MODEL_MAP[
+            self.training_parameters["model"]
+        ](**model_params)
         return self
 
     def train(
@@ -312,7 +327,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
     def inference(
         self,
         data: pd.DataFrame,
-        operators_to_forcast: list[Operator],
+        parameters: InferenceParameters,
     ) -> pd.DataFrame:
         """
         From a trained model query an inference.

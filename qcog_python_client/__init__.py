@@ -1,1 +1,1 @@
-from .client import QcogClient  # noqa: F401
+from .qcog import QcogClient  # noqa: F401

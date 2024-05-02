@@ -8,13 +8,13 @@ from qcog_python_client import QcogClient
 
 HOSTNAME = os.environ["HOSTNAME"]
 API_TOKEN = os.environ["API_TOKEN"]
-TRAINED_MODEL_GUID = "b9cb6828-9aca-44c8-991e-19581487e1fc"  # "20c0353d-05f1-43f4-864d-4ab9f8e659c1" # replace me
+TRAINED_MODEL_GUID = "8e81f73d-218d-4fb9-b38a-3021e51b3fcd"
 
 hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).preloaded_model(TRAINED_MODEL_GUID)
 print(hsm.status())
 
 while True:
-    if hsm.status()["status"] == "completed":
+    if hsm.status() == "completed":
         break
     print(hsm.status())
     time.sleep(5)

@@ -322,9 +322,12 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         return self
 
     def status(self) -> str:
-        resp: dict = self.http_client.get(f"model/{self.trained_model['guid']}")
+        resp: dict = self.http_client.get(
+            f"model/{self.trained_model['guid']}"
+        )
 
-        return resp["status"]
+        status: str = resp["status"]
+        return status
 
     def inference(
         self,

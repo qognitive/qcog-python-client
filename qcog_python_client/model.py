@@ -65,12 +65,11 @@ class InferenceParameters(TypedDict):
     operators_to_forecast: list[str] | None
     states: np.ndarray | None
     return_states: bool
-    kwargs: NotRequiredInferenceKwargs
+    kwargs: dict
 
 
 NotRequiredWeightParams: TypeAlias = WeightParams | EMPTY_DICTIONARY
 NotRequiredStateParams: TypeAlias = StateParams | EMPTY_DICTIONARY
-NotRequiredInferenceKwargs: TypeAlias = InferenceParameters | EMPTY_DICTIONARY
 
 
 class TrainingParameters(TypedDict):

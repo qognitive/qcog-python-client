@@ -78,6 +78,11 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             1. Training
             2. Inference
 
+        The class definition is such that every parameter must be used
+        explicitly:
+
+            hsm_client = QcogClient(token="value", version="0.0.45")
+
         Each "public" method return "self" to chain method calls unless
         it is one of the following utilities: status and inference
 

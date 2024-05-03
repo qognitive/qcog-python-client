@@ -1,19 +1,19 @@
 from __future__ import annotations
 
+from typing import Type, TypeAlias
 import pandas as pd
 
+from .pauli import PauliModel
+from .ensemble import EnsembleModel
 from .client import (
     RequestsClient,
     # decode_base64,  # for when inference returns dataframe
     base642dataframe,
     encode_base64,
 )
-
-from .model import (
-    MODEL_MAP,
+from .common import (
+    Model,
     Dataset,
-    PauliModel,
-    EnsembleModel,
     TrainProtocol,
     TrainingParameters,
     InferenceProtocol,
@@ -22,6 +22,15 @@ from .model import (
     NotRequiredWeightParams,
     NotRequiredStateParams,
 )
+
+
+TrainingModel: TypeAlias = PauliModel | EnsembleModel
+
+
+MODEL_MAP: dict[str, Type[TrainingModel]] = {
+    Model.pauli.value: PauliModel,
+    Model.ensemble.value: EnsembleModel,
+}
 
 
 def is_version_v1_gt_v2(v1: str, v2: str) -> bool:

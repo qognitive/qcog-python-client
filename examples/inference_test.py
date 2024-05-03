@@ -8,7 +8,7 @@ from qcog_python_client import QcogClient
 
 HOSTNAME = os.environ["HOSTNAME"]
 API_TOKEN = os.environ["API_TOKEN"]
-TRAINED_MODEL_GUID = "8e81f73d-218d-4fb9-b38a-3021e51b3fcd"
+TRAINED_MODEL_GUID = "d9bb0c85-8d1d-4d4d-af1c-4cb203a43bc6"
 
 hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).preloaded_model(TRAINED_MODEL_GUID)
 print(hsm.status())

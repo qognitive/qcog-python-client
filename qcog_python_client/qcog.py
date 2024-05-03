@@ -3,15 +3,13 @@ from __future__ import annotations
 from typing import Type, TypeAlias
 import pandas as pd
 
-from .pauli import PauliModel
-from .ensemble import EnsembleModel
 from .client import (
     RequestsClient,
     # decode_base64,  # for when inference returns dataframe
     base642dataframe,
     encode_base64,
 )
-from .common import (
+from .schema import (
     Model,
     Dataset,
     TrainProtocol,
@@ -21,6 +19,8 @@ from .common import (
     Operator,
     NotRequiredWeightParams,
     NotRequiredStateParams,
+    PauliModel,
+    EnsembleModel,
 )
 
 
@@ -422,7 +422,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
                 "dataset_guid": self.dataset["guid"],
                 "project_guid": self.project["guid"],
 
-                # TODO: we need to rewrite this to no expose internal details like that
+                # TODO: we need to rewrite this to no expose internal details like that  # noqa: 503
                 "training_package_location": f"s3://ubiops-qognitive-default/packages/qcog-{self.version}-cp310-cp310-linux_x86_64/training_package.zip"  # noqa: 503
             },
         )

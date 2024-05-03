@@ -1,0 +1,16 @@
+name: "mkl-python repo"
+description: "install a mkl dependent python repo"
+
+runs:
+  using: "composite"
+  steps:
+  - name: Python dependencies
+    run: |
+      python -m pip cache purge
+      python -m pip install --upgrade pip
+      python -m pip install .
+    shell: bash
+  - name: Compile our extensions locally to allow for testing
+    run: |
+      python -m build .
+    shell: bash

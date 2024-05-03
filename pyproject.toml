@@ -1,0 +1,44 @@
+[build-system]
+requires = [
+  "setuptools",
+  "build",
+]
+
+[project]
+name = "qcog_python_client"
+version = "0.0.1"
+readme = "README.md"
+description = "qcog python client"
+dependencies = [
+  "requests",
+  "pandas",
+  "numpy",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build",
+  "mypy",
+  "flake8",
+  "pandas-stubs",
+  "types-requests"
+]
+
+[tool.mypy]
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+# Needed because of bug in MyPy
+disallow_subclassing_any = false
+
+mypy_path = "stubs"
+
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_return_any = true
+no_implicit_optional = true
+strict_optional = true
+ignore_missing_imports = true
+
+exclude = []

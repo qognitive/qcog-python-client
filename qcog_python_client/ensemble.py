@@ -40,7 +40,7 @@ class EnsembleModel(EnsembleProtocol, ValueMixin):
     client side schema implementation
     """
 
-    model = Model.pauli
+    model = Model.ensemble
 
     class payload(TypedDict):
         operators: list[Operator]

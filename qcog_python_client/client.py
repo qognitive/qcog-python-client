@@ -70,7 +70,7 @@ class RequestsClient:
     This class is the https API client
     """
 
-    TOKEN: str = os.environ.get("QCOG_API_TOKEN", "N/A")
+    TOKEN: str = os.environ.get("QCOG_API_TOKEN", "")
     HOSTNAME: str = os.environ.get("QCOG_HOSTNAME", "api.qognitive.io")
     PORT: str = os.environ.get("QCOG_PORT", "443")
 
@@ -110,7 +110,7 @@ class RequestsClient:
         """
 
         self.token: str = token if isinstance(token, str) else self.TOKEN
-        if self.token == "N/A":
+        if not self.token:
             raise RuntimeError("missing token")
 
         self.hostname: str = hostname if isinstance(

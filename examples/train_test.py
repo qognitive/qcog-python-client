@@ -37,6 +37,6 @@ training_parameters = {
 }
 
 
-hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).ensemble(operators=["X", "Y", "Z"]).data(df).train(**training_parameters)
+hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).ensemble(operators=["X", "Y", "Z"], dim=4, num_axes=16).data(df).train(**training_parameters)
 
 print(hsm.trained_model)

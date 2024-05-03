@@ -69,7 +69,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         port: str | int | None = None,
         api_version: str = "v1",
         secure: bool = True,
-        ?safe_mode: bool = True,  # NOTE will make False default later
+        safe_mode: bool = True,  # NOTE will make False default later
         verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
         version: str = NEWEST_VERSION,

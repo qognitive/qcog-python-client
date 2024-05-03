@@ -101,19 +101,9 @@ class QcogClient(TrainProtocol, InferenceProtocol):
 
         but this would require to run the following loop:
 
-        while hsm.status() == "pending":
-            time.sleep(5)
-
-        if hsm.status() != "completed":
-            # something went wrong
-            raise RuntimeError("something went wrong")
-
-        result: pd.DataFrame = hsm.inference(...)
+            hsm.wait_for_training().inference(...)
 
         to make sure training has successfully completed.
-
-        The wait utility is implemented in the wait_for_training
-        method
 
         To run multiple inference on a persistent trained model,
         the trained_model guid go to storage. Datasets? Also

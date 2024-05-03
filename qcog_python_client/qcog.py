@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import Type, TypeAlias
+import json
+import time
 import pandas as pd
 
 from .client import (
@@ -104,6 +106,9 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         result: pd.DataFrame = hsm.inference(...)
 
         to make sure training has successfully completed.
+
+        The wait utility is implemented in the wait_for_training
+        method
 
         To run multiple inference on a persistent trained model,
         the trained_model guid go to storage. Datasets? Also
@@ -428,12 +433,39 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         return self
 
     def status(self) -> str:
-        resp: dict = self.http_client.get(
+        self.status_resp: dict = self.http_client.get(
             f"model/{self.trained_model['guid']}"
         )
 
-        status: str = resp["status"]
-        return status
+        self.last_status: str = self.status_resp["status"]
+        return self.last_status
+
+    def wait_for_training(self, wait_time: int = 5) -> QcogClient:
+        """
+        Wait for training to complete.
+
+        Parameters:
+        -----------
+        wait_time: int:
+            status checks intervals in seconds
+
+        Returns:
+        --------
+        QcogClient: itself
+
+        """
+        while self.status() == "pending":
+            if self.last_status == "completed":
+                break
+            time.sleep(wait_time)
+
+        if self.last_status != "completed":
+            # something went wrong
+            raise RuntimeError(
+                f"something went wrong {json.dumps(self.status_resp, indent=4)}"
+            )
+
+        return self
 
     def inference(
         self,

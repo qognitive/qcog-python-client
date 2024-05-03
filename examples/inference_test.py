@@ -13,12 +13,6 @@ TRAINED_MODEL_GUID = "d9bb0c85-8d1d-4d4d-af1c-4cb203a43bc6"
 hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).preloaded_model(TRAINED_MODEL_GUID)
 print(hsm.status())
 
-while True:
-    if hsm.status() == "completed":
-        break
-    print(hsm.status())
-    time.sleep(5)
-
 print("################################")
 print("# FORECAST                     #")
 print("################################")
@@ -41,6 +35,6 @@ parameters = {
         "learning_rate_psi": 0.1
     }
 
-print(hsm.inference(forecast_data, parameters))
+print(hsm.wait_for_training().inference(forecast_data, parameters))
 
 print("done")

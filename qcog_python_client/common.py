@@ -94,6 +94,9 @@ class TrainProtocol(Protocol):
 
 
 class InferenceProtocol(Protocol):
+    """
+    Inference method "prototype"
+    """
     def inference(
         self,
         data: pd.DataFrame,
@@ -106,6 +109,9 @@ Operator: TypeAlias = str | int
 
 
 class ValueMixin:
+    """
+    Utility mixin for the client Models
+    """
     model: Model
 
     @property

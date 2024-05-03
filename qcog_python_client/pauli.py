@@ -12,6 +12,9 @@ from .common import (
 
 
 class PauliProtocol(Protocol):
+    """
+    Pauli model class "prototype"
+    """
     def __init__(
         self,
         operators: list[Operator],
@@ -26,10 +29,16 @@ class PauliProtocol(Protocol):
 
 
 class PauliSchema(PauliProtocol, TrainProtocol, InferenceProtocol):
+    """
+    Schema definition meant to be used externally
+    """
     pass
 
 
 class PauliModel(PauliProtocol, ValueMixin):
+    """
+    client side schema implementation
+    """
 
     model = Model.pauli
 

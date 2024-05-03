@@ -34,6 +34,21 @@ MODEL_MAP: dict[str, Type[TrainingModel]] = {
 
 
 def is_version_v1_gt_v2(v1: str, v2: str) -> bool:
+    """
+    test M.N.F version comparison
+
+    Parameters:
+    -----------
+    v1: str
+        expected to be of the form M.N.F
+    v2: str
+        expected to be of the form M.N.F
+
+    Return:
+    -------
+    bool: True if v1 is cardinally greated than v2 False
+        otherwise
+    """
     major1, minor1, fix1 = [int(w) for w in v1.split(".")]
     major2, minor2, fix2 = [int(w) for w in v2.split(".")]
 
@@ -54,11 +69,87 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         port: str | int | None = None,
         api_version: str = "v1",
         secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
+        ?safe_mode: bool = True,  # NOTE will make False default later
         verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
         version: str = NEWEST_VERSION,
     ):
+        """
+        Qcog api client implementation there are 2 main expected usages:
+            1. Training
+            2. Inference
+
+        Each "public" method return "self" to chain method calls unless
+        it is one of the following utilities: status and inference
+
+        Each method that results in an api call will store the api
+        response as a json dict in a class attribute
+
+        In practice, the 2 main expected usage would be for a fresh training:
+
+        hsm = QcogClient(...).pauli(...).data(...).train(...)
+
+        where the "..." would be replaced with desired parametrization
+
+        If we wanted, we could infer after training, right away.
+
+        result: pd.DataFrame = hsm.inference(...)
+
+        but this would require to run the following loop:
+
+        while hsm.status() == "pending":
+            time.sleep(5)
+
+        if hsm.status() != "completed":
+            # something went wrong
+            raise RuntimeError("something went wrong")
+
+        result: pd.DataFrame = hsm.inference(...)
+
+        to make sure training has successfully completed.
+
+        To run multiple inference on a persistent trained model,
+        the trained_model guid go to storage. Datasets? Also
+        storage. Training parameters? Storage. That way one can
+        rebuild the client to run inference:
+
+        hsm = QcogClient(...).preloaded_model(trained_model_guid)
+
+        for df in list_of_dataframes:
+            result: Dataframe = hsm.inference(...)
+
+        Most methods class order is not important with 3 exceptions:
+            1. train may only be called after data, and named model
+            2. inference and status must have a preloaded model first
+
+        Parameters:
+        -----------
+        token: str | None
+            A valid API token granting access optional
+            when unset (or None) expects to find the proper
+            value as QCOG_API_TOKEN environment veriable
+        hostname: str | None
+            optional string of the hostname. Currently default
+            to a standard api endpoint
+        port: str | int | None
+            port value default to https 443
+        api_version: str
+            the "vX" part of the url for the api version
+        secure: bool
+            if true use https else use http mainly for local
+            testing
+        safe_mode: bool
+            if true runs healthchecks before running any api call
+            sequences
+        verify: bool
+            ignore ssl provenance for testing purposes
+        test_projest: bool
+            For testing purposes. if the project resolvers finds
+            no project, create one. For testing purposes
+        version: str
+            the qcog version to use. Must be greater than OLDEST_VERSION
+            and no greater than NEWEST_VERSION.
+        """
 
         self.http_client = RequestsClient(
             token=token,
@@ -159,6 +250,9 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         seed: int = 42,
         target_operator: list[Operator] = [],
     ) -> QcogClient:
+        """
+        Select PauliModel for the training
+        """
         self.model = PauliModel(
             operators,
             qbits,
@@ -180,6 +274,9 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         seed: int = 42,
         target_operator: list[Operator] = [],
     ) -> QcogClient:
+        """
+        Select EnsembleModel for the training
+        """
         self.model = EnsembleModel(
             operators,
             dim,
@@ -324,6 +421,8 @@ class QcogClient(TrainProtocol, InferenceProtocol):
                 "training_parameters_guid": self.training_parameters["guid"],
                 "dataset_guid": self.dataset["guid"],
                 "project_guid": self.project["guid"],
+
+                # TODO: we need to rewrite this to no expose internal details like that
                 "training_package_location": f"s3://ubiops-qognitive-default/packages/qcog-{self.version}-cp310-cp310-linux_x86_64/training_package.zip"  # noqa: 503
             },
         )

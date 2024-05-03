@@ -12,6 +12,9 @@ from .common import (
 
 
 class EnsembleProtocol(Protocol):
+    """
+    Ensemble model class "prototype"
+    """
     def __init__(
         self,
         operators: list[Operator],
@@ -26,10 +29,16 @@ class EnsembleProtocol(Protocol):
 
 
 class EnsembleSchema(EnsembleProtocol, TrainProtocol, InferenceProtocol):
+    """
+    Schema definition meant to be used externally
+    """
     pass
 
 
 class EnsembleModel(EnsembleProtocol, ValueMixin):
+    """
+    client side schema implementation
+    """
 
     model = Model.pauli
 

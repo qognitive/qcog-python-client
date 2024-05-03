@@ -5,7 +5,6 @@ import pandas as pd
 
 from .client import (
     RequestsClient,
-    # decode_base64,  # for when inference returns dataframe
     base642dataframe,
     encode_base64,
 )
@@ -33,26 +32,24 @@ MODEL_MAP: dict[str, Type[TrainingModel]] = {
 }
 
 
-def is_version_v1_gt_v2(v1: str, v2: str) -> bool:
+def numeric_version(version: str) -> list[int]:
     """
-    test M.N.F version comparison
+    Reformulate a string M.N.F version for test comparison
 
     Parameters:
     -----------
-    v1: str
-        expected to be of the form M.N.F
-    v2: str
+    version: str
         expected to be of the form M.N.F
 
     Return:
     -------
-    bool: True if v1 is cardinally greated than v2 False
-        otherwise
+    list[int]: a list of 3 int that can pythonically compared
     """
-    major1, minor1, fix1 = [int(w) for w in v1.split(".")]
-    major2, minor2, fix2 = [int(w) for w in v2.split(".")]
+    numbers = version.split(".")
+    if len(numbers) != 3:
+        raise ValueError(f"Invalid version number {version}")
 
-    return major1 > major2 or minor1 > minor2 or fix1 > fix2
+    return [int(w) for w in numbers]
 
 
 class QcogClient(TrainProtocol, InferenceProtocol):
@@ -147,7 +144,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             For testing purposes. if the project resolvers finds
             no project, create one. For testing purposes
         version: str
-            the qcog version to use. Must be greater than OLDEST_VERSION
+            the qcog version to use. Must be no smaller than OLDEST_VERSION
             and no greater than NEWEST_VERSION.
         """
 
@@ -161,11 +158,12 @@ class QcogClient(TrainProtocol, InferenceProtocol):
             verify=verify,
         )
         self.model: PauliModel | EnsembleModel
-        if is_version_v1_gt_v2(self.OLDEST_VERSION, version):
+
+        if numeric_version(version) < numeric_version(self.OLDEST_VERSION):
             raise ValueError(
                 f"qcog version can't be older than {self.OLDEST_VERSION}"
             )
-        if is_version_v1_gt_v2(version, self.NEWEST_VERSION):
+        if numeric_version(version) > numeric_version(self.NEWEST_VERSION):
             raise ValueError(
                 f"qcog version can't be older than {self.NEWEST_VERSION}"
             )

@@ -445,9 +445,11 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         self.last_status: str = self.status_resp["status"]
         return self.last_status
 
-    def wait_for_training(self, wait_time: int = 5) -> QcogClient:
+    def wait_for_training(self, poll_time: int = 5) -> QcogClient:
         """
         Wait for training to complete.
+
+        the function is blocking
 
         Parameters:
         -----------
@@ -462,7 +464,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         while self.status() == "pending":
             if self.last_status == "completed":
                 break
-            time.sleep(wait_time)
+            time.sleep(poll_time)
 
         if self.last_status != "completed":
             # something went wrong

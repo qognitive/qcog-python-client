@@ -467,7 +467,7 @@ class QcogClient(TrainProtocol, InferenceProtocol):
         if self.last_status != "completed":
             # something went wrong
             raise RuntimeError(
-                f"something went wrong {json.dumps(self.status_resp, indent=4)}"
+                f"something went wrong {json.dumps(self.status_resp, indent=4)}"  # noqa: 503
             )
 
         return self

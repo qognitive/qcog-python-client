@@ -25,6 +25,3 @@ jobs:
         QCOG_DEPLOY_PUSH_KEY: ${{ secrets.QCOG_DEPLOY_PUSH_KEY }}
     - name: Push our build to gemfury
       uses: ./.github/actions/upload-wheel
-      env:
-        GEMFURY_TOKEN: ${{ secrets.GEMFURY_PUSH_TOKEN }}
-        GEMFURY_MASTER_TOKEN: ${{ secrets.GEMFURY_FULL_TOKEN }}

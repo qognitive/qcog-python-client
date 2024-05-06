@@ -9,6 +9,9 @@ runs:
     shell: bash
   - name: build wheel
     run: |
+      python -m pip cache purge
+      python -m pip install --upgrade pip
+      python -m pip install ".[dev]"
       python -m pip install build wheel
       python -m build .
     shell: bash

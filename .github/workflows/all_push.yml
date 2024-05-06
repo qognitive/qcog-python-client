@@ -20,6 +20,11 @@ jobs:
       uses: ./.github/actions/python-build
     - name: Run Pytest
       uses: ./.github/actions/test
+    - name: Configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        role-to-assume: arn:aws:iam::885886606610:role/GithubFullS3
+        aws-region: "us-east-2"
     - name: Push our build to gemfury
       uses: ./.github/actions/upload-wheel
       env:

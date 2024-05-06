@@ -23,7 +23,7 @@ runs:
     shell: bash
   - name: push wheel to gemfury
     run: |
-      GEMFURY_MASTER_TOKEN=$(aws secretsmanager  get-secret-value --secret-id gemfury-push-yank | jq .SecretString | sed -e 's/\\//g' | sed -e 's/.$//' | sed -e 's/"//' | jq .GEMFURY_MASTER_TOKEN)
+      echo "add-mask::export GEMFURY_MASTER_TOKEN=$(aws secretsmanager  get-secret-value --secret-id gemfury-push-yank | jq .SecretString | sed -e \'s/\\//g\' | sed -e \'s/.$//\' | sed -e \'s/\"//\' | jq .GEMFURY_MASTER_TOKEN)"
       python -m pip install wheel-filename
       sudo apt install jq
       export PACKAGE_VERSION=`wheel-filename dist/$(ls dist -1 | grep whl) | jq -r '.version'`

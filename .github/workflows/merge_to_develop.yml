@@ -23,5 +23,10 @@ jobs:
       uses: ./.github/actions/bumpversion
       env:
         QCOG_DEPLOY_PUSH_KEY: ${{ secrets.QCOG_DEPLOY_PUSH_KEY }}
+    - name: Configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        role-to-assume: arn:aws:iam::885886606610:role/GithubFullS3
+        aws-region: "us-east-2"
     - name: Push our build to gemfury
       uses: ./.github/actions/upload-wheel

@@ -1,12 +1,13 @@
 [build-system]
 requires = [
-  "setuptools",
+  "setuptools>=64",
   "build",
+  "setuptools_scm[toml]",
 ]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "qcog_python_client"
-version = "0.0.1"
 readme = "README.md"
 description = "qcog python client"
 dependencies = [
@@ -14,6 +15,7 @@ dependencies = [
   "pandas",
   "numpy",
 ]
+dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
@@ -23,6 +25,9 @@ dev = [
   "pandas-stubs",
   "types-requests"
 ]
+
+[tool.setuptools_scm]
+version_file = "qcog_python_client/__version__.py"
 
 [tool.mypy]
 warn_redundant_casts = true

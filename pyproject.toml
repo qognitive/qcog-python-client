@@ -2,7 +2,7 @@
 requires = [
   "setuptools>=64",
   "build",
-  "setuptools_scm[toml]",
+  "setuptools_scm[toml]>=8",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -23,7 +23,9 @@ dev = [
   "mypy",
   "flake8",
   "pandas-stubs",
-  "types-requests"
+  "types-requests",
+  "setuptools>=64",
+  "setuptools_scm[toml]>=8",
 ]
 
 [tool.setuptools_scm]

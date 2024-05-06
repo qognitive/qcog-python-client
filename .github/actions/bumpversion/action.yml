@@ -4,24 +4,19 @@ description: "bump our version in the repo and push the change"
 runs:
   using: "composite"
   steps:
-  - name: install bumpversion
-    run: |
-      pip install bump2version
-    shell: bash
   - name: configure git
     run: |
       git config --global user.email "devs@qognitiveai.com"
       git config --global user.name "qcog_bot"
-    shell: bash
-  - name: bump the version
-    run: |
-      bump2version patch --allow-dirty
     shell: bash
   - name: push to repo
     run: |
       mkdir -p ~/.ssh
       echo "${QCOG_DEPLOY_PUSH_KEY}" > ~/.ssh/id_rsa
       chmod 600 ~/.ssh/id_rsa
+    git commit -m "Bump version: $(git tag -l --sort=creatordate | tail -n 1) → $(python -m setuptools_scm --strip-dev) [skip ci]"
+      git tag $(python -m setuptools_scm --strip-dev)
       git push git@github.com:${GITHUB_REPOSITORY}
       git push --tags git@github.com:${GITHUB_REPOSITORY}
     shell: bash
+

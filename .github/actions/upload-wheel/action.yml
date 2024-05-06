@@ -25,7 +25,7 @@ runs:
     run: |
       python -m pip install wheel-filename
       sudo apt install jq
-      export PACKAGE_VERSION=`wheel-filename dist/$(ls dist -1) | jq -r '.version'`
+      export PACKAGE_VERSION=`wheel-filename dist/$(ls dist -1 | grep whl) | jq -r '.version'`
       fury yank qcog_python_client -v $PACKAGE_VERSION --account qognitive --api-token ${GEMFURY_MASTER_TOKEN} || echo "No existing package to remove, moving on to push."
-      fury push dist/$(ls dist -1) --api-token ${GEMFURY_MASTER_TOKEN}
+      fury push dist/$(ls dist -1 | grep whl) --api-token ${GEMFURY_MASTER_TOKEN}
     shell: bash

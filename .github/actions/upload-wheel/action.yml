@@ -1,9 +1,6 @@
 name: "wheel upload to gemfury"
 description: "we build our wheel here and upload it to gemfury"
 
-env:
-  GEMFURY_MASTER_TOKEN: value
-
 runs:
   using: "composite"
   steps:
@@ -22,12 +19,6 @@ runs:
       echo "deb [trusted=yes] https://apt.fury.io/cli/ * *" | sudo tee /etc/apt/sources.list.d/fury-cli.list
       sudo apt-get update
       sudo apt-get install fury-cli
-    shell: bash
-  - name: retrieve gemfury token
-    run: |
-      GEMFURY_TOKEN=$(aws secretsmanager  get-secret-value --secret-id gemfury-push-yank | jq .SecretString | sed -e 's/\\//g' | sed -e 's/.$//' | sed -e 's/\"//' | jq .GEMFURY_MASTER_TOKEN)
-      echo "::add-mask::$GEMFURY_TOKEN"
-      echo GEMFURY_MASTER_TOKEN=$GEMFURY_TOKEN >> $GITHUB_ENV
     shell: bash
   - name: push wheel to gemfury
     run: |

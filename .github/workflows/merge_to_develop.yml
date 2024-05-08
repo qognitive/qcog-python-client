@@ -16,7 +16,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Setup python, Lint Code and test
-      uses: ./.github/actions/setup_and_lint
+      uses: ./.github/actions/setup_lint_and_test
     - name: Bump version
       uses: ./.github/actions/bumpversion
     - name: Build and install our repo

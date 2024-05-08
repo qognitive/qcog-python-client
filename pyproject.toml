@@ -22,6 +22,7 @@ dev = [
   "build",
   "mypy",
   "flake8",
+  "pytest",
   "pandas-stubs",
   "types-requests",
   "setuptools>=64",

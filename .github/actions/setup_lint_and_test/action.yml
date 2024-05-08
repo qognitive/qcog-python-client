@@ -8,8 +8,8 @@ runs:
     uses: actions/setup-python@v4
     with:
       python-version: '3.10.4'
-  - name: install linters and pytest
-    run: pip install flake8 mypy pytest
+  - name: install dev dependencies
+    run: pip install ".[dev]"
     shell: bash
   - name: run flake8
     run: flake8 qcog_python_client

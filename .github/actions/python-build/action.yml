@@ -1,5 +1,5 @@
-name: "mkl-python repo"
-description: "install a mkl dependent python repo"
+name: "python build package"
+description: "build client wheel"
 
 runs:
   using: "composite"

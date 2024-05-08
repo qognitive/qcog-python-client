@@ -15,12 +15,10 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Setup python and Lint Code
+    - name: Setup python, Lint Code and test
       uses: ./.github/actions/setup_and_lint
     - name: Build and install our repo
       uses: ./.github/actions/python-build
-    - name: Run Pytest
-      uses: ./.github/actions/test
     - name: Bump version
       uses: ./.github/actions/bumpversion
       env:

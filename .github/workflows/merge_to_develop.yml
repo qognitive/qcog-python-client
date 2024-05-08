@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  bump-version-and-upload:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Setup python, Lint Code and test
+      uses: ./.github/actions/setup_and_lint
+    - name: Bump version
+      uses: ./.github/actions/bumpversion
+    - name: Build and install our repo
+      uses: ./.github/actions/python-build
+    - name: Push version
+      uses: ./.github/actions/pushversion
+      env:
+        QCOG_DEPLOY_PUSH_KEY: ${{ secrets.QCOG_DEPLOY_PUSH_KEY }}
+    - name: Push our build to gemfury
+      uses: ./.github/actions/upload-wheel
+      env:
+        GEMFURY_MASTER_TOKEN: ${{ secrets.GEMFURY_MASTER_TOKEN }}

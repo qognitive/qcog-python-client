@@ -1,0 +1,17 @@
+name: "bump version"
+description: "bump our version in the repo and push the change"
+
+runs:
+  using: "composite"
+  steps:
+  - name: configure git
+    run: |
+      git config --global user.email "devs@qognitiveai.com"
+      git config --global user.name "qcog_bot"
+    shell: bash
+  - name: push to repo
+    run: |
+      git commit -m "Bump version: $(git tag -l --sort=creatordate | tail -n 1) → $(python -m setuptools_scm --strip-dev) [skip ci]"
+      git tag $(python -m setuptools_scm --strip-dev)
+    shell: bash
+

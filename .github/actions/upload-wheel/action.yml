@@ -1,0 +1,31 @@
+name: "wheel upload to gemfury"
+description: "we build our wheel here and upload it to gemfury"
+
+runs:
+  using: "composite"
+  steps:
+  - name: echo the version suffix
+    run: echo "VERSION SUFFIX = ${VERSION_SUFFIX}"
+    shell: bash
+  - name: build wheel
+    run: |
+      python -m pip cache purge
+      python -m pip install --upgrade pip
+      python -m pip install ".[dev]"
+      make clean && make build
+    shell: bash
+  - name: install gemfury CLI
+    run: |
+      echo "deb [trusted=yes] https://apt.fury.io/cli/ * *" | sudo tee /etc/apt/sources.list.d/fury-cli.list
+      sudo apt-get update
+      sudo apt-get install fury-cli
+    shell: bash
+  - name: push wheel to gemfury
+    run: |
+      python -m pip install wheel-filename
+      sudo apt install jq
+      export PACKAGE_VERSION=`wheel-filename dist/$(ls dist -1 | grep whl) | jq -r '.version'`
+      echo ${{ env.GEMFURY_MASTER_TOKEN }}
+      fury yank qcog_python_client -v $PACKAGE_VERSION --account qognitive --api-token ${{ env.GEMFURY_MASTER_TOKEN }} || echo "No existing package to remove, moving on to push."
+      fury push dist/$(ls dist -1 | grep whl) --api-token ${{ env.GEMFURY_MASTER_TOKEN }}
+    shell: bash

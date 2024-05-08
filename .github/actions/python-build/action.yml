@@ -1,0 +1,16 @@
+name: "python build package"
+description: "build client wheel"
+
+runs:
+  using: "composite"
+  steps:
+  - name: Python dependencies
+    run: |
+      python -m pip cache purge
+      python -m pip install --upgrade pip
+      python -m pip install ".[dev]"
+    shell: bash
+  - name: Compile our extensions locally to allow for testing
+    run: |
+      python -m build .
+    shell: bash

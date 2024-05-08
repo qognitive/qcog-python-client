@@ -17,10 +17,12 @@ jobs:
         fetch-depth: 0
     - name: Setup python, Lint Code and test
       uses: ./.github/actions/setup_and_lint
-    - name: Build and install our repo
-      uses: ./.github/actions/python-build
     - name: Bump version
       uses: ./.github/actions/bumpversion
+    - name: Build and install our repo
+      uses: ./.github/actions/python-build
+    - name: Push version
+      uses: ./.github/actions/pushversion
       env:
         QCOG_DEPLOY_PUSH_KEY: ${{ secrets.QCOG_DEPLOY_PUSH_KEY }}
     - name: Configure aws credentials

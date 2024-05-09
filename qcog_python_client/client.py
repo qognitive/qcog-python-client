@@ -3,6 +3,9 @@ from __future__ import annotations
 import base64
 import io
 import os
+
+# import asyncio
+# import aiohttp
 import requests
 
 import pandas as pd
@@ -65,7 +68,7 @@ def encode_base64(data: pd.DataFrame) -> str:
     return base64_string
 
 
-class RequestsClient:
+class _HTTPClient:
     """
     This class is the https API client
     """
@@ -127,15 +130,25 @@ class RequestsClient:
         prefix: str = "https://" if secure else "http://"
         base_url: str = f"{prefix}{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
-        self.checks: list[str] = [
-            f"{base_url}/status/",
-            f"{base_url}/health/db/",
-            f"{base_url}/health/s3/",
-        ]
+        self.check: str = f"{base_url}/status/"
         self.safe_mode: bool = safe_mode
         self.verify: bool = verify
 
         self._test_connection()
+
+    def _test_connection(self) -> None:
+        """
+        Run health check at class creation
+        """
+        raise NotImplementedError(
+            "Http client class must implement private method _test_connection"
+        )
+
+
+class RequestsClient(_HTTPClient):
+    """
+    This class is the synchronous implementation of the API client
+    """
 
     def _get(self, uri: str) -> requests.Response:
         """
@@ -198,11 +211,10 @@ class RequestsClient:
 
     def _test_connection(self) -> None:
         """
-        Run health checks at class creation
+        Run health check at class creation
         """
         if self.safe_mode:
-            for uri in self.checks:
-                self._get(uri)
+            self._get(self.check)
 
     def get(self, endpoint: str) -> dict:
         """

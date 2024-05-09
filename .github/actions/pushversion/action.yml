@@ -9,7 +9,6 @@ runs:
       mkdir -p ~/.ssh
       echo "${QCOG_DEPLOY_PUSH_KEY}" > ~/.ssh/id_rsa
       chmod 600 ~/.ssh/id_rsa
-      git push git@github.com:${GITHUB_REPOSITORY}
       git push --tags git@github.com:${GITHUB_REPOSITORY}
     shell: bash
 

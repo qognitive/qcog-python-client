@@ -11,7 +11,6 @@ runs:
     shell: bash
   - name: push to repo
     run: |
-      git commit -m "Bump version: $(git tag -l --sort=creatordate | tail -n 1) → $(python -m setuptools_scm --strip-dev) [skip ci]"
       git tag $(python -m setuptools_scm --strip-dev)
     shell: bash
 

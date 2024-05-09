@@ -4,8 +4,8 @@ import base64
 import io
 import os
 
-# import asyncio
-# import aiohttp
+import asyncio
+import aiohttp
 import requests
 
 import pandas as pd
@@ -150,6 +150,13 @@ class RequestsClient(_HTTPClient):
     This class is the synchronous implementation of the API client
     """
 
+    def _test_connection(self) -> None:
+        """
+        Run health check at class creation
+        """
+        if self.safe_mode:
+            self._get(self.check)
+
     def _get(self, uri: str) -> requests.Response:
         """
         Execute the get "requests" by adding class-level settings
@@ -209,12 +216,116 @@ class RequestsClient(_HTTPClient):
 
         return resp
 
-    def _test_connection(self) -> None:
+    def get(self, endpoint: str) -> dict:
+        """
+        Convenience wrapper around requests.get (called via _get method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
+        retval: dict = self._get(f"{self.url}/{endpoint}/").json()
+        return retval
+
+    def post(self, endpoint: str, data: dict) -> dict:
+        """
+        Convenience wrapper around requests.post (called via _post method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
+        retval: dict = self._post(
+            f"{self.url}/{endpoint}/",
+            data=data
+        ).json()
+        return retval
+
+
+class AIOHTTPClient(_HTTPClient):
+    """
+    This class is the synchronous implementation of the API client
+    """
+
+    async def _test_connection(self) -> None:
         """
         Run health check at class creation
         """
         if self.safe_mode:
-            self._get(self.check)
+            asyncio.wait(self._aget(self.check))
+
+    def _aget(self, uri: str) -> FIXME.Response:
+        """
+        Execute the async get "aiohttp" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+
+        Returns:
+        --------
+        FIXME.Response object
+            will raise_for_status so caller
+            may use .json()
+        """
+        resp = requests.get(uri, headers=self.headers, verify=self.verify)
+
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            print(resp.status_code)
+            print(resp.text)
+            raise e
+
+        return resp
+
+    def _post(self, uri: str, data: dict) -> requests.Response:
+        """
+        Execute the posts "requests" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+        requests.Response object
+            will raise_for_status so caller
+            may use .json()
+        """
+        resp = requests.post(
+            uri,
+            headers=self.headers,
+            json=data,
+            verify=self.verify,
+        )
+
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            print(resp.status_code)
+            print(resp.text)
+            raise e
+
+        return resp
 
     def get(self, endpoint: str) -> dict:
         """

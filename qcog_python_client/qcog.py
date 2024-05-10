@@ -598,16 +598,16 @@ class AsyncQcogClient(BaseQcogClient):
         test_project: bool = False,
         version: str = BaseQcogClient.NEWEST_VERSION,
     ) -> AsyncQcogClient:
-        """Factory method to create a client with any intializations from the API.
+        """Factory method to create a client with intializations from the API.
 
-        Since __init__ is always sync we cannot call to the API using that method
-        of class creation. If we need to fetch things such as the project ID that
-        the token is associated with the only way to do that properly with async
-        objects is to use a factory method.
+        Since __init__ is always sync we cannot call to the API using that
+        method of class creation. If we need to fetch things such as the
+        project ID that the token is associated with the only way to do that
+        properly with async objects is to use a factory method.
 
-        Here we wrap init and then once the object is created (since the sync part
-        is linked to the creation of the object in memory space) we are able to
-        then call the API using our async methods and not block on the IO.
+        Here we wrap init and then once the object is created (since the sync
+        part is linked to the creation of the object in memory space) we are
+        able to then call the API using our async methods and not block on IO.
         """
         hsm = cls(
             token=token,
@@ -884,7 +884,7 @@ class AsyncQcogClient(BaseQcogClient):
         pd.DataFrame: the predictions
 
         """
-        self.inference_result = await self.http_client.post(
+        self.inference_result: dict = await self.http_client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
                 "data": encode_base64(data),

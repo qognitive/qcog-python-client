@@ -277,10 +277,10 @@ class AIOHTTPClient(_HTTPClient):
         """
         async with aiohttp.ClientSession(
             headers=self.headers,
-            ssl=self.verify,
             raise_for_status=True
         ) as session:
-            return await session.get(uri)
+            resp = await session.get(uri, ssl=self.verify)
+            return await resp.json()
 
     async def _post(self, uri: str, data: dict) -> dict:
         """Execute the posts "requests" by adding class-level settings
@@ -298,10 +298,10 @@ class AIOHTTPClient(_HTTPClient):
         """
         async with aiohttp.ClientSession(
             headers=self.headers,
-            ssl=self.verify,
             raise_for_status=True
         ) as session:
-            return await session.post(uri, json=data)
+            resp = await session.post(uri, json=data, ssl=self.verify)
+            return await resp.json()
 
     async def get(self, endpoint: str) -> dict:
         """Convenience wrapper around aiohttp.get (called via _get method)

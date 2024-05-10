@@ -230,6 +230,33 @@ class QcogClient(BaseQcogClient):
         )
         self._resolve_project(test_project)
 
+    @classmethod
+    def create(
+        cls,
+        *,
+        token: str | None = None,
+        hostname: str | None = None,
+        port: str | int | None = None,
+        api_version: str = "v1",
+        secure: bool = True,
+        safe_mode: bool = True,  # NOTE will make False default later
+        verify: bool = True,  # for debugging until ssl is fixed
+        test_project: bool = False,
+        version: str = BaseQcogClient.NEWEST_VERSION,
+    ) -> QcogClient:
+        """A wrapper around __init__ to maintain the same structure as the Async client."""
+        return cls(
+            token=token,
+            hostname=hostname,
+            port=port,
+            api_version=api_version,
+            secure=secure,
+            safe_mode=safe_mode,
+            verify=verify,
+            test_project=test_project,
+            version=version,
+        )
+
     def _resolve_project(self, test_project: bool) -> None:
         """
         NOTE: CURRENTLY A STUB
@@ -546,7 +573,7 @@ class AsyncQcogClient(BaseQcogClient):
         -----------
         See QcogClient for parameter details
         """
-        super().__init__(test_project=test_project, version=version)
+        super().__init__(version=version)
         self.http_client = AIOHTTPClient(
             token=token,
             hostname=hostname,
@@ -556,6 +583,35 @@ class AsyncQcogClient(BaseQcogClient):
             safe_mode=safe_mode,
             verify=verify,
         )
+
+    @classmethod
+    async def create(
+        cls,
+        *,
+        token: str | None = None,
+        hostname: str | None = None,
+        port: str | int | None = None,
+        api_version: str = "v1",
+        secure: bool = True,
+        safe_mode: bool = True,  # NOTE will make False default later
+        verify: bool = True,  # for debugging until ssl is fixed
+        test_project: bool = False,
+        version: str = BaseQcogClient.NEWEST_VERSION,
+    ) -> AsyncQcogClient:
+        """A wrapper around __init__ to maintain the same structure as the Async client."""
+        hsm = cls(
+            token=token,
+            hostname=hostname,
+            port=port,
+            api_version=api_version,
+            secure=secure,
+            safe_mode=safe_mode,
+            verify=verify,
+            test_project=test_project,
+            version=version,
+        )
+        await hsm._resolve_project(test_project)
+        return hsm
 
     async def _resolve_project(self, test_project: bool) -> None:
         """
@@ -581,7 +637,10 @@ class AsyncQcogClient(BaseQcogClient):
                     "bucket_name": "ubiops-qognitive-default"
                 }
             ))["guid"]
-        self.project = await self._preload("project", self.PROJECT_GUID_TEMPORARY)
+        self.project = await self._preload(
+            "project",
+            self.PROJECT_GUID_TEMPORARY
+        )
 
     async def _preload(self, ep: str, guid: str) -> dict:
         """

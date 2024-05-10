@@ -244,7 +244,7 @@ class QcogClient(BaseQcogClient):
         test_project: bool = False,
         version: str = BaseQcogClient.NEWEST_VERSION,
     ) -> QcogClient:
-        """A wrapper around __init__ to maintain the same structure as the Async client."""
+        """Wrapper to maintain the same structure as the Async client."""
         return cls(
             token=token,
             hostname=hostname,
@@ -598,7 +598,17 @@ class AsyncQcogClient(BaseQcogClient):
         test_project: bool = False,
         version: str = BaseQcogClient.NEWEST_VERSION,
     ) -> AsyncQcogClient:
-        """A wrapper around __init__ to maintain the same structure as the Async client."""
+        """Factory method to create a client with any intializations from the API.
+
+        Since __init__ is always sync we cannot call to the API using that method
+        of class creation. If we need to fetch things such as the project ID that
+        the token is associated with the only way to do that properly with async
+        objects is to use a factory method.
+
+        Here we wrap init and then once the object is created (since the sync part
+        is linked to the creation of the object in memory space) we are able to
+        then call the API using our async methods and not block on the IO.
+        """
         hsm = cls(
             token=token,
             hostname=hostname,

@@ -146,20 +146,15 @@ class _HTTPClient:
 
 
 class RequestsClient(_HTTPClient):
-    """
-    This class is the synchronous implementation of the API client
-    """
+    """This class is the synchronous implementation of the API client."""
 
     def _test_connection(self) -> None:
-        """
-        Run health check at class creation
-        """
+        """Run health check at class creation."""
         if self.safe_mode:
             self._get(self.check)
 
     def _get(self, uri: str) -> requests.Response:
-        """
-        Execute the get "requests" by adding class-level settings
+        """Execute the get "requests" by adding class-level settings
 
         Parameters:
         -----------
@@ -184,8 +179,7 @@ class RequestsClient(_HTTPClient):
         return resp
 
     def _post(self, uri: str, data: dict) -> requests.Response:
-        """
-        Execute the posts "requests" by adding class-level settings
+        """Execute the posts "requests" by adding class-level settings
 
         Parameters:
         -----------
@@ -257,18 +251,16 @@ class RequestsClient(_HTTPClient):
 
 
 class AIOHTTPClient(_HTTPClient):
-    """
-    This class is the synchronous implementation of the API client
-    """
+    """This class is the async implementation of the API client"""
 
     async def _test_connection(self) -> None:
         """
         Run health check at class creation
         """
         if self.safe_mode:
-            asyncio.wait(self._aget(self.check))
+            asyncio.wait(self._get(self.check))
 
-    def _aget(self, uri: str) -> FIXME.Response:
+    async def _get(self, uri: str) -> dict:
         """
         Execute the async get "aiohttp" by adding class-level settings
 
@@ -283,20 +275,15 @@ class AIOHTTPClient(_HTTPClient):
             will raise_for_status so caller
             may use .json()
         """
-        resp = requests.get(uri, headers=self.headers, verify=self.verify)
+        async with aiohttp.ClientSession(
+            headers=self.headers,
+            ssl=self.verify,
+            raise_for_status=True
+        ) as session:
+            return await session.get(uri)
 
-        try:
-            resp.raise_for_status()
-        except Exception as e:
-            print(resp.status_code)
-            print(resp.text)
-            raise e
-
-        return resp
-
-    def _post(self, uri: str, data: dict) -> requests.Response:
-        """
-        Execute the posts "requests" by adding class-level settings
+    async def _post(self, uri: str, data: dict) -> dict:
+        """Execute the posts "requests" by adding class-level settings
 
         Parameters:
         -----------
@@ -307,29 +294,17 @@ class AIOHTTPClient(_HTTPClient):
 
         Returns:
         --------
-        requests.Response object
-            will raise_for_status so caller
-            may use .json()
+        dict: unpacked json dict
         """
-        resp = requests.post(
-            uri,
+        async with aiohttp.ClientSession(
             headers=self.headers,
-            json=data,
-            verify=self.verify,
-        )
+            ssl=self.verify,
+            raise_for_status=True
+        ) as session:
+            return await session.post(uri, json=data)
 
-        try:
-            resp.raise_for_status()
-        except Exception as e:
-            print(resp.status_code)
-            print(resp.text)
-            raise e
-
-        return resp
-
-    def get(self, endpoint: str) -> dict:
-        """
-        Convenience wrapper around requests.get (called via _get method)
+    async def get(self, endpoint: str) -> dict:
+        """Convenience wrapper around aiohttp.get (called via _get method)
 
         Parameters:
         -----------
@@ -341,12 +316,10 @@ class AIOHTTPClient(_HTTPClient):
         --------
             dict: unpacked json dict
         """
-        retval: dict = self._get(f"{self.url}/{endpoint}/").json()
-        return retval
+        return await self._get(f"{self.url}/{endpoint}/")
 
-    def post(self, endpoint: str, data: dict) -> dict:
-        """
-        Convenience wrapper around requests.post (called via _post method)
+    async def post(self, endpoint: str, data: dict) -> dict:
+        """Convenience wrapper around requests.post (called via _post method)
 
         Parameters:
         -----------
@@ -360,8 +333,4 @@ class AIOHTTPClient(_HTTPClient):
         --------
             dict: unpacked json dict
         """
-        retval: dict = self._post(
-            f"{self.url}/{endpoint}/",
-            data=data
-        ).json()
-        return retval
+        return await self._post(f"{self.url}/{endpoint}/", data=data)

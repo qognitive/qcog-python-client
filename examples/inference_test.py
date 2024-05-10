@@ -1,17 +1,12 @@
 import os
-import json
 import pandas
-import time
 import numpy as np
 
-from qcog_python_client import QcogClient
+from qcog_python_client import QcogClient, AsyncQcogClient
 
 HOSTNAME = os.environ["HOSTNAME"]
 API_TOKEN = os.environ["API_TOKEN"]
 TRAINED_MODEL_GUID = "d9bb0c85-8d1d-4d4d-af1c-4cb203a43bc6"
-
-hsm = QcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False).preloaded_model(TRAINED_MODEL_GUID)
-print(hsm.status())
 
 print("################################")
 print("# FORECAST                     #")
@@ -29,12 +24,39 @@ forecast_data = pandas.DataFrame(
     columns=["X", "Y"]
 )
 parameters = {
-        "state_method": "LOBPCG_FAST",
-        "iterations": 5,
-        "learning_rate_axes": 0,
-        "learning_rate_psi": 0.1
-    }
+    "state_method": "LOBPCG_FAST",
+    "iterations": 5,
+    "learning_rate_axes": 0,
+    "learning_rate_psi": 0.1
+}
 
-print(hsm.wait_for_training().inference(forecast_data, parameters))
 
-print("done")
+def main():
+    hsm = QcogClient(
+        token=API_TOKEN,
+        hostname=HOSTNAME,
+        verify=False
+    ).preloaded_model(TRAINED_MODEL_GUID)
+    print(hsm.status())
+    print(hsm.wait_for_training().inference(forecast_data, parameters))
+
+
+async def async_main():
+    hsm = AsyncQcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False)
+    hsm = await hsm.preloaded_model(TRAINED_MODEL_GUID)
+    print(await hsm.status())
+    await hsm.wait_for_training()
+    print(await hsm.inference(forecast_data, parameters))
+
+
+if __name__ == "__main__":
+    print("################################")
+    print("# SYNC                         #")
+    print("################################")
+    main()
+    print("################################")
+    print("# ASYNC                        #")
+    print("################################")
+    import asyncio
+    asyncio.run(async_main())
+    print("done")

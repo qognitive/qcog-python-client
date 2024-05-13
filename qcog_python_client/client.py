@@ -253,12 +253,12 @@ class RequestsClient(_HTTPClient):
 class AIOHTTPClient(_HTTPClient):
     """This class is the async implementation of the API client"""
 
-    async def _test_connection(self) -> None:
+    def _test_connection(self) -> None:
         """
         Run health check at class creation
         """
         if self.safe_mode:
-            asyncio.wait(self._get(self.check))
+            asyncio.run(self._get(self.check))
 
     async def _get(self, uri: str) -> dict:
         """
@@ -279,8 +279,11 @@ class AIOHTTPClient(_HTTPClient):
             headers=self.headers,
             raise_for_status=True
         ) as session:
+
             resp = await session.get(uri, ssl=self.verify)
-            return await resp.json()
+            retval: dict = await resp.json()
+
+            return retval
 
     async def _post(self, uri: str, data: dict) -> dict:
         """Execute the posts "requests" by adding class-level settings
@@ -300,8 +303,11 @@ class AIOHTTPClient(_HTTPClient):
             headers=self.headers,
             raise_for_status=True
         ) as session:
+
             resp = await session.post(uri, json=data, ssl=self.verify)
-            return await resp.json()
+            retval: dict = await resp.json()
+
+            return retval
 
     async def get(self, endpoint: str) -> dict:
         """Convenience wrapper around aiohttp.get (called via _get method)

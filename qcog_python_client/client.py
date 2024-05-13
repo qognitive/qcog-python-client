@@ -259,7 +259,7 @@ class AIOHTTPClient(_HTTPClient):
         """
         if self.safe_mode:
             coro = self._get(self.check)
-            asyncio.create_task(coro)
+            self._test_connection_task = asyncio.create_task(coro)
 
     async def _get(self, uri: str) -> dict:
         """

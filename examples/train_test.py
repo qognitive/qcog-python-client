@@ -37,7 +37,7 @@ training_parameters = {
 
 
 def main():
-    hsm = QcogClient(
+    hsm = QcogClient.create(
         token=API_TOKEN,
         hostname=HOSTNAME,
         verify=False

@@ -32,7 +32,7 @@ parameters = {
 
 
 def main():
-    hsm = QcogClient(
+    hsm = QcogClient.create(
         token=API_TOKEN,
         hostname=HOSTNAME,
         verify=False
@@ -42,7 +42,7 @@ def main():
 
 
 async def async_main():
-    hsm = AsyncQcogClient(token=API_TOKEN, hostname=HOSTNAME, verify=False)
+    hsm = await AsyncQcogClient.create(token=API_TOKEN, hostname=HOSTNAME, verify=False)
     hsm = await hsm.preloaded_model(TRAINED_MODEL_GUID)
     print(await hsm.status())
     await hsm.wait_for_training()

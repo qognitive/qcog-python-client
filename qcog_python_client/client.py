@@ -258,7 +258,8 @@ class AIOHTTPClient(_HTTPClient):
         Run health check at class creation
         """
         if self.safe_mode:
-            asyncio.run(self._get(self.check))
+            coro = self._get(self.check)
+            asyncio.create_task(coro)
 
     async def _get(self, uri: str) -> dict:
         """

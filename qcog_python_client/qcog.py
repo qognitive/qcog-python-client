@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Awaitable, Type, TypeAlias
+from typing import Type, TypeAlias
 import json
 import time
 import pandas as pd
@@ -531,7 +531,11 @@ class QcogClient(BaseQcogClient, TrainProtocol, InferenceProtocol):
         return base642dataframe(self.inference_result["response"]["data"])
 
 
-class AsyncQcogClient(BaseQcogClient, AsyncTrainProtocol, AsyncInferenceProtocol):
+class AsyncQcogClient(
+    BaseQcogClient,
+    AsyncTrainProtocol,
+    AsyncInferenceProtocol,
+):
 
     def __init__(
         self,

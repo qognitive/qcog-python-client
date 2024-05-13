@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Awaitable, TypedDict, TypeAlias, Any, Protocol
+from typing import TypedDict, TypeAlias, Any, Protocol
 
 import numpy as np
 import pandas as pd

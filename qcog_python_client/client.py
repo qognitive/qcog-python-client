@@ -4,7 +4,6 @@ import base64
 import io
 import os
 
-import asyncio
 import aiohttp
 import requests
 
@@ -134,24 +133,9 @@ class _HTTPClient:
         self.safe_mode: bool = safe_mode
         self.verify: bool = verify
 
-        self._test_connection()
-
-    def _test_connection(self) -> None:
-        """
-        Run health check at class creation
-        """
-        raise NotImplementedError(
-            "Http client class must implement private method _test_connection"
-        )
-
 
 class RequestsClient(_HTTPClient):
     """This class is the synchronous implementation of the API client."""
-
-    def _test_connection(self) -> None:
-        """Run health check at class creation."""
-        if self.safe_mode:
-            self._get(self.check)
 
     def _get(self, uri: str) -> requests.Response:
         """Execute the get "requests" by adding class-level settings
@@ -252,14 +236,6 @@ class RequestsClient(_HTTPClient):
 
 class AIOHTTPClient(_HTTPClient):
     """This class is the async implementation of the API client"""
-
-    def _test_connection(self) -> None:
-        """
-        Run health check at class creation
-        """
-        if self.safe_mode:
-            coro = self._get(self.check)
-            self._test_connection_task = asyncio.create_task(coro)
 
     async def _get(self, uri: str) -> dict:
         """

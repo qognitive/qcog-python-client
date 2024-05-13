@@ -84,7 +84,6 @@ class _HTTPClient:
         port: str | int | None = None,
         api_version: str = "v1",
         secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
         verify: bool = True,  # for debugging until ssl is fixed
     ):
         """
@@ -104,9 +103,6 @@ class _HTTPClient:
         secure: bool
             if true use https else use http mainly for local
             testing
-        safe_mode: bool
-            if true runs healthchecks before running any api call
-            sequences
         verify: bool
             ignore ssl provenance for testing purposes
         """
@@ -130,7 +126,6 @@ class _HTTPClient:
         base_url: str = f"{prefix}{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
         self.check: str = f"{base_url}/status/"
-        self.safe_mode: bool = safe_mode
         self.verify: bool = verify
 
 

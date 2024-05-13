@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Type, TypeAlias
+from typing import Generic, Type, TypeAlias, TypeVar
 import json
 import time
 import pandas as pd
@@ -30,6 +30,7 @@ from .schema import (
 
 
 TrainingModel: TypeAlias = PauliModel | EnsembleModel
+CLIENT = TypeVar("CLIENT")
 
 
 MODEL_MAP: dict[str, Type[TrainingModel]] = {
@@ -58,29 +59,46 @@ def numeric_version(version: str) -> list[int]:
     return [int(w) for w in numbers]
 
 
-class BaseQcogClient:
+class BaseQcogClient(Generic[CLIENT]):
 
     OLDEST_VERSION = "0.0.43"
     NEWEST_VERSION = "0.0.44"
     PROJECT_GUID_TEMPORARY: str = "45ec9045-3d50-46fb-a82c-4aa0502801e9"
 
-    def __init__(self, *, version: str = NEWEST_VERSION):
+    def __init__(self) -> None:
+        self._version: str
+        self._http_client: CLIENT
         self.model: PauliModel | EnsembleModel
-
-        if numeric_version(version) < numeric_version(self.OLDEST_VERSION):
-            raise ValueError(
-                f"qcog version can't be older than {self.OLDEST_VERSION}"
-            )
-        if numeric_version(version) > numeric_version(self.NEWEST_VERSION):
-            raise ValueError(
-                f"qcog version can't be older than {self.NEWEST_VERSION}"
-            )
-        self.version: str = version
         self.project: dict[str, str]
         self.dataset: dict = {}
         self.training_parameters: dict = {}
         self.trained_model: dict = {}
         self.inference_result: dict = {}
+
+    @property
+    def version(self) -> str:
+        return self._version
+
+    @version.setter
+    def version(self, value: str) -> None:
+        if numeric_version(value) < numeric_version(self.OLDEST_VERSION):
+            raise ValueError(
+                f"qcog version can't be older than {self.OLDEST_VERSION}"
+            )
+        if numeric_version(value) > numeric_version(self.NEWEST_VERSION):
+            raise ValueError(
+                f"qcog version can't be older than {self.NEWEST_VERSION}"
+            )
+
+        self._version = value
+
+    @property
+    def http_client(self) -> CLIENT:
+        return self._http_client
+
+    @http_client.setter
+    def http_client(self, value: CLIENT) -> None:
+        self._http_client = value
 
     def pauli(
         self,
@@ -131,22 +149,39 @@ class BaseQcogClient:
         return self
 
 
-class QcogClient(BaseQcogClient, TrainProtocol, InferenceProtocol):
+class QcogClient(
+    BaseQcogClient[RequestsClient],
+    TrainProtocol,
+    InferenceProtocol,
+):
 
-    def __init__(
-        self,
+    @classmethod
+    def create(
+        cls,
         *,
         token: str | None = None,
         hostname: str | None = None,
         port: str | int | None = None,
         api_version: str = "v1",
         secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
+        safe_mode: bool = False,
         verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
         version: str = BaseQcogClient.NEWEST_VERSION,
-    ):
+    ) -> QcogClient:
         """
+        Factory method to create a client with intializations from the API.
+
+        Since __init__ is always sync we cannot call to the API using that
+        method of class creation. If we need to fetch things such as the
+        project ID that the token is associated with the only way to do that
+        properly with async objects is to use a factory method.
+
+        Here we replace init with create and then once the object is created
+        (since the sync part is linked to the creation of the object in memory
+        space) we are able to then call the API using our async methods and
+        not block on IO.
+
         Qcog api client implementation there are 2 main expected usages:
             1. Training
             2. Inference
@@ -164,7 +199,7 @@ class QcogClient(BaseQcogClient, TrainProtocol, InferenceProtocol):
 
         In practice, the 2 main expected usage would be for a fresh training:
 
-        hsm = QcogClient(...).pauli(...).data(...).train(...)
+        hsm = QcogClient.create(...).pauli(...).data(...).train(...)
 
         where the "..." would be replaced with desired parametrization
 
@@ -183,7 +218,7 @@ class QcogClient(BaseQcogClient, TrainProtocol, InferenceProtocol):
         storage. Training parameters? Storage. That way one can
         rebuild the client to run inference:
 
-        hsm = QcogClient(...).preloaded_model(trained_model_guid)
+        hsm = QcogClient.create(...).preloaded_model(trained_model_guid)
 
         for df in list_of_dataframes:
             result: Dataframe = hsm.inference(...)
@@ -220,44 +255,23 @@ class QcogClient(BaseQcogClient, TrainProtocol, InferenceProtocol):
             the qcog version to use. Must be no smaller than OLDEST_VERSION
             and no greater than NEWEST_VERSION.
         """
-        super().__init__(version=version)
-        self.http_client = RequestsClient(
+        hsm = cls()
+        hsm.version = version
+        hsm.http_client = RequestsClient(
             token=token,
             hostname=hostname,
             port=port,
             api_version=api_version,
             secure=secure,
-            safe_mode=safe_mode,
             verify=verify,
         )
-        self._resolve_project(test_project)
 
-    @classmethod
-    def create(
-        cls,
-        *,
-        token: str | None = None,
-        hostname: str | None = None,
-        port: str | int | None = None,
-        api_version: str = "v1",
-        secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
-        verify: bool = True,  # for debugging until ssl is fixed
-        test_project: bool = False,
-        version: str = BaseQcogClient.NEWEST_VERSION,
-    ) -> QcogClient:
-        """Wrapper to maintain the same structure as the Async client."""
-        return cls(
-            token=token,
-            hostname=hostname,
-            port=port,
-            api_version=api_version,
-            secure=secure,
-            safe_mode=safe_mode,
-            verify=verify,
-            test_project=test_project,
-            version=version,
-        )
+        if safe_mode:
+            hsm.http_client.get("status")
+
+        hsm._resolve_project(test_project)
+
+        return hsm
 
     def _resolve_project(self, test_project: bool) -> None:
         """
@@ -532,35 +546,35 @@ class QcogClient(BaseQcogClient, TrainProtocol, InferenceProtocol):
 
 
 class AsyncQcogClient(
-    BaseQcogClient,
+    BaseQcogClient[AIOHTTPClient],
     AsyncTrainProtocol,
     AsyncInferenceProtocol,
 ):
 
-    def __init__(
-        self,
+    @classmethod
+    async def create(
+        cls,
         *,
         token: str | None = None,
         hostname: str | None = None,
         port: str | int | None = None,
         api_version: str = "v1",
         secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
+        safe_mode: bool = False,
         verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
         version: str = BaseQcogClient.NEWEST_VERSION,
-    ):
+    ) -> AsyncQcogClient:
         """Asyncronous Qcog api client implementation
 
         This is similar to the sync client with the exception that any API
         calls will be async and require an await
 
         For example:
-            hsm = await(
-                (
-                    await AsyncQcogClient(...).pauli(...).data(...)
-                ).train(...)
-            )
+
+        TODO:
+        hsm = AsyncQcogClient.create(...).pauli(...).data(...).train(...)
+        TODO
 
         where the "..." would be replaced with desired parametrization
 
@@ -579,54 +593,22 @@ class AsyncQcogClient(
         -----------
         See QcogClient for parameter details
         """
-        super().__init__(version=version)
-        self.http_client = AIOHTTPClient(
+        hsm = cls()
+        hsm.version = version
+        hsm.http_client = AIOHTTPClient(
             token=token,
             hostname=hostname,
             port=port,
             api_version=api_version,
             secure=secure,
-            safe_mode=safe_mode,
             verify=verify,
         )
 
-    @classmethod
-    async def create(
-        cls,
-        *,
-        token: str | None = None,
-        hostname: str | None = None,
-        port: str | int | None = None,
-        api_version: str = "v1",
-        secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
-        verify: bool = True,  # for debugging until ssl is fixed
-        test_project: bool = False,
-        version: str = BaseQcogClient.NEWEST_VERSION,
-    ) -> AsyncQcogClient:
-        """Factory method to create a client with intializations from the API.
+        if safe_mode:
+            await hsm.http_client.get("status")
 
-        Since __init__ is always sync we cannot call to the API using that
-        method of class creation. If we need to fetch things such as the
-        project ID that the token is associated with the only way to do that
-        properly with async objects is to use a factory method.
-
-        Here we wrap init and then once the object is created (since the sync
-        part is linked to the creation of the object in memory space) we are
-        able to then call the API using our async methods and not block on IO.
-        """
-        hsm = cls(
-            token=token,
-            hostname=hostname,
-            port=port,
-            api_version=api_version,
-            secure=secure,
-            safe_mode=safe_mode,
-            verify=verify,
-            test_project=test_project,
-            version=version,
-        )
         await hsm._resolve_project(test_project)
+
         return hsm
 
     async def _resolve_project(self, test_project: bool) -> None:

@@ -51,17 +51,16 @@ def main():
 
 
 async def async_main():
-    hsm = await AsyncQcogClient.create(
+    hsm = (await AsyncQcogClient.create(
         token=API_TOKEN,
         hostname=HOSTNAME,
-        verify=False
-    )
-    hsm = hsm.ensemble(
+        verify=False,
+    )).ensemble(
         operators=["X", "Y", "Z"],
         dim=4,
         num_axes=16
     )
-    hsm = await hsm.data(df)
+    await hsm.data(df)
     await hsm.train(**training_parameters)
     print(hsm.trained_model)
 

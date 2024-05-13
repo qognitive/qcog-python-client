@@ -42,8 +42,12 @@ def main():
 
 
 async def async_main():
-    hsm = await AsyncQcogClient.create(token=API_TOKEN, hostname=HOSTNAME, verify=False)
-    hsm = await hsm.preloaded_model(TRAINED_MODEL_GUID)
+    hsm = (
+        await (
+            await AsyncQcogClient.create(token=API_TOKEN, hostname=HOSTNAME, verify=False)
+        ).preloaded_model(TRAINED_MODEL_GUID)
+
+    )
     print(await hsm.status())
     await hsm.wait_for_training()
     print(await hsm.inference(forecast_data, parameters))

@@ -572,9 +572,9 @@ class AsyncQcogClient(
 
         For example:
 
-        TODO:
-        hsm = AsyncQcogClient.create(...).pauli(...).data(...).train(...)
-        TODO
+        hsm = (await AsyncQcogClient.create(...)).pauli(...)
+        await hsm.data(...)
+        await hsm.train(...)
 
         where the "..." would be replaced with desired parametrization
 

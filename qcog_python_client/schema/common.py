@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TypedDict, TypeAlias, Any, Protocol
+from typing import Awaitable, TypedDict, TypeAlias, Any, Protocol
 
 import numpy as np
 import pandas as pd
@@ -77,6 +77,32 @@ class TrainingParameters(TypedDict):
     # definittions
     weight_optimization_kwargs: NotRequiredWeightParams
     state_kwargs: NotRequiredStateParams
+
+
+class AsyncTrainProtocol(Protocol):
+    """
+    Train method "prototype"
+    """
+    async def train(
+        self,
+        batch_size: int,
+        num_passes: int,
+        weight_optimization: NotRequiredWeightParams,
+        get_states_extra: NotRequiredStateParams,
+    ) -> Any:  # NOTE: we could make this a generic
+        raise NotImplementedError("Train class must implement train")
+
+
+class AsyncInferenceProtocol(Protocol):
+    """
+    Inference method "prototype"
+    """
+    async def inference(
+        self,
+        data: pd.DataFrame,
+        parameters: InferenceParameters,
+    ) -> pd.DataFrame:
+        raise NotImplementedError("Inference class must implement inference")
 
 
 class TrainProtocol(Protocol):

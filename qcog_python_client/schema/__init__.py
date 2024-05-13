@@ -1,8 +1,10 @@
 from .common import (  # noqa: F401
     Model,
     Dataset,
+    AsyncTrainProtocol,
     TrainProtocol,
     TrainingParameters,
+    AsyncInferenceProtocol,
     InferenceProtocol,
     InferenceParameters,
     Operator,

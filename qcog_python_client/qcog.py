@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Type, TypeAlias
+from typing import Awaitable, Type, TypeAlias
 import json
 import time
 import pandas as pd
@@ -15,8 +15,10 @@ from .client import (
 from .schema import (
     Model,
     Dataset,
+    AsyncTrainProtocol,
     TrainProtocol,
     TrainingParameters,
+    AsyncInferenceProtocol,
     InferenceProtocol,
     InferenceParameters,
     Operator,
@@ -56,7 +58,7 @@ def numeric_version(version: str) -> list[int]:
     return [int(w) for w in numbers]
 
 
-class BaseQcogClient(TrainProtocol, InferenceProtocol):
+class BaseQcogClient:
 
     OLDEST_VERSION = "0.0.43"
     NEWEST_VERSION = "0.0.44"
@@ -129,7 +131,7 @@ class BaseQcogClient(TrainProtocol, InferenceProtocol):
         return self
 
 
-class QcogClient(BaseQcogClient):
+class QcogClient(BaseQcogClient, TrainProtocol, InferenceProtocol):
 
     def __init__(
         self,
@@ -529,7 +531,7 @@ class QcogClient(BaseQcogClient):
         return base642dataframe(self.inference_result["response"]["data"])
 
 
-class AsyncQcogClient(BaseQcogClient):
+class AsyncQcogClient(BaseQcogClient, AsyncTrainProtocol, AsyncInferenceProtocol):
 
     def __init__(
         self,

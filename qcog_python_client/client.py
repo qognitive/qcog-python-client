@@ -125,7 +125,6 @@ class _HTTPClient:
         prefix: str = "https://" if secure else "http://"
         base_url: str = f"{prefix}{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
-        self.check: str = f"{base_url}/status/"
         self.verify: bool = verify
 
 

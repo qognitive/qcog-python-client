@@ -79,6 +79,32 @@ class TrainingParameters(TypedDict):
     state_kwargs: NotRequiredStateParams
 
 
+class AsyncTrainProtocol(Protocol):
+    """
+    Train method "prototype"
+    """
+    async def train(
+        self,
+        batch_size: int,
+        num_passes: int,
+        weight_optimization: NotRequiredWeightParams,
+        get_states_extra: NotRequiredStateParams,
+    ) -> Any:  # NOTE: we could make this a generic
+        raise NotImplementedError("Train class must implement train")
+
+
+class AsyncInferenceProtocol(Protocol):
+    """
+    Inference method "prototype"
+    """
+    async def inference(
+        self,
+        data: pd.DataFrame,
+        parameters: InferenceParameters,
+    ) -> pd.DataFrame:
+        raise NotImplementedError("Inference class must implement inference")
+
+
 class TrainProtocol(Protocol):
     """
     Train method "prototype"

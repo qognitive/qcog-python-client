@@ -3,6 +3,8 @@ from __future__ import annotations
 import base64
 import io
 import os
+
+import aiohttp
 import requests
 
 import pandas as pd
@@ -65,7 +67,7 @@ def encode_base64(data: pd.DataFrame) -> str:
     return base64_string
 
 
-class RequestsClient:
+class _HTTPClient:
     """
     This class is the https API client
     """
@@ -82,7 +84,6 @@ class RequestsClient:
         port: str | int | None = None,
         api_version: str = "v1",
         secure: bool = True,
-        safe_mode: bool = True,  # NOTE will make False default later
         verify: bool = True,  # for debugging until ssl is fixed
     ):
         """
@@ -102,9 +103,6 @@ class RequestsClient:
         secure: bool
             if true use https else use http mainly for local
             testing
-        safe_mode: bool
-            if true runs healthchecks before running any api call
-            sequences
         verify: bool
             ignore ssl provenance for testing purposes
         """
@@ -127,19 +125,14 @@ class RequestsClient:
         prefix: str = "https://" if secure else "http://"
         base_url: str = f"{prefix}{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
-        self.checks: list[str] = [
-            f"{base_url}/status/",
-            f"{base_url}/health/db/",
-            f"{base_url}/health/s3/",
-        ]
-        self.safe_mode: bool = safe_mode
         self.verify: bool = verify
 
-        self._test_connection()
+
+class RequestsClient(_HTTPClient):
+    """This class is the synchronous implementation of the API client."""
 
     def _get(self, uri: str) -> requests.Response:
-        """
-        Execute the get "requests" by adding class-level settings
+        """Execute the get "requests" by adding class-level settings
 
         Parameters:
         -----------
@@ -164,8 +157,7 @@ class RequestsClient:
         return resp
 
     def _post(self, uri: str, data: dict) -> requests.Response:
-        """
-        Execute the posts "requests" by adding class-level settings
+        """Execute the posts "requests" by adding class-level settings
 
         Parameters:
         -----------
@@ -195,14 +187,6 @@ class RequestsClient:
             raise e
 
         return resp
-
-    def _test_connection(self) -> None:
-        """
-        Run health checks at class creation
-        """
-        if self.safe_mode:
-            for uri in self.checks:
-                self._get(uri)
 
     def get(self, endpoint: str) -> dict:
         """
@@ -242,3 +226,88 @@ class RequestsClient:
             data=data
         ).json()
         return retval
+
+
+class AIOHTTPClient(_HTTPClient):
+    """This class is the async implementation of the API client"""
+
+    async def _get(self, uri: str) -> dict:
+        """
+        Execute the async get "aiohttp" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+
+        Returns:
+        --------
+        FIXME.Response object
+            will raise_for_status so caller
+            may use .json()
+        """
+        async with aiohttp.ClientSession(
+            headers=self.headers,
+            raise_for_status=True
+        ) as session:
+
+            resp = await session.get(uri, ssl=self.verify)
+            retval: dict = await resp.json()
+
+            return retval
+
+    async def _post(self, uri: str, data: dict) -> dict:
+        """Execute the posts "requests" by adding class-level settings
+
+        Parameters:
+        -----------
+        uri: str
+            Full http url
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+        dict: unpacked json dict
+        """
+        async with aiohttp.ClientSession(
+            headers=self.headers,
+            raise_for_status=True
+        ) as session:
+
+            resp = await session.post(uri, json=data, ssl=self.verify)
+            retval: dict = await resp.json()
+
+            return retval
+
+    async def get(self, endpoint: str) -> dict:
+        """Convenience wrapper around aiohttp.get (called via _get method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
+        return await self._get(f"{self.url}/{endpoint}/")
+
+    async def post(self, endpoint: str, data: dict) -> dict:
+        """Convenience wrapper around requests.post (called via _post method)
+
+        Parameters:
+        -----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+        data: dict
+            json-able data payload
+
+        Returns:
+        --------
+            dict: unpacked json dict
+        """
+        return await self._post(f"{self.url}/{endpoint}/", data=data)

@@ -17,6 +17,7 @@ class Model(Enum):
     """
     pauli = "pauli"
     ensemble = "ensemble"
+    general = "general"
 
 
 class EMPTY_DICTIONARY(TypedDict):

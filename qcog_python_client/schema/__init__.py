@@ -13,3 +13,4 @@ from .common import (  # noqa: F401
 )
 from .pauli import PauliSchema, PauliModel  # noqa: F401
 from .ensemble import EnsembleSchema, EnsembleModel  # noqa: F401
+from .general import GeneralSchema, GeneralModel  # noqa: F401

@@ -19,7 +19,6 @@ class GeneralProtocol(Protocol):
         self,
         operators: list[Operator],
         dim: int,
-        num_axes: int,
         sigma_sq: dict[str, float],
         sigma_sq_optimization: dict[str, float],
         seed: int,
@@ -45,7 +44,6 @@ class GeneralModel(GeneralProtocol, ValueMixin):
     class payload(TypedDict):
         operators: list[Operator]
         dim: int
-        num_axes: int
         sigma_sq: dict[str, float]
         sigma_sq_optimization_kwargs: dict[str, float]
         seed: int
@@ -55,7 +53,6 @@ class GeneralModel(GeneralProtocol, ValueMixin):
         self,
         operators: list[Operator],
         dim: int,
-        num_axes: int,
         sigma_sq: dict[str, float],
         sigma_sq_optimization: dict[str, float],
         seed: int,
@@ -64,7 +61,6 @@ class GeneralModel(GeneralProtocol, ValueMixin):
         self.params = self.payload(
             operators=operators,
             dim=dim,
-            num_axes=num_axes,
             sigma_sq=sigma_sq,
             sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,

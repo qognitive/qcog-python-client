@@ -18,9 +18,8 @@ class GeneralProtocol(Protocol):
     def __init__(
         self,
         operators: list[Operator],
-        dim: int,
+        dims: int,
         sigma_sq: dict[str, float],
-        sigma_sq_optimization: dict[str, float],
         seed: int,
         target_operators: list[Operator],
     ):
@@ -43,16 +42,15 @@ class GeneralModel(GeneralProtocol, ValueMixin):
 
     class payload(TypedDict):
         operators: list[Operator]
-        dim: int
+        dims: int
         sigma_sq: dict[str, float]
-        sigma_sq_optimization_kwargs: dict[str, float]
         seed: int
         target_operators: list[Operator]
 
     def __init__(
         self,
         operators: list[Operator],
-        dim: int,
+        dims: int,
         sigma_sq: dict[str, float],
         sigma_sq_optimization: dict[str, float],
         seed: int,
@@ -60,9 +58,8 @@ class GeneralModel(GeneralProtocol, ValueMixin):
     ):
         self.params = self.payload(
             operators=operators,
-            dim=dim,
+            dims=dims,
             sigma_sq=sigma_sq,
-            sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,
             target_operators=target_operators,
         )

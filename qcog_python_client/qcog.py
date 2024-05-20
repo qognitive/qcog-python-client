@@ -534,7 +534,7 @@ class QcogClient(
         pd.DataFrame: the predictions
 
         """
-        self.inference_result = self.http_client.post(
+        inference_result = self.http_client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
                 "data": encode_base64(data),
@@ -542,7 +542,7 @@ class QcogClient(
             },
         )
 
-        return base642dataframe(self.inference_result["response"]["data"])
+        return base642dataframe(inference_result["response"]["data"])
 
 
 class AsyncQcogClient(

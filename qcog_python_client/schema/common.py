@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import TypedDict, TypeAlias, Any, Protocol
+from typing_extensions import NotRequired
 
 import numpy as np
 import pandas as pd
+
+
+Operator: TypeAlias = str | int
 
 
 class Model(Enum):
@@ -41,7 +45,12 @@ class WeightParams(TypedDict):
 
 
 class FisherParams(TypedDict):
-    learning_rate: float
+    learning_rate: NotRequired[float]
+    init_update_n: int
+    update_frequency: int
+    adjust_lr: bool
+    average_over_axis: NotRequired[int]
+    use_hessian: bool
 
 
 class StateParams(TypedDict):
@@ -129,9 +138,6 @@ class InferenceProtocol(Protocol):
         parameters: InferenceParameters,
     ) -> pd.DataFrame:
         raise NotImplementedError("Inference class must implement inference")
-
-
-Operator: TypeAlias = str | int
 
 
 class ValueMixin:

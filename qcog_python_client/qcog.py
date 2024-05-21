@@ -39,6 +39,8 @@ MODEL_MAP: dict[str, Type[TrainingModel]] = {
     Model.ensemble.value: EnsembleModel,
     Model.general.value: GeneralModel,
 }
+WAITING_STATUS = ("processing", "pending")
+SUCCESS_STATUS = ("completed")
 
 
 def numeric_version(version: str) -> list[int]:
@@ -503,12 +505,12 @@ class QcogClient(
         QcogClient: itself
 
         """
-        while self.status() == "pending":
-            if self.last_status == "completed":
+        while self.status() in WAITING_STATUS:
+            if self.last_status in SUCCESS_STATUS:
                 break
             time.sleep(poll_time)
 
-        if self.last_status != "completed":
+        if self.last_status not in SUCCESS_STATUS:
             # something went wrong
             raise RuntimeError(
                 f"something went wrong {json.dumps(self.status_resp, indent=4)}"  # noqa: 503
@@ -841,12 +843,12 @@ class AsyncQcogClient(
         AsyncQcogClient: itself
 
         """
-        while (await self.status()) == "pending":
-            if self.last_status == "completed":
+        while (await self.status()) in WAITING_STATUS:
+            if self.last_status in SUCCESS_STATUS:
                 break
             await asyncio.sleep(poll_time)
 
-        if self.last_status != "completed":
+        if self.last_status not in SUCCESS_STATUS:
             # something went wrong
             raise RuntimeError(
                 f"something went wrong {json.dumps(self.status_resp, indent=4)}"  # noqa: 503

@@ -45,7 +45,7 @@ def base642dataframe(encoded_string: str) -> pd.DataFrame:
     """
     decoded_string: str = decode_base64(encoded_string)
     s = io.StringIO(decoded_string)
-    return pd.read_csv(s)
+    return pd.read_csv(s, index_col=0)
 
 
 def encode_base64(data: pd.DataFrame) -> str:
@@ -60,7 +60,7 @@ def encode_base64(data: pd.DataFrame) -> str:
     Returns:
     str: encoded base64 string
     """
-    raw_string: str = data.to_csv(index=False)
+    raw_string: str = data.to_csv()
     raw_bytes: bytes = raw_string.encode("ascii")
     base64_bytes = base64.b64encode(raw_bytes)
     base64_string = base64_bytes.decode("ascii")

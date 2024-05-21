@@ -39,6 +39,7 @@ MODEL_MAP: dict[str, Type[TrainingModel]] = {
     Model.ensemble.value: EnsembleModel,
     Model.general.value: GeneralModel,
 }
+# https://ubiops.com/docs/r_client_library/deployment_requests/#response-structure_1
 WAITING_STATUS = ("processing", "pending")
 SUCCESS_STATUS = ("completed")
 

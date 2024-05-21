@@ -17,6 +17,7 @@ class Model(Enum):
     """
     pauli = "pauli"
     ensemble = "ensemble"
+    general = "general"
 
 
 class EMPTY_DICTIONARY(TypedDict):
@@ -60,8 +61,8 @@ class StateParams(TypedDict):
     # TODO we should remove the "kwargs"
     # from the names and favor explicit
     # definittions
-    fisher_axes_kwargs: FisherParams
-    fisher_state_kwargs: FisherParams
+    fisher_axes_kwargs: NotRequired[FisherParams]
+    fisher_state_kwargs: NotRequired[FisherParams]
 
 
 class InferenceParameters(TypedDict):

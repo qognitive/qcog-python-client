@@ -26,16 +26,18 @@ from .schema import (
     NotRequiredStateParams,
     PauliModel,
     EnsembleModel,
+    GeneralModel,
 )
 
 
-TrainingModel: TypeAlias = PauliModel | EnsembleModel
+TrainingModel: TypeAlias = PauliModel | EnsembleModel | GeneralModel
 CLIENT = TypeVar("CLIENT")
 
 
 MODEL_MAP: dict[str, Type[TrainingModel]] = {
     Model.pauli.value: PauliModel,
     Model.ensemble.value: EnsembleModel,
+    Model.general.value: GeneralModel,
 }
 
 
@@ -62,13 +64,13 @@ def numeric_version(version: str) -> list[int]:
 class BaseQcogClient(Generic[CLIENT]):
 
     OLDEST_VERSION = "0.0.43"
-    NEWEST_VERSION = "0.0.44"
+    NEWEST_VERSION = "0.0.56"
     PROJECT_GUID_TEMPORARY: str = "45ec9045-3d50-46fb-a82c-4aa0502801e9"
 
     def __init__(self) -> None:
         self._version: str
         self._http_client: CLIENT
-        self.model: PauliModel | EnsembleModel
+        self.model: TrainingModel
         self.project: dict[str, str]
         self.dataset: dict = {}
         self.training_parameters: dict = {}

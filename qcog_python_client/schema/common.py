@@ -32,6 +32,7 @@ class Dataset(TypedDict):
     format: str
     source: str
     data: str
+    indexing: list[int]
     project_guid: str
 
 

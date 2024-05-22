@@ -29,7 +29,7 @@ def decode_base64(encoded_string: str) -> str:
     return decoded_bytes.decode("ascii")
 
 
-def base642dataframe(encoded_string: str) -> pd.DataFrame:
+def base642dataframe(encoded_string: str, indexing: list[int]) -> pd.DataFrame:
     """
     From a base64 encoded str type, decode into original
     string str type and parse as csv dataframe using io
@@ -45,7 +45,7 @@ def base642dataframe(encoded_string: str) -> pd.DataFrame:
     """
     decoded_string: str = decode_base64(encoded_string)
     s = io.StringIO(decoded_string)
-    return pd.read_csv(s, index_col=0)
+    return pd.read_csv(s, index_col=indexing)
 
 
 def encode_base64(data: pd.DataFrame) -> str:

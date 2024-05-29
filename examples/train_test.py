@@ -26,12 +26,6 @@ training_parameters = {
         "state_method": "LOBPCG_FAST",
         "iterations": 10,
         "learning_rate_axes": 0.01,
-        "fisher_axes_kwargs": {
-             "learning_rate": 1e-5
-        },
-        "fisher_state_kwargs": {
-             "learning_rate": 1e-5
-        }
     }
 }
 

@@ -491,7 +491,7 @@ class QcogClient(
         self.last_status: str = self.status_resp["status"]
         return self.last_status
 
-    def wait_for_training(self, poll_time: int = 5) -> QcogClient:
+    def wait_for_training(self, poll_time: int = 60) -> QcogClient:
         """
         Wait for training to complete.
 
@@ -834,7 +834,7 @@ class AsyncQcogClient(
         self.last_status: str = self.status_resp["status"]
         return self.last_status
 
-    async def wait_for_training(self, poll_time: int = 5) -> AsyncQcogClient:
+    async def wait_for_training(self, poll_time: int = 60) -> AsyncQcogClient:
         """
         Wait for training to complete.
 

@@ -3,11 +3,19 @@ from __future__ import annotations
 import base64
 import io
 import os
+import time
+from enum import Enum
 
 import aiohttp
 import requests
+import random
 
 import pandas as pd
+
+
+class HttpMethod(Enum):
+    get = "get"
+    post = "post"
 
 
 def decode_base64(encoded_string: str) -> str:
@@ -85,6 +93,7 @@ class _HTTPClient:
         api_version: str = "v1",
         secure: bool = True,
         verify: bool = True,  # for debugging until ssl is fixed
+        retries: int = 3
     ):
         """
         Parameters:
@@ -105,6 +114,8 @@ class _HTTPClient:
             testing
         verify: bool
             ignore ssl provenance for testing purposes
+        retries: int
+            number of attempts in cases of bad gateway
         """
 
         self.token: str = token if isinstance(token, str) else self.TOKEN
@@ -126,45 +137,28 @@ class _HTTPClient:
         base_url: str = f"{prefix}{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
         self.verify: bool = verify
+        self.retries: int = retries
 
 
 class RequestsClient(_HTTPClient):
     """This class is the synchronous implementation of the API client."""
 
-    def _get(self, uri: str) -> requests.Response:
+    def _request_retry(
+        self,
+        uri: str,
+        method: HttpMethod,
+        data: dict | None = None,
+    ) -> requests.Response:
         """Execute the get "requests" by adding class-level settings
 
         Parameters:
         -----------
         uri: str
             Full http url
-
-        Returns:
-        --------
-        requests.Response object
-            will raise_for_status so caller
-            may use .json()
-        """
-        resp = requests.get(uri, headers=self.headers, verify=self.verify)
-
-        try:
-            resp.raise_for_status()
-        except Exception as e:
-            print(resp.status_code)
-            print(resp.text)
-            raise e
-
-        return resp
-
-    def _post(self, uri: str, data: dict) -> requests.Response:
-        """Execute the posts "requests" by adding class-level settings
-
-        Parameters:
-        -----------
-        uri: str
-            Full http url
         data: dict
-            json-able data payload
+            in case of post data to post otherwise empty dict
+        method: HttpMethod
+            method enum
 
         Returns:
         --------
@@ -172,21 +166,34 @@ class RequestsClient(_HTTPClient):
             will raise_for_status so caller
             may use .json()
         """
-        resp = requests.post(
-            uri,
-            headers=self.headers,
-            json=data,
-            verify=self.verify,
-        )
+        random.seed()
+        sleep_for: int = random.randrange(1, 5)
+        exception: Exception
 
-        try:
-            resp.raise_for_status()
-        except Exception as e:
-            print(resp.status_code)
-            print(resp.text)
-            raise e
+        for retry in range(self.retries):
+            try:
 
-        return resp
+                resp = requests.request(
+                    method.value,
+                    uri,
+                    json=data,
+                    headers=self.headers,
+                    verify=self.verify
+                )
+                resp.raise_for_status()
+
+                return resp
+
+            except Exception as e:
+
+                time.sleep(sleep_for)
+                sleep_for = random.randrange(1, 2 * sleep_for)
+                exception = e
+
+        print(resp.status_code)
+        print(resp.text)
+
+        raise exception
 
     def get(self, endpoint: str) -> dict:
         """
@@ -202,7 +209,11 @@ class RequestsClient(_HTTPClient):
         --------
             dict: unpacked json dict
         """
-        retval: dict = self._get(f"{self.url}/{endpoint}/").json()
+        retval: dict = self._request_retry(
+            f"{self.url}/{endpoint}/",
+            HttpMethod.get,
+        ).json()
+
         return retval
 
     def post(self, endpoint: str, data: dict) -> dict:
@@ -221,17 +232,24 @@ class RequestsClient(_HTTPClient):
         --------
             dict: unpacked json dict
         """
-        retval: dict = self._post(
+        retval: dict = self._request_retry(
             f"{self.url}/{endpoint}/",
-            data=data
+            HttpMethod.post,
+            data,
         ).json()
+
         return retval
 
 
 class AIOHTTPClient(_HTTPClient):
     """This class is the async implementation of the API client"""
 
-    async def _get(self, uri: str) -> dict:
+    async def _request_retry(
+        self,
+        uri: str,
+        method: HttpMethod,
+        data: dict | None = None,
+    ) -> dict:
         """
         Execute the async get "aiohttp" by adding class-level settings
 
@@ -239,6 +257,10 @@ class AIOHTTPClient(_HTTPClient):
         -----------
         uri: str
             Full http url
+        data: dict
+            in case of post, the posted data, empty dict otherwise
+        method: HttpMethod
+            request type enum
 
         Returns:
         --------
@@ -246,39 +268,34 @@ class AIOHTTPClient(_HTTPClient):
             will raise_for_status so caller
             may use .json()
         """
-        async with aiohttp.ClientSession(
-            headers=self.headers,
-            raise_for_status=True
-        ) as session:
+        random.seed()
+        sleep_for: int = random.randrange(1, 5)
+        exception: aiohttp.client_exceptions.ClientResponseError
 
-            resp = await session.get(uri, ssl=self.verify)
-            retval: dict = await resp.json()
+        for retry in range(self.retries):
+            try:
+                async with aiohttp.ClientSession(
+                    headers=self.headers,
+                    raise_for_status=True
+                ) as session:
 
-            return retval
+                    resp = await session.request(
+                        method.value,
+                        uri,
+                        json=data,
+                        ssl=self.verify,
+                    )
+                    retval: dict = await resp.json()
 
-    async def _post(self, uri: str, data: dict) -> dict:
-        """Execute the posts "requests" by adding class-level settings
+                    return retval
 
-        Parameters:
-        -----------
-        uri: str
-            Full http url
-        data: dict
-            json-able data payload
+            except aiohttp.client_exceptions.ClientResponseError as e:
 
-        Returns:
-        --------
-        dict: unpacked json dict
-        """
-        async with aiohttp.ClientSession(
-            headers=self.headers,
-            raise_for_status=True
-        ) as session:
+                time.sleep(sleep_for)
+                sleep_for = random.randrange(1, 2 * sleep_for)
+                exception = e
 
-            resp = await session.post(uri, json=data, ssl=self.verify)
-            retval: dict = await resp.json()
-
-            return retval
+        raise exception
 
     async def get(self, endpoint: str) -> dict:
         """Convenience wrapper around aiohttp.get (called via _get method)
@@ -293,7 +310,10 @@ class AIOHTTPClient(_HTTPClient):
         --------
             dict: unpacked json dict
         """
-        return await self._get(f"{self.url}/{endpoint}/")
+        return await self._request_retry(
+            f"{self.url}/{endpoint}/",
+            HttpMethod.get,
+        )
 
     async def post(self, endpoint: str, data: dict) -> dict:
         """Convenience wrapper around requests.post (called via _post method)
@@ -310,4 +330,8 @@ class AIOHTTPClient(_HTTPClient):
         --------
             dict: unpacked json dict
         """
-        return await self._post(f"{self.url}/{endpoint}/", data=data)
+        return await self._request_retry(
+            f"{self.url}/{endpoint}/",
+            HttpMethod.post,
+            data,
+        )

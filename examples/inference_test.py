@@ -6,7 +6,7 @@ from qcog_python_client import QcogClient, AsyncQcogClient
 
 HOSTNAME = os.environ["HOSTNAME"]
 API_TOKEN = os.environ["API_TOKEN"]
-TRAINED_MODEL_GUID = "d9bb0c85-8d1d-4d4d-af1c-4cb203a43bc6"
+TRAINED_MODEL_GUID = "9d1432c3-6f43-4c90-aa32-1ac2d54e9a3c"
 
 print("################################")
 print("# FORECAST                     #")

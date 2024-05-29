@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import base64
 import io
 import os
@@ -187,11 +188,8 @@ class RequestsClient(_HTTPClient):
             except Exception as e:
 
                 time.sleep(sleep_for)
-                sleep_for = random.randrange(1, 2 * sleep_for)
+                sleep_for = random.randrange(sleep_for, 2 * sleep_for)
                 exception = e
-
-        print(resp.status_code)
-        print(resp.text)
 
         raise exception
 
@@ -291,8 +289,8 @@ class AIOHTTPClient(_HTTPClient):
 
             except aiohttp.client_exceptions.ClientResponseError as e:
 
-                time.sleep(sleep_for)
-                sleep_for = random.randrange(1, 2 * sleep_for)
+                await asyncio.sleep(sleep_for)
+                sleep_for = random.randrange(sleep_for, 2 * sleep_for)
                 exception = e
 
         raise exception

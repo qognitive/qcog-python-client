@@ -361,10 +361,9 @@ class QcogClient(
         QcogClient: itself
         """
         data_payload = Dataset(
-            format="csv",
+            format="dataframe",
             source="client",
             data=encode_base64(data),
-            indexing=list(range(data.index.nlevels)),
             project_guid=self.project["guid"],
         )
         valid_data: dict = {k: v for k, v in data_payload.items()}  # type cast
@@ -545,13 +544,11 @@ class QcogClient(
             {
                 "data": encode_base64(data),
                 "parameters": parameters,
-                "indexing": list(range(data.index.nlevels)),
             },
         )
 
         return base642dataframe(
             inference_result["response"]["data"],
-            list(range(data.index.nlevels)),
         )
 
 
@@ -703,10 +700,9 @@ class AsyncQcogClient(
         AsyncQcogClient: itself
         """
         data_payload = Dataset(
-            format="csv",
+            format="dataframe",
             source="client",
             data=encode_base64(data),
-            indexing=list(range(data.index.nlevels)),
             project_guid=self.project["guid"],
         )
         valid_data: dict = {k: v for k, v in data_payload.items()}  # type cast
@@ -888,11 +884,9 @@ class AsyncQcogClient(
             {
                 "data": encode_base64(data),
                 "parameters": parameters,
-                "indexing": list(range(data.index.nlevels)),
             },
         )
 
         return base642dataframe(
             self.inference_result["response"]["data"],
-            list(range(data.index.nlevels)),
         )

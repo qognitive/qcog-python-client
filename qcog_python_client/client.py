@@ -3,9 +3,11 @@ from __future__ import annotations
 import asyncio
 import base64
 import io
+import json
 import os
 import time
 from enum import Enum
+from typing import TypedDict
 
 import aiohttp
 import requests
@@ -17,6 +19,11 @@ import pandas as pd
 class HttpMethod(Enum):
     get = "get"
     post = "post"
+
+
+class DataFramePayload(TypedDict):
+    blob: str
+    indexing: list[int]
 
 
 def decode_base64(encoded_string: str) -> str:
@@ -38,7 +45,7 @@ def decode_base64(encoded_string: str) -> str:
     return decoded_bytes.decode("ascii")
 
 
-def base642dataframe(encoded_string: str, indexing: list[int]) -> pd.DataFrame:
+def base642dataframe(encoded_string: str) -> pd.DataFrame:
     """
     From a base64 encoded str type, decode into original
     string str type and parse as csv dataframe using io
@@ -53,8 +60,13 @@ def base642dataframe(encoded_string: str, indexing: list[int]) -> pd.DataFrame:
     pd.DataFrame: parsed csv dataframe
     """
     decoded_string: str = decode_base64(encoded_string)
-    s = io.StringIO(decoded_string)
-    return pd.read_csv(s, index_col=indexing)
+    raw_dict: dict = json.loads(decoded_string)
+    payload: DataFramePayload = DataFramePayload(
+        blob=raw_dict["blob"],
+        indexing=raw_dict["indexing"],
+    )
+    s = io.StringIO(payload["blob"])
+    return pd.read_csv(s, index_col=payload["indexing"])
 
 
 def encode_base64(data: pd.DataFrame) -> str:
@@ -69,8 +81,13 @@ def encode_base64(data: pd.DataFrame) -> str:
     Returns:
     str: encoded base64 string
     """
+    indexing: list[int] = list(range(data.index.nlevels))
     raw_string: str = data.to_csv()
-    raw_bytes: bytes = raw_string.encode("ascii")
+    payload: DataFramePayload = DataFramePayload(
+        blob=raw_string,
+        indexing=indexing,
+    )
+    raw_bytes: bytes = json.dumps(payload).encode("ascii")
     base64_bytes = base64.b64encode(raw_bytes)
     base64_string = base64_bytes.decode("ascii")
     return base64_string

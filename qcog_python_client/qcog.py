@@ -68,7 +68,7 @@ class BaseQcogClient(Generic[CLIENT]):
 
     OLDEST_VERSION = "0.0.57"
     NEWEST_VERSION = "0.0.57"
-    PROJECT_GUID_TEMPORARY: str = "45ec9045-3d50-46fb-a82c-4aa0502801e9"
+    PROJECT_GUID_TEMPORARY: str = "03a09afa-c99e-4f7b-9441-05bd0a5c7c4b"
 
     def __init__(self) -> None:
         self._version: str

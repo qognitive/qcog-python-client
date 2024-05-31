@@ -46,6 +46,7 @@ def main():
     ).data(df).train(**training_parameters)
 
     print(hsm.trained_model)
+    return hsm.trained_model["guid"]
 
 
 async def async_main():
@@ -63,16 +64,19 @@ async def async_main():
     await hsm.data(df)
     await hsm.train(**training_parameters)
     print(hsm.trained_model)
+    return hsm.trained_model["guid"]
 
 
 if __name__ == "__main__":
     print("################################")
     print("# SYNC                         #")
     print("################################")
-    main()
+    guid = main()
     print("################################")
     print("# ASYNC                        #")
     print("################################")
     import asyncio
     asyncio.run(async_main())
     print("done")
+
+    print(f"\nexport TRAINED_MODEL={guid}")

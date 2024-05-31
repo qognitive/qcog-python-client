@@ -6,6 +6,8 @@ from qcog_python_client import QcogClient, AsyncQcogClient
 
 HOSTNAME = os.environ["HOSTNAME"]
 API_TOKEN = os.environ["API_TOKEN"]
+HOSTPORT = os.environ.get("HOSTPORT", 443)
+SECURE_MODE = os.environ.get("SECURE_MODE", "true").lower() == "true"
 TRAINED_MODEL_GUID = "9d1432c3-6f43-4c90-aa32-1ac2d54e9a3c"
 
 print("################################")
@@ -35,7 +37,9 @@ def main():
     hsm = QcogClient.create(
         token=API_TOKEN,
         hostname=HOSTNAME,
-        verify=False
+        port=HOSTPORT,
+        verify=False,
+        secure=SECURE_MODE,
     ).preloaded_model(TRAINED_MODEL_GUID)
     print(hsm.status())
     print(hsm.wait_for_training().inference(forecast_data, parameters))
@@ -44,7 +48,13 @@ def main():
 async def async_main():
     hsm = (
         await (
-            await AsyncQcogClient.create(token=API_TOKEN, hostname=HOSTNAME, verify=False)
+            await AsyncQcogClient.create(
+                token=API_TOKEN,
+                hostname=HOSTNAME,
+                port=HOSTPORT,
+                verify=False,
+                secure=SECURE_MODE,
+            )
         ).preloaded_model(TRAINED_MODEL_GUID)
 
     )

@@ -44,6 +44,9 @@ WAITING_STATUS = ("processing", "pending")
 SUCCESS_STATUS = ("completed")
 
 
+DEFAULT_QCOG_VERSION = "0.0.60"
+
+
 def numeric_version(version: str) -> list[int]:
     """
     Reformulate a string M.N.F version for test comparison
@@ -66,8 +69,6 @@ def numeric_version(version: str) -> list[int]:
 
 class BaseQcogClient(Generic[CLIENT]):
 
-    OLDEST_VERSION = "0.0.57"
-    NEWEST_VERSION = "0.0.57"
     PROJECT_GUID_TEMPORARY: str = "03a09afa-c99e-4f7b-9441-05bd0a5c7c4b"
 
     def __init__(self) -> None:
@@ -86,15 +87,7 @@ class BaseQcogClient(Generic[CLIENT]):
 
     @version.setter
     def version(self, value: str) -> None:
-        if numeric_version(value) < numeric_version(self.OLDEST_VERSION):
-            raise ValueError(
-                f"qcog version can't be older than {self.OLDEST_VERSION}"
-            )
-        if numeric_version(value) > numeric_version(self.NEWEST_VERSION):
-            raise ValueError(
-                f"qcog version can't be older than {self.NEWEST_VERSION}"
-            )
-
+        numeric_version(value)  # validate version format
         self._version = value
 
     @property
@@ -172,7 +165,7 @@ class QcogClient(
         safe_mode: bool = False,
         verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
-        version: str = BaseQcogClient.NEWEST_VERSION,
+        version: str = DEFAULT_QCOG_VERSION,
     ) -> QcogClient:
         """
         Factory method to create a client with intializations from the API.
@@ -415,9 +408,7 @@ class QcogClient(
         self.trained_model = self._preload("model", guid)
 
         self._preload("project", self.trained_model["project_guid"])
-        self.version = self.trained_model[
-            "training_package_location"
-        ].split("packages/")[-1].split("-")[1]
+        self.version = self.trained_model["qcog_version"]
 
         self.preloaded_training_parameters(
             self.trained_model["training_parameters_guid"]
@@ -474,9 +465,7 @@ class QcogClient(
                 "training_parameters_guid": self.training_parameters["guid"],
                 "dataset_guid": self.dataset["guid"],
                 "project_guid": self.project["guid"],
-
-                # TODO: we need to rewrite this to no expose internal details like that  # noqa: 503
-                "training_package_location": f"s3://ubiops-qognitive-default/packages/qcog-{self.version}-cp310-cp310-linux_x86_64/training_package.zip"  # noqa: 503
+                "qcog_version": self.version,
             },
         )
 
@@ -570,7 +559,7 @@ class AsyncQcogClient(
         safe_mode: bool = False,
         verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
-        version: str = BaseQcogClient.NEWEST_VERSION,
+        version: str = DEFAULT_QCOG_VERSION,
     ) -> AsyncQcogClient:
         """Asyncronous Qcog api client implementation
 
@@ -752,9 +741,7 @@ class AsyncQcogClient(
     async def preloaded_model(self, guid: str) -> AsyncQcogClient:
         self.trained_model = await self._preload("model", guid)
 
-        self.version = self.trained_model[
-            "training_package_location"
-        ].split("packages/")[-1].split("-")[1]
+        self.version = self.trained_model["qcog_version"]
 
         await asyncio.gather(
             self._preload("project", self.trained_model["project_guid"]),
@@ -814,9 +801,7 @@ class AsyncQcogClient(
                 "training_parameters_guid": self.training_parameters["guid"],
                 "dataset_guid": self.dataset["guid"],
                 "project_guid": self.project["guid"],
-
-                # TODO: we need to rewrite this to no expose internal details like that  # noqa: 503
-                "training_package_location": f"s3://ubiops-qognitive-default/packages/qcog-{self.version}-cp310-cp310-linux_x86_64/training_package.zip"  # noqa: 503
+                "qcog_version": self.version,
             },
         )
 

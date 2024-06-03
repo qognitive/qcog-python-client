@@ -69,8 +69,6 @@ def numeric_version(version: str) -> list[int]:
 
 class BaseQcogClient(Generic[CLIENT]):
 
-    PROJECT_GUID_TEMPORARY: str = "03a09afa-c99e-4f7b-9441-05bd0a5c7c4b"
-
     def __init__(self) -> None:
         self._version: str
         self._http_client: CLIENT
@@ -295,7 +293,7 @@ class QcogClient(
                     "bucket_name": "ubiops-qognitive-default"
                 }
             )["guid"]
-        self.project = self._preload("project", self.PROJECT_GUID_TEMPORARY)
+        self.project = self.http_client.get("bootstrap")
 
     def _preload(self, ep: str, guid: str) -> dict:
         """
@@ -631,10 +629,7 @@ class AsyncQcogClient(
                     "bucket_name": "ubiops-qognitive-default"
                 }
             ))["guid"]
-        self.project = await self._preload(
-            "project",
-            self.PROJECT_GUID_TEMPORARY
-        )
+        self.project = await self.http_client.get("bootstrap")
 
     async def _preload(self, ep: str, guid: str) -> dict:
         """

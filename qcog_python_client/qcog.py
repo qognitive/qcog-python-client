@@ -223,31 +223,31 @@ class QcogClient(
             1. train may only be called after data, and named model
             2. inference and status must have a preloaded model first
 
-        Parameters:
-        -----------
-        token: str | None
+        Parameters
+        ----------
+        token : str | None
             A valid API token granting access optional
             when unset (or None) expects to find the proper
             value as QCOG_API_TOKEN environment veriable
-        hostname: str | None
+        hostname : str | None
             optional string of the hostname. Currently default
             to a standard api endpoint
-        port: str | int | None
+        port : str | int | None
             port value default to https 443
-        api_version: str
+        api_version : str
             the "vX" part of the url for the api version
-        secure: bool
+        secure : bool
             if true use https else use http mainly for local
             testing
-        safe_mode: bool
+        safe_mode : bool
             if true runs healthchecks before running any api call
             sequences
-        verify: bool
+        verify : bool
             ignore ssl provenance for testing purposes
-        test_projest: bool
+        test_projest : bool
             For testing purposes. if the project resolvers finds
             no project, create one. For testing purposes
-        version: str
+        version : str
             the qcog version to use. Must be no smaller than OLDEST_VERSION
             and no greater than NEWEST_VERSION.
         """

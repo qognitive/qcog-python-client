@@ -1,2 +1,2 @@
-Timeseries Example
+Timeseries
 ==================

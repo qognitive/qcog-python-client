@@ -1,2 +1,2 @@
-Setting up for training - parameterization
+Parameterizing Training
 ==============================

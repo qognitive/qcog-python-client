@@ -24,6 +24,15 @@ Qognitive Python Client
 .. toctree::
    :maxdepth: 2
    :hidden:
+   :caption: Models
+
+   /models/pauli
+   /models/ensemble
+   /models/general
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
    :caption: API Reference
 
 The Qognitive API Client gives you access to our proprietary machine learning model QCML - Quantum Cognition Machine Learning.

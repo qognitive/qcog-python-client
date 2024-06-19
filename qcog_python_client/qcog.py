@@ -437,7 +437,7 @@ class QcogClient(
         weight_optimization: NotRequiredWeightParams,
         get_states_extra: NotRequiredStateParams,
     ) -> QcogClient:
-        """A fresh "to train" model properly configured to trigger a training request.
+        """Send a training request from the configured model.
 
         Parameters
         ----------

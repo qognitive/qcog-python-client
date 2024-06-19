@@ -18,9 +18,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.duration",
-    "sphinx.ext.autosummary",
-    "autoapi.extension",
-    "sphinx_paramlinks",  # from sqlalchemy: needed to stop :paramref: errors
+    "sphinx.ext.autosummary"
 ]
 
 templates_path = ["_templates"]

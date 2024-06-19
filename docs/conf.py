@@ -5,6 +5,10 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath('..'))
 
 project = "qcog-python-client"
 copyright = "2024, Qognitive Inc"
@@ -30,8 +34,3 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
-
-
-# -- AutoAPI configuration ---------------------------------------------------
-autoapi_type = "python"
-autoapi_dirs = ["../qcog_python_client"]

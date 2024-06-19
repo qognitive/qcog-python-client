@@ -4,3 +4,4 @@ requests
 pandas
 numpy
 aiohttp
+typing_extensions

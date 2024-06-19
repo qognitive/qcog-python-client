@@ -51,8 +51,8 @@ def numeric_version(version: str) -> list[int]:
     """
     Reformulate a string M.N.F version for test comparison
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     version: str
         expected to be of the form M.N.F
 
@@ -165,8 +165,7 @@ class QcogClient(
         test_project: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> QcogClient:
-        """
-        Factory method to create a client with intializations from the API.
+        """Factory method to create a client with intializations from the API.
 
         Since __init__ is always sync we cannot call to the API using that
         method of class creation. If we need to fetch things such as the
@@ -248,8 +247,8 @@ class QcogClient(
             For testing purposes. if the project resolvers finds
             no project, create one. For testing purposes
         version : str
-            the qcog version to use. Must be no smaller than OLDEST_VERSION
-            and no greater than NEWEST_VERSION.
+            the qcog version to use. Must be no smaller than `OLDEST_VERSION`
+            and no greater than `NEWEST_VERSION`
         """
         hsm = cls()
         hsm.version = version
@@ -278,9 +277,9 @@ class QcogClient(
 
         Implements a "test mode" that will create a project
 
-        Parameters:
-        -----------
-        test_project: bool
+        Parameters
+        ----------
+        test_project : bool
             If true, the class creation will create a new project and
             store its GUID in the PROJECT_GUID_TEMPORARY variable
         """
@@ -299,16 +298,17 @@ class QcogClient(
         """
         Utility function
 
-        Parameters:
-        -----------
-        ep: str
+        Parameters
+        ----------
+        ep : str
             endpoint name (ex: dataset)
-        guid: str
+        guid : str
             endpoint name (ex: dataset)
 
-        Returns:
-        --------
-        dict response from api call
+        Returns
+        -------
+        dict
+            response from api call
         """
         return self.http_client.get(f"{ep}/{guid}")
 
@@ -316,9 +316,9 @@ class QcogClient(
         """
         Upload training parameters
 
-        Parameters:
-        -----------
-        params: TrainingParameters
+        Parameters
+        ----------
+        params : TrainingParameters
             Valid TypedDict of the training parameters
         """
         self.training_parameters = self.http_client.post(
@@ -340,16 +340,17 @@ class QcogClient(
         For a fresh "to train" model and properly initialized model
         upload a pandas DataFrame dataset.
 
-        Parameters:
-        -----------
-        data: pd.DataFrame:
+        Parameters
+        ----------
+        data : pd.DataFrame
             the dataset as a DataFrame
-        upload: bool:
+        upload : bool
             if true post the dataset
 
-        Returns:
-        --------
-        QcogClient: itself
+        Returns
+        -------
+        QcogClient
+            itself
         """
         data_payload = Dataset(
             format="dataframe",
@@ -365,14 +366,15 @@ class QcogClient(
         """
         retrieve a dataset that was previously uploaded from guid.
 
-        Parameters:
-        -----------
-        guid: str:
+        Parameters
+        ----------
+        guid : str
             guid of a previously uploaded dataset
 
-        Returns:
-        --------
-        QcogClient itself
+        Returns
+        -------
+        QcogClient
+            itself
         """
         self.dataset = self._preload("dataset", guid)
         return self
@@ -381,20 +383,20 @@ class QcogClient(
         self, guid: str,
         rebuild: bool = False
     ) -> QcogClient:
-        """
-        Retrieve preexisting training parameters payload.
+        """Retrieve preexisting training parameters payload.
 
-        Parameters:
-        -----------
-        guid: str
+        Parameters
+        ----------
+        guid : str
             model guid
-        rebuild: bool
+        rebuild : bool
             if True, will initialize the class "model"
             (ex: pauli or ensemble) from the payload
 
-        Returns:
-        --------
-        QcogClient itself
+        Returns
+        -------
+        QcogClient
+            itself
         """
         self.training_parameters = self._preload(
             "training_parameters",
@@ -435,17 +437,16 @@ class QcogClient(
         weight_optimization: NotRequiredWeightParams,
         get_states_extra: NotRequiredStateParams,
     ) -> QcogClient:
-        """
-        For a fresh "to train" model properly configured and initialized
-        trigger a training request.
+        """A fresh "to train" model properly configured to trigger a training request.
 
-        Parameters:
-        -----------
-        params: TrainingParameters
+        Parameters
+        ----------
+        params : TrainingParameters
 
-        Returns:
-        --------
-        QcogClient: itself
+        Returns
+        -------
+        QcogClient
+            itself
         """
 
         params: TrainingParameters = TrainingParameters(
@@ -478,19 +479,21 @@ class QcogClient(
         return self.last_status
 
     def wait_for_training(self, poll_time: int = 60) -> QcogClient:
-        """
-        Wait for training to complete.
+        """Wait for training to complete.
 
-        the function is blocking
+        Note
+        ----
+        This function is blocking
 
-        Parameters:
-        -----------
-        poll_time: int:
+        Parameters
+        ----------
+        poll_time : int:
             status checks intervals in seconds
 
-        Returns:
-        --------
-        QcogClient: itself
+        Returns
+        -------
+        QcogClient
+            itself
 
         """
         while self.status() in WAITING_STATUS:
@@ -511,19 +514,19 @@ class QcogClient(
         data: pd.DataFrame,
         parameters: InferenceParameters,
     ) -> pd.DataFrame:
-        """
-        From a trained model query an inference.
+        """From a trained model query an inference.
 
-        Parameters:
-        -----------
-        data: pd.DataFrame:
+        Parameters
+        ----------
+        data : pd.DataFrame
             the dataset as a DataFrame
-        parameters: dict:
+        parameters : dict
             inference parameters
 
-        Returns:
-        --------
-        pd.DataFrame: the predictions
+        Returns
+        -------
+        pd.DataFrame
+            the predictions
 
         """
         inference_result = self.http_client.post(
@@ -583,9 +586,33 @@ class AsyncQcogClient(
 
         to make sure training has successfully completed.
 
-        Parameters:
-        -----------
-        See QcogClient for parameter details
+        Parameters
+        ----------
+        token : str | None
+            A valid API token granting access optional
+            when unset (or None) expects to find the proper
+            value as QCOG_API_TOKEN environment veriable
+        hostname : str | None
+            optional string of the hostname. Currently default
+            to a standard api endpoint
+        port : str | int | None
+            port value default to https 443
+        api_version : str
+            the "vX" part of the url for the api version
+        secure : bool
+            if true use https else use http mainly for local
+            testing
+        safe_mode : bool
+            if true runs healthchecks before running any api call
+            sequences
+        verify : bool
+            ignore ssl provenance for testing purposes
+        test_projest : bool
+            For testing purposes. if the project resolvers finds
+            no project, create one. For testing purposes
+        version : str
+            the qcog version to use. Must be no smaller than `OLDEST_VERSION`
+            and no greater than `NEWEST_VERSION`
         """
         hsm = cls()
         hsm.version = version
@@ -606,17 +633,17 @@ class AsyncQcogClient(
         return hsm
 
     async def _resolve_project(self, test_project: bool) -> None:
-        """
-        NOTE: CURRENTLY A STUB
+        """NOTE: CURRENTLY A STUB
+
         This method is a utility method of the class __init__
         method that resolves the project(s) accessible for this
         "token-as-proxy-for-org/user"
 
         Implements a "test mode" that will create a project
 
-        Parameters:
-        -----------
-        test_project: bool
+        Parameters
+        ----------
+        test_project : bool
             If true, the class creation will create a new project and
             store its GUID in the PROJECT_GUID_TEMPORARY variable
         """
@@ -635,16 +662,17 @@ class AsyncQcogClient(
         """
         Utility function
 
-        Parameters:
-        -----------
-        ep: str
+        Parameters
+        ----------
+        ep : str
             endpoint name (ex: dataset)
-        guid: str
+        guid : str
             endpoint name (ex: dataset)
 
-        Returns:
-        --------
-        dict response from api call
+        Returns
+        -------
+        dict
+            response from api call
         """
         return await self.http_client.get(f"{ep}/{guid}")
 
@@ -652,9 +680,9 @@ class AsyncQcogClient(
         """
         Upload training parameters
 
-        Parameters:
-        -----------
-        params: TrainingParameters
+        Parameters
+        ----------
+        params : TrainingParameters
             Valid TypedDict of the training parameters
         """
         self.training_parameters = await self.http_client.post(
@@ -672,16 +700,17 @@ class AsyncQcogClient(
         """For a fresh "to train" model and properly initialized model
         upload a pandas DataFrame dataset.
 
-        Parameters:
-        -----------
-        data: pd.DataFrame:
+        Parameters
+        ----------
+        data : pd.DataFrame:
             the dataset as a DataFrame
-        upload: bool:
+        upload : bool:
             if true post the dataset
 
-        Returns:
-        --------
-        AsyncQcogClient: itself
+        Returns
+        -------
+        AsyncQcogClient
+            itself
         """
         data_payload = Dataset(
             format="dataframe",
@@ -696,14 +725,15 @@ class AsyncQcogClient(
     async def preloaded_data(self, guid: str) -> AsyncQcogClient:
         """Retrieve a dataset that was previously uploaded from guid.
 
-        Parameters:
-        -----------
-        guid: str:
+        Parameters
+        ----------
+        guid : str
             guid of a previously uploaded dataset
 
-        Returns:
-        --------
-        AsyncQcogClient itself
+        Returns
+        -------
+        AsyncQcogClient
+            itself
         """
         self.dataset = await self._preload("dataset", guid)
         return self
@@ -715,17 +745,18 @@ class AsyncQcogClient(
         """
         Retrieve preexisting training parameters payload.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         guid: str
             model guid
         rebuild: bool
             if True, will initialize the class "model"
             (ex: pauli or ensemble) from the payload
 
-        Returns:
-        --------
-        AsyncQcogClient itself
+        Returns
+        -------
+        AsyncQcogClient
+            itself
         """
         self.training_parameters = await self._preload(
             "training_parameters",
@@ -772,13 +803,14 @@ class AsyncQcogClient(
         For a fresh "to train" model properly configured and initialized
         trigger a training request.
 
-        Parameters:
-        -----------
-        params: TrainingParameters
+        Parameters
+        ----------
+        params : TrainingParameters
 
-        Returns:
-        --------
-        AsyncQcogClient: itself
+        Returns
+        -------
+        AsyncQcogClient
+            itself
         """
 
         params: TrainingParameters = TrainingParameters(
@@ -811,19 +843,17 @@ class AsyncQcogClient(
         return self.last_status
 
     async def wait_for_training(self, poll_time: int = 60) -> AsyncQcogClient:
-        """
-        Wait for training to complete.
+        """Wait for training to complete.
 
-        the function is blocking
-
-        Parameters:
-        -----------
-        poll_time: int:
+        Parameters
+        ----------
+        poll_time : int
             status checks intervals in seconds
 
-        Returns:
-        --------
-        AsyncQcogClient: itself
+        Returns
+        -------
+        AsyncQcogClient
+            itself
 
         """
         while (await self.status()) in WAITING_STATUS:
@@ -844,20 +874,19 @@ class AsyncQcogClient(
         data: pd.DataFrame,
         parameters: InferenceParameters,
     ) -> pd.DataFrame:
-        """
-        From a trained model query an inference.
+        """From a trained model query an inference.
 
-        Parameters:
-        -----------
-        data: pd.DataFrame:
+        Parameters
+        ----------
+        data : pd.DataFrame
             the dataset as a DataFrame
-        parameters: dict:
+        parameters : dict
             inference parameters
 
-        Returns:
-        --------
-        pd.DataFrame: the predictions
-
+        Returns
+        -------
+        pd.DataFrame
+            the predictions
         """
         self.inference_result: dict = await self.http_client.post(
             f"model/{self.trained_model['guid']}/inference",

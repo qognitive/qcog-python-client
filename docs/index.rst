@@ -8,7 +8,7 @@ Qognitive Python Client
 
    /tutorial/install
    /tutorial/datasets
-   /tutorial/training_parameters
+   /tutorial/models
    /tutorial/training
    /tutorial/inference
 
@@ -28,7 +28,6 @@ Qognitive Python Client
 
    /models/pauli
    /models/ensemble
-   /models/general
 
 .. toctree::
    :maxdepth: 2

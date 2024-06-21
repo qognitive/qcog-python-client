@@ -45,7 +45,7 @@ First we'll instantiate our client object.
 .. code-block:: console
 
     >>> from qognitive import Qognitive
-    >>> client = QcogClient.create(
+    >>> qcml = QcogClient.create(
         token=API_TOKEN,
         hostname="api.qognitive.io",
         port=443,
@@ -57,7 +57,7 @@ Now we'll upload our data to the API.
 
 .. code-block:: console
 
-    >>> dataset = client.data(dataset)
+    >>> dataset = qcml.data(dataset)
 
 That's in, now we just need to get our parameters and we can train a model on this dataset.
 
@@ -69,13 +69,13 @@ We can do the same operations but using our Async client for those whose infrast
 .. code-block:: console
 
     >>> from qognitive import AsyncQognitive
-    >>> async_client = await AsyncQcogClient.create(
+    >>> qcml = await AsyncQcogClient.create(
         token=API_TOKEN,
         hostname="api.qognitive.io",
         port=443,
         verify=False,
         secure=True,
     )
-    >>> await async_client.data(dataset)
+    >>> await qcml.data(dataset)
 
 Onwards

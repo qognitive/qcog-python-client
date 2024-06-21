@@ -227,7 +227,7 @@ class QcogClient(
         token : str | None
             A valid API token granting access optional
             when unset (or None) expects to find the proper
-            value as QCOG_API_TOKEN environment veriable
+            value as QCOG_API_TOKEN environment variable
         hostname : str | None
             optional string of the hostname. Currently default
             to a standard api endpoint

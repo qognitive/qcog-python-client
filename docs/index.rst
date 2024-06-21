@@ -17,8 +17,8 @@ Qognitive Python Client
    :hidden:
    :caption: Examples
 
-   /examples/xyz
-   /examples/mnist
+   /examples/wisconsin
+   /examples/coil20
    /examples/timeseries
 
 .. toctree::

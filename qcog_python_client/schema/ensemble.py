@@ -29,8 +29,27 @@ class EnsembleProtocol(Protocol):
 
 
 class EnsembleSchema(EnsembleProtocol, TrainProtocol, InferenceProtocol):
-    """
-    Schema definition meant to be used externally
+    """Ensemble-model specific parameters.
+
+    Parameters
+    ----------
+    operators : list[Operator]
+        List of operators to be used in the model. These should be the names
+        of the columns in the dataframe for the dataset being trained.
+    dim : int
+        The dimensional size of our internal state.
+    num_axes : int
+        This corresponds to the sparsity of our representation in our internal
+        state, and it can be thought of as how many basis vectors we are decomposing
+        our internal state into. 1 would make our internal state of low rank and
+        the maximum here is equal to dim^2, which would be a full dense representation.
+    sigma_sq : dict[str, float]
+        Dictionary of scaling factors where the keys are the operators and the
+        values are the scaling factors. These are in the form of 1/sigma so a
+        small sigma will increase the weight of that operator in the model.
+    seed : int
+        A random seed which is used to initialize the model, you can set this
+        in order to increase reproducibility.
     """
     pass
 

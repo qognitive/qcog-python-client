@@ -13,24 +13,25 @@ We'll use a small synthetic dataset which we call `XY=Z`.  Super simple, it is a
 
 We'll just confine ourselves to the values of `1` and `-1` so we can be even smaller.  Our complete dataset then looks like this:
 
-.. code-block:: console
+.. code-block:: python
 
-    >>> import numpy as np
-    >>> import pandas as pd
-    >>> xs = np.array([1, 1, -1 , -1])
-    >>> ys = np.array([1, -1, -1, 1])
-    >>> zs = xs * ys
-    >>> dataset = pd.DataFrame(
-    ...     data=(np.vstack([xs, ys, zs])).T,
-    ...     index=range(4),
-    ...     columns=["X", "Y", "Z"]
-    ... )
-    >>> dataset
-    X  Y  Z
-    0  1  1  1
-    1  1 -1 -1
-    2 -1 -1  1
-    3 -1  1 -1
+    import numpy as np
+    import pandas as pd
+
+    xs = np.array([1, 1, -1 , -1])
+    ys = np.array([1, -1, -1, 1])
+    zs = xs * ys
+    dataset = pd.DataFrame(
+        data=(np.vstack([xs, ys, zs])).T,
+        index=range(4),
+        columns=["X", "Y", "Z"]
+    )
+    print(dataset)
+    # X  Y  Z
+    # 0  1  1  1
+    # 1  1 -1 -1
+    # 2 -1 -1  1
+    # 3 -1  1 -1
 
 We want to now send this to Qognitive to store so we can train on this later
 
@@ -42,10 +43,10 @@ First we'll instantiate our client object.
 .. note::
     We should have more defaults and fix the DNS
 
-.. code-block:: console
+.. code-block:: python
 
-    >>> from qognitive import Qognitive
-    >>> qcml = QcogClient.create(
+    from qognitive import Qognitive
+    qcml = QcogClient.create(
         token=API_TOKEN,
         hostname="api.qognitive.io",
         port=443,
@@ -55,9 +56,9 @@ First we'll instantiate our client object.
 
 Now we'll upload our data to the API.
 
-.. code-block:: console
+.. code-block:: python
 
-    >>> dataset = qcml.data(dataset)
+    dataset = qcml.data(dataset)
 
 That's in, now we just need to get our parameters and we can train a model on this dataset.
 
@@ -66,16 +67,14 @@ Using Async
 
 We can do the same operations but using our Async client for those whose infrastructure is built for async.
 
-.. code-block:: console
+.. code-block:: python
 
-    >>> from qognitive import AsyncQognitive
-    >>> qcml = await AsyncQcogClient.create(
+    from qognitive import AsyncQognitive
+    qcml = await AsyncQcogClient.create(
         token=API_TOKEN,
         hostname="api.qognitive.io",
         port=443,
         verify=False,
         secure=True,
     )
-    >>> await qcml.data(dataset)
-
-Onwards
+    await qcml.data(dataset)

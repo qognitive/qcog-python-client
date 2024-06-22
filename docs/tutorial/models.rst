@@ -8,15 +8,14 @@ We're going to use the Pauli model for this example.
 Setting the Model Parameters
 ----------------------------
 
-.. code-block:: console
+We configure our model by a call on our ``qcml`` object, which returns the object with the model configuration. This is the same procedure for both sync and async clients.
 
-    >>> qcml = qcml.pauli(
+.. code-block:: python
+
+    qcml = qcml.pauli(
         operators=["X", "Y", "Z"],
         qbits=2,
         pauli_weight=2
     )
 
-
-
-Setting the Training Parameters
--------------------------------
+You can read more about the pauli model, the parameterization, and the available options on the :doc:`/models/pauli` page.

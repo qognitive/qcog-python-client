@@ -40,9 +40,10 @@ class EnsembleSchema(EnsembleProtocol, TrainProtocol, InferenceProtocol):
         The dimensional size of our internal state.
     num_axes : int
         This corresponds to the sparsity of our representation in our internal
-        state, and it can be thought of as how many basis vectors we are decomposing
-        our internal state into. 1 would make our internal state of low rank and
-        the maximum here is equal to dim^2, which would be a full dense representation.
+        state, and it can be thought of as how many basis vectors we are
+        decomposing our internal state into. 1 would make our internal state
+        of low rank and the maximum here is equal to dim^2, which would be a
+        full dense representation.
     sigma_sq : dict[str, float]
         Dictionary of scaling factors where the keys are the operators and the
         values are the scaling factors. These are in the form of 1/sigma so a

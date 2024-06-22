@@ -27,7 +27,7 @@ The first two parameters are the batch size and the number of passes. The batch 
 
 The next batch of parameters is ``weight_optimization``. This determines how the internal weights that generate the quantum representation are optimized with each pass over the data. In this example we are using gradient descent. There are more details on the optimization methods and their parameterization in the :doc:`/parameters/optimization` section. The parameters from that section are placed as a sub dictionary on the ``weight_optimization`` key in the training parameters.
 
-The last batch of parameters are ``get_states_extra``. This determines how the internal quantum state is calculated, and this is used for both the inference and for training. Since multiple passes are made over the data in training the tolerances can be lower than for inference, since only a single inference pass is made in that step. There are more details in the :doc:`/parameters/optimization` section. The parameters from that section are placed as a sub dictionary on the ``get_states_extra`` key in the training parameters.
+The last batch of parameters are ``get_states_extra``. This determines how the internal quantum state is calculated, and this is used for both the inference and for training. Since multiple passes are made over the data in training the tolerances can be lower than for inference, since only a single inference pass is made in that step. There are more details in the :doc:`/parameters/state` section. The parameters from that section are placed as a sub dictionary on the ``get_states_extra`` key in the training parameters.
 
 With the parameters in hand we can proceed to execute a training run.
 

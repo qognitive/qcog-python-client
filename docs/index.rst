@@ -32,6 +32,14 @@ Qognitive Python Client
 .. toctree::
    :maxdepth: 2
    :hidden:
+   :caption: Parameters
+
+   /parameters/optimization
+   /parameters/state
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
    :caption: API Reference
 
    /api/base_client

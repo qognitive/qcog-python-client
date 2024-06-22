@@ -22,6 +22,7 @@ First we need to build our input data.  We'll put together 10 samples of X and Y
 Now we will construct some inference parameters that will determine how the model is run on the inference data. Here we have to specify ``state parameters``, which you can read more about these state parameters in the :doc:`/parameters/state` section.
 
 .. code:: python
+
     parameters = {
         "state_method": "LOBPCG_FAST",
         "iterations": 5

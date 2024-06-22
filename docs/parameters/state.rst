@@ -15,10 +15,9 @@ LOBPCG_FAST
 The recommended method for most cases. This method uses the Locally Optimal Block Preconditioned Conjugate Gradient method to find the optimal state. We call this ``FAST`` because it exploits internal symmetries of the problem to speed up the computation versus a generic implementation of LOBPCG.
 
 Parameters
-#. iterations: int, default=100
-    The number of iterations to run the LOBPCG algorithm for.
-#. tol: float, default=1e-6
-    The tolerance for the LOBPCG algorithm.
+#. iterations: int, default=100. The number of iterations to run the LOBPCG algorithm for.
+#. tol: float, default=1e-6. The tolerance for the LOBPCG algorithm.
+
 
 POWER_ITER
 -----------

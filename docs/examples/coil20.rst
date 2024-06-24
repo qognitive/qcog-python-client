@@ -19,6 +19,7 @@ We'll be using some extra packages here such as ``PIL``, ``requests``, ``sklearn
 Let's download the data and format it into a dataframe suitable for training and inference.
 
 .. code-block:: python
+
     import numpy as np
     import pandas as pd
     import torch

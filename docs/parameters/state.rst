@@ -18,6 +18,28 @@ Parameters
 #. iterations: int, default=100. The number of iterations to run the LOBPCG algorithm for.
 #. tol: float, default=1e-6. The tolerance for the LOBPCG algorithm.
 
+.. glossary::
+    iterations: int, default=100.
+        The number of iterations to run the LOBPCG algorithm for.
+    tol: float, default=1e-6.
+        The tolerance for the LOBPCG algorithm.
+
+.. hlist::
+    :columns: 1
+
+    * ``iterations``: int, default=100.
+        The number of iterations to run the LOBPCG algorithm for.
+    * ``tol``: float, default=1e-6.
+        The tolerance for the LOBPCG algorithm.
+
+.. hlist::
+    :columns: 2
+
+    * ``iterations``: int, default=100.
+    * The number of iterations to run the LOBPCG algorithm for.
+    * ``tol``: float, default=1e-6.
+    * The tolerance for the LOBPCG algorithm.
+
 
 POWER_ITER
 -----------
@@ -48,4 +70,5 @@ This uses the scipy ``LOBPCG`` solver.
 GRAD
 ----
 
-Using gradient descent we find our way to the optimal state.
+Using a gradient descent procedure with fixed learning rate we find our way to the optimal state.
+

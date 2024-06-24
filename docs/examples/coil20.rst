@@ -42,7 +42,9 @@ Let's download the data and format it into a dataframe suitable for training and
     with tempfile.TemporaryDirectory() as temp_dir:
         zip_file = os.path.join(temp_dir, 'coil20.zip')
 
-        results = requests.get('http://www.cs.columbia.edu/CAVE/databases/SLAM_coil-20_coil-100/coil-20/coil-20-proc.zip')
+        results = requests.get(
+            'http://www.cs.columbia.edu/CAVE/databases/SLAM_coil-20_coil-100/coil-20/coil-20-proc.zip'
+        )
         with open(zip_file, "wb") as code:
             code.write(results.content)
 
@@ -127,12 +129,10 @@ Now set some training specific parameters and execute the training.
 .. code-block:: python
 
     qcml = qcml.train(
-        batch_size=4,
+        batch_size=len(df_train),
         num_passes=10,
         weight_optimization={
-            "learning_rate": 1e-3,
-            "iterations": 10,
-            "optimization_method": "GRAD"
+            "optimization_method": "ANALYTIC"
         },
         get_states_extra={
             "state_method": "LOBPCG_FAST",
@@ -142,6 +142,7 @@ Now set some training specific parameters and execute the training.
     qcml.wait_for_training()
     print(qcml.trained_model["guid"])
 
+Here we are using our analytic solver which is avaliable for the Pauli model. As per the documentation for the analytic optimization method we set our batch size to the number of samples in our dataset so we process all data in a single batch.
 .. note::
 
     The training process may take a while to complete, here we call ``wait_for_training`` which will block until training is complete.
@@ -173,7 +174,7 @@ With our trained model loaded into the client, we can now run inference on the d
         }
     )
     num_correct = (
-        forecasted_digits.idxmax(axis=1) == df_test_targets.idxmax(axis=1)
+        result_df.idxmax(axis=1) == df_target.idxmax(axis=1)
     ).sum()
     print(f"Correct: {num_correct * 100 / len(df.test):.2f}% out of {len(df.test)}")
 

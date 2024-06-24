@@ -19,6 +19,7 @@ Parameters
 #. tol: float, default=1e-6. The tolerance for the LOBPCG algorithm.
 
 .. glossary::
+
     iterations: int, default=100.
         The number of iterations to run the LOBPCG algorithm for.
     tol: float, default=1e-6.

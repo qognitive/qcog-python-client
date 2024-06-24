@@ -12,7 +12,7 @@ First let's make sure we install some extra dependencies
 
 .. code-block:: bash
 
-    pip install scikit-learn torch
+    (venv)$ pip install scikit-learn torch
 
 
 .. code-block:: python

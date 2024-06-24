@@ -71,11 +71,6 @@ That's it!  You have all the pieces to get started with the QCML library. You ca
 
 Try some more complicated examples and see how the model performs, or dive right into your own data.
 
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Examples
-
-   /examples/wisconsin
-   /examples/coil20
-   /examples/timeseries
+* :doc:`/examples/wisconsin`
+* :doc:`/examples/coil20`
+* :doc:`/examples/timeseries`

@@ -19,3 +19,6 @@ We configure our model by a call on our ``qcml`` object, which returns the objec
     )
 
 You can read more about the pauli model, the parameterization, and the available options on the :doc:`/models/pauli` page.
+
+.. note::
+    The operators list does have to match the dataset that you are going to be running on. This might seem redundant but it happens in lots of other machine learning models where you have to match the dimensionality of your input to the dimensions of the model - or at least do some preprocessing to get the data into the proper scale.

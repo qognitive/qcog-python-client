@@ -1,9 +1,9 @@
 Inference
 =========
 
-With our model trained we can now use it for inference. Lets make some predictions.
+With our model trained we can now use it for inference.
 
-First we need to build our input data.  We'll put together 10 samples of X and Y but not provide Z.
+First we need to build our input data. We'll put together 10 samples of X and Y but not provide Z.
 
 .. code:: python
 
@@ -45,7 +45,7 @@ First make sure you get and save the ID of your model after you train it.
 
 .. code:: python
 
-    model_id = qcml..trained_model["guid"]
+    model_id = qcml.trained_model["guid"]
 
 Then you can load the model back in using the ID. You will need to instantiate a ``qcml`` object but you do not need to provide any other parameters other than the trained model ID to proceed with inference.
 
@@ -61,10 +61,21 @@ The async client has the same interface except we have to await our inference ca
 
 .. code:: python
 
-    predicted_df = await model.inference(forecast_data, parameters)
+    result_df = await model.inference(forecast_data, parameters)
 
 
 Next Steps
 ----------
 
 That's it!  You have all the pieces to get started with the QCML library. You can find some more complex examples in our examples section on the left. There are also a lot of options and parameters for you to explore to find the best fit to your problem space.
+
+Try some more complicated examples and see how the model performs, or dive right into your own data.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Examples
+
+   /examples/wisconsin
+   /examples/coil20
+   /examples/timeseries

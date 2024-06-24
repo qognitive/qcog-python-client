@@ -9,9 +9,9 @@ We'll need to upload some data in order to train a model on it.
 
 Binary XY = Z
 -------------
-We'll use a small synthetic dataset which we call `XY=Z`.  Super simple, it is a dataset that has two input features `X` and `Y` and one output feature `Z`.  The output feature `Z` is just `X` times `Y`.
+As a simple example, we create a small synthetic dataset which we call `XY=Z`.  Super simple, it is a dataset that has two input features `X` and `Y` and one output feature `Z`.  The output feature `Z` is just `X` times `Y`.
 
-We'll just confine ourselves to the values of `1` and `-1` so we can be even smaller.  Our complete dataset then looks like this:
+For simplicity, we confine ourselves to the values of `1` and `-1` so we can be even smaller.  Our complete dataset then looks like this:
 
 .. code-block:: python
 
@@ -45,7 +45,7 @@ First we'll instantiate our client object.
 
 .. code-block:: python
 
-    from qognitive import Qognitive
+    from qcog_python_client import QcogClient
     qcml = QcogClient.create(
         token=API_TOKEN,
         hostname="api.qognitive.io",
@@ -69,7 +69,7 @@ We can do the same operations but using our Async client for those whose infrast
 
 .. code-block:: python
 
-    from qognitive import AsyncQognitive
+    from qcog_python_client import AsyncQcogClient
     qcml = await AsyncQcogClient.create(
         token=API_TOKEN,
         hostname="api.qognitive.io",
@@ -78,3 +78,5 @@ We can do the same operations but using our Async client for those whose infrast
         secure=True,
     )
     await qcml.data(dataset)
+
+Asyncronous programming is very powerful when your applications become ``io`` bound, either by the network (APIs, Databases, etc) or through file operations. This allows you to keep the CPU busy while waiting for the IO to complete. For more detail about using asyncronous programming in python `the python asyncio docs are a good place to start <https://docs.python.org/3/library/asyncio.html>`_.

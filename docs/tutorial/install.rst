@@ -17,7 +17,7 @@ Once your virtual environment is set up you can install the package by running t
 API Token
 ---------
 
-You'll need an API token from Qognitive to use the platform. This can be obtained by contacting us at `support@qognitive.io`.
+You'll need an API token from Qognitive to use the platform. This can be obtained by contacting us at support@qognitive.io .
 
 Once you have the token you have two ways to set the token in your system:
 

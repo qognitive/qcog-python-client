@@ -47,22 +47,22 @@ This uses the scipy ``EIGS`` solver.
     :columns: 1
 
     * ``tol``: float, default=0.2.
-        The tolerance for the EIGS algorithm. This is a relative tolerance and not an absolute one, so the units are arbitrary. Generally 0.2 which is the default is a very loose tolerance. If you want to have the output from this method close to one of the more exact solvers then try ``1e-4 -> 1e-8`` for the tolerance. You can see more details about this method `here <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigs.html>`_. Only ``tol`` is supported as a parameter for this method.
+        The tolerance for the EIGS algorithm. This is a relative tolerance and not an absolute one, so the units are arbitrary. Generally 0.2 which is the default is a very loose tolerance. If you want to have the output from this method close to one of the more exact solvers then try ``1e-4 -> 1e-8`` for the tolerance. You can see more details about this method `here <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigs.html>`__. Only ``tol`` is supported as a parameter for this method.
 
 EIGH
 ----
 
-This uses the scipy ``EIGH`` solver. ``EIGH`` takes no parameters. You can see more details about this method `here <https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html#scipy.linalg.eigh>`_.
+This uses the scipy ``EIGH`` solver. ``EIGH`` takes no parameters. You can see more details about this method `here <https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html#scipy.linalg.eigh>`__.
 
 NP_EIGH
 -------
 
-This uses the numpy ``EIGH`` solver. ``EIGH`` takes no parameters. You can see more details about this method `here <https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigh.html>`_.
+This uses the numpy ``EIGH`` solver. ``EIGH`` takes no parameters. You can see more details about this method `here <https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigh.html>`__.
 
 LOBPCG
 ------
 
-This uses the scipy ``LOBPCG`` solver. You can see more details about this method `here <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.lobpcg.html>`_.
+This uses the scipy ``LOBPCG`` solver. You can see more details about this method `here <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.lobpcg.html>`__.
 
 .. hlist::
     :columns: 1

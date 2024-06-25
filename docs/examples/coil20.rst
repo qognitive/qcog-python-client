@@ -10,11 +10,11 @@ Uploading the Dataset
 
 First we need to get our hands on the data and upload it to the qognitive servers. We'll download COIL20 as a zip file, unzip it and construct a dataframe.  We'll define each pixel in our image to be an operator along with an operator for every category (so our categorization will be between 20 operators where we will take 1 to be the image is of that category and 0 to be that it is not of that category).
 
-We'll be using some extra packages here such as ``PIL``, ``requests``, ``sklearn`` and ``pytorch``.  You can install these with the following command:
+We'll be using some extra packages here such as ``PIL``, ``requests``, ``scikit-learn`` and ``pytorch``.  You can install these with the following command:
 
 .. code-block:: bash
 
-    (venv)$ pip install pillow requests torch sklearn
+    (venv)$ pip install pillow requests torch scikit-learn
 
 Let's download the data and format it into a dataframe suitable for training and inference.
 
@@ -166,7 +166,6 @@ With our trained model loaded into the client, we can now run inference on the d
 
     result_df = qcml.inference(
         data=df_test,
-        batch_size=4,
         get_states_extra={
             "state_method": "LOBPCG_FAST",
             "iterations": 20,

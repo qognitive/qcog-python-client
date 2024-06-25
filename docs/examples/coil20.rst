@@ -143,6 +143,7 @@ Now set some training specific parameters and execute the training.
     print(qcml.trained_model["guid"])
 
 Here we are using our analytic solver which is avaliable for the Pauli model. As per the documentation for the analytic optimization method we set our batch size to the number of samples in our dataset so we process all data in a single batch.
+
 .. note::
 
     The training process may take a while to complete, here we call ``wait_for_training`` which will block until training is complete.

@@ -1,20 +1,17 @@
 Time Series Regression
 ======================
 
-Contains the responses of a gas multisensor device deployed on the field in an Italian city. Hourly responses averages are recorded along with gas concentrations references from a certified analyzer.
-See the `paper <https://www.sciencedirect.com/science/article/abs/pii/S0925400507007691?via%3Dihub>`_ and `dataset <https://archive.ics.uci.edu/ml/datasets/Air+Quality>`_ for more information.
+Our other examples have been classification examples, but let us switch to a different regime. One of the most powerful features of QCML is that the same model architectures can function well across many different problem regimes. Here we'll apply it to time series forecasting.
+
+The data set that we are using for this example contains the responses of a gas multisensor device deployed in an Italian city. Hourly responses averages are recorded along with gas concentrations references from a certified analyzer. See the `paper <https://www.sciencedirect.com/science/article/abs/pii/S0925400507007691?via%3Dihub>`_ and `dataset <https://archive.ics.uci.edu/ml/datasets/Air+Quality>`_ for more information.
 
 In this example we will use QCML models to predict all observed features for a given horizon using a specified lookback window.
 
 Uploading the Dataset
 ----------------------
 
-First we need to get our hands on the data and upload it to the qognitive servers.
-We use the `UC Irvine Machine Learning Repository <https://archive.ics.uci.edu/>`_ to download and access the data.
-After that, we need to convert our datetime features, scale the data, and add lagged features.
-Each measurement is taken hourly so we will use a lookback window of 24 hours and a horizon of 24 hours.
-Since the original dataset has 15 features, we will have 15*(24+24) = 36 features in total during training and each of these will correspond to an observable operator.
-s
+First we need to get our hands on the data and upload it to the qognitive servers. We use the `UC Irvine Machine Learning Repository <https://archive.ics.uci.edu/>`_ to download and access the data. After that, we need to convert our datetime features, scale the data, and add lagged features. Each measurement is taken hourly so we will use a lookback window of 24 hours and a horizon of 24 hours. Since the original dataset has 15 features, we will have 15*(24+24) = 720 features in total during training and each of these will correspond to an observable operator.
+
 We'll be using some extra packages here such as ``scikit-learn`` and ``ucimlrepo``.  You can install these with the following command:
 
 .. code-block:: bash
@@ -209,7 +206,7 @@ Let's download the data and format it into a dataframe suitable for training and
 
         return df_train, df_test, df_target
 
-Let's instantiate a client object and set the dataset to COIL20.  We're only going to upload the ``df_train`` dataframe as the test data is only used for evaluation.
+Let's instantiate a client object and set the dataset to our timeseries dataframe.  We're only going to upload the ``df_train`` dataframe as the test data is only used for evaluation.
 
 .. code-block:: python
 
@@ -269,7 +266,8 @@ Now set some training specific parameters and execute the training.
     qcml.wait_for_training()
     print(qcml.trained_model["guid"])
 
-Here we are using our analytic solver which is avaliable for the Pauli model. As per the documentation for the analytic optimization method we set our batch size to the number of samples in our dataset so we process all data in a single batch.
+Here we use the gradient descent optimizer with a learning rate of 1e-5 and 3 iterations. We also use the LOBPCG_FAST state method with 15 iterations. We are not using the analytic solver because we are not passing the entire dataset at the same time.
+
 .. note::
 
     The training process may take a while to complete, here we call ``wait_for_training`` which will block until training is complete.
@@ -307,6 +305,7 @@ With our trained model loaded into the client, we can now run inference on the d
 Results
 -------
 
+Some example results for various qubit counts and Pauli weights are shown below. The mean squared error (MSE) and mean absolute percentage error (MAPE) are calculated for each case.
 
 .. list-table:: Sample Results
     :header-rows: 1

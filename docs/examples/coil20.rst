@@ -77,7 +77,6 @@ Let's download the data and format it into a dataframe suitable for training and
     train_data, test_data, train_target, test_target = train_test_split(data,
                                                                         targets,
                                                                         test_size=test_fraction,
-                                                                        random_state=random_state,
                                                                         stratify=labels)
 
     # Convert to DataFrame
@@ -167,7 +166,7 @@ With our trained model loaded into the client, we can now run inference on the d
 
     result_df = qcml.inference(
         data=df_test,
-        get_states_extra={
+        parameters={
             "state_method": "LOBPCG_FAST",
             "iterations": 20,
             "tolerance": 1e-6
@@ -176,11 +175,25 @@ With our trained model loaded into the client, we can now run inference on the d
     num_correct = (
         result_df.idxmax(axis=1) == df_target.idxmax(axis=1)
     ).sum()
-    print(f"Correct: {num_correct * 100 / len(df.test):.2f}% out of {len(df.test)}")
+    print(f"Correct: {num_correct * 100 / len(df_test):.2f}% out of {len(df_test)}")
 
 Results
 -------
 
-.. note::
+Some example results for various qubit counts and Pauli weights are shown below. The mean squared error (MSE) and mean absolute percentage error (MAPE) are calculated for each case.
 
-    TODO we should put some example results in here!
+.. list-table:: Sample Results
+    :header-rows: 1
+
+    * - Qubits
+      - Pauli Weight
+      - Accuracy
+    * - 5
+      - 2
+      - 1.098
+    * - 6
+      - 2
+      - 0.983
+    * - 6
+      - 3
+      - 0.903

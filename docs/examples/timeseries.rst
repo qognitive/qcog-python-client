@@ -291,7 +291,7 @@ With our trained model loaded into the client, we can now run inference on the d
 
     result_df = qcml.inference(
         data=df_test,
-        get_states_extra={
+        parameters={
             "state_method": "LOBPCG_FAST",
             "iterations": 25,
             "tolerance": 1e-4

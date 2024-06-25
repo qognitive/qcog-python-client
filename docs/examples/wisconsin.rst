@@ -17,8 +17,16 @@ First let's make sure we install some extra dependencies
 
 .. code-block:: python
 
+    import numpy as np
+
+    import pandas as pd
+
     from sklearn import datasets as sk_datasets
     from sklearn.preprocessing import StandardScaler
+
+    import torch
+
+    test_fraction = 0.2
 
     data = sk_datasets.load_breast_cancer()
     n_data = data.data.shape[0]
@@ -80,8 +88,8 @@ Let's pick an Ensemble model to run.
 
     qcml = qcml.ensemble(
         operators=df_train.columns.tolist(),
-        dims=64,
-        axes=64
+        dim=64,
+        num_axes=64
     )
 
 Here we remember our operators have to match the dataset that we are going to run.
@@ -112,7 +120,7 @@ Now set some training specific parameters and execute the training.
 
 .. note::
 
-    The training process may take a while to complete, here we call ``wait_for_training`` which will block until training is complete.
+    The training process may take a while to complete, here we call ``wait_for_training`` which will block until training is complete.  It should take about 4 minutes to train the model from a cold start.
 
 .. note::
 
@@ -133,7 +141,7 @@ With our trained model loaded into the client, we can now run inference on the d
 
     result_df = qcml.inference(
         data=df_test,
-        get_states_extra={
+        parameters={
             "state_method": "LOBPCG_FAST",
             "iterations": 20,
             "tolerance": 1e-6
@@ -142,11 +150,25 @@ With our trained model loaded into the client, we can now run inference on the d
     num_correct = (
         result_df.idxmax(axis=1) == df_target.idxmax(axis=1)
     ).sum()
-    print(f"Correct: {num_correct * 100 / len(df.test):.2f}% out of {len(df.test)}")
+    print(f"Correct: {num_correct * 100 / len(df_test):.2f}% out of {len(df_test)}")
 
 Results
 -------
 
-.. note::
+Some example results for various dimensionalities and axes numbers are shown below.
 
-    TODO we should put some example results in here!
+.. list-table:: Sample Results
+    :header-rows: 1
+
+    * - Dimensionality
+      - Num of Axes
+      - Accuracy
+    * - 64
+      - 64
+      - 87.72 %
+    * - 64
+      - 256
+      - 88.60 %
+    * - 256
+      - 512
+      - 88.60 %

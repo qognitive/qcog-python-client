@@ -37,6 +37,8 @@ Let's download the data and format it into a dataframe suitable for training and
     data_file = os.path.join(data_dir, 'data.npy')
     labels_file = os.path.join(data_dir, 'labels.npy')
 
+    test_fraction = 0.2
+
     # checks whether data has been downloaded already
 
     with tempfile.TemporaryDirectory() as temp_dir:

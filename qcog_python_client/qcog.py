@@ -536,6 +536,7 @@ class QcogClient(
                 "parameters": parameters,
             },
         )
+        print(inference_result)
 
         return base642dataframe(
             inference_result["response"]["data"],

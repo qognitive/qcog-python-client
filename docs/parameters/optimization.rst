@@ -8,7 +8,13 @@ There are several different methods of optimization that we currently support, e
 ANALYTIC
 --------
 
-The analytic optimizer is a closed form solution to the internal weight matrix in our model. Not all QCML models have an analytic solution, but when they do, the analytic optimizer is the fastest and most accurate way to train the model. The caveat is that the entire dataset needs to be in a single batch and this places memory constraints on the dataset that is used. Small datasets can benefit from the analytic optimizer, but large datasets which cannot fit in memory should use another optimizer.
+The analytic optimizer is a closed form solution to the internal weight matrix in our model.
+
+.. note::
+    Not all QCML models have an analytic solution.
+
+.. warning::
+    The caveat is that the entire dataset needs to be in a single batch and this places memory constraints on the dataset that is used. Small datasets can benefit from the analytic optimizer, but large datasets which cannot fit in memory should use another optimizer.
 
 The analytic optimizer takes no parameters.
 

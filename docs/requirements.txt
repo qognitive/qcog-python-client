@@ -1,0 +1,7 @@
+sphinx
+sphinx_rtd_theme
+requests
+pandas
+numpy
+aiohttp
+typing_extensions

@@ -12,7 +12,7 @@ This documentation is broken up by each ``state_method`` parameter, each having 
 LOBPCG_FAST
 -----------
 
-The recommended method for most cases. This method uses the Locally Optimal Block Preconditioned Conjugate Gradient method to find the optimal state. We call this ``FAST`` because it exploits internal symmetries of the problem to speed up the computation versus a generic implementation of LOBPCG.
+The recommended method for most cases. This method uses the Locally Optimal Block Preconditioned Conjugate Gradient method to find the optimal state. We call this ``FAST`` because it reduces redundant numerical calculations when operating on a batch of data to speed up the computation versus a generic implementation of LOBPCG.
 
 .. hlist::
     :columns: 1

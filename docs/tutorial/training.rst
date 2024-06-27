@@ -1,7 +1,7 @@
 Running a training job
 ======================
 
-Now we need to specify training parameters for the model. So far the model that we have built has parameterization that pertains to both the inference as well as the training phases. The training parameters only matter for training the model. We will upload these training specific parameters to qogntive's servers so a training run can be launched.
+So far, the settings that parameterize our model to pertain to both the inference as well as the training phases. Now we introduce the `training_parameters` which __only__ affect the training of our model. We will upload these training specific parameters to qogntive's servers so a training run can be launched.
 
 We'll set the training parameters and trigger our training run.
 

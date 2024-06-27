@@ -53,12 +53,13 @@ def numeric_version(version: str) -> list[int]:
 
     Parameters
     ----------
-    version: str
+    version : str
         expected to be of the form M.N.F
 
-    Return:
-    -------
-    list[int]: a list of 3 int that can pythonically compared
+    Return
+    ------
+    list[int]
+        a list of 3 int that can pythonically compared
     """
     numbers = version.split(".")
     if len(numbers) != 3:
@@ -178,11 +179,14 @@ class QcogClient(
         not block on IO.
 
         Qcog api client implementation there are 2 main expected usages:
-            1. Training
-            2. Inference
+
+        1. Training
+        2. Inference
 
         The class definition is such that every parameter must be used
         explicitly:
+
+        .. code-block:: python
 
             hsm_client = QcogClient(token="value", version="0.0.45")
 
@@ -194,15 +198,21 @@ class QcogClient(
 
         In practice, the 2 main expected usage would be for a fresh training:
 
-        hsm = QcogClient.create(...).pauli(...).data(...).train(...)
+        .. code-block:: python
+
+            hsm = QcogClient.create(...).pauli(...).data(...).train(...)
 
         where the "..." would be replaced with desired parametrization
 
         If we wanted, we could infer after training, right away.
 
-        result: pd.DataFrame = hsm.inference(...)
+        .. code-block:: python
+
+            result: pd.DataFrame = hsm.inference(...)
 
         but this would require to run the following loop:
+
+        .. code-block:: python
 
             hsm.wait_for_training().inference(...)
 
@@ -213,14 +223,17 @@ class QcogClient(
         storage. Training parameters? Storage. That way one can
         rebuild the client to run inference:
 
-        hsm = QcogClient.create(...).preloaded_model(trained_model_guid)
+        .. code-block:: python
 
-        for df in list_of_dataframes:
-            result: Dataframe = hsm.inference(...)
+            hsm = QcogClient.create(...).preloaded_model(trained_model_guid)
+
+            for df in list_of_dataframes:
+                result: Dataframe = hsm.inference(...)
 
         Most methods class order is not important with 3 exceptions:
-            1. train may only be called after data, and named model
-            2. inference and status must have a preloaded model first
+
+        1. train may only be called after data, and named model
+        2. inference and status must have a preloaded model first
 
         Parameters
         ----------
@@ -249,6 +262,11 @@ class QcogClient(
         version : str
             the qcog version to use. Must be no smaller than `OLDEST_VERSION`
             and no greater than `NEWEST_VERSION`
+
+        Returns
+        -------
+        QcogClient
+            the client object
         """
         hsm = cls()
         hsm.version = version
@@ -570,17 +588,23 @@ class AsyncQcogClient(
 
         For example:
 
-        hsm = (await AsyncQcogClient.create(...)).pauli(...)
-        await hsm.data(...)
-        await hsm.train(...)
+        .. code-block:: python
+
+            hsm = (await AsyncQcogClient.create(...)).pauli(...)
+            await hsm.data(...)
+            await hsm.train(...)
 
         where the "..." would be replaced with desired parametrization
 
         If we wanted, we could infer after training, right away.
 
-        result: pd.DataFrame = await hsm.inference(...)
+        .. code-block:: python
+
+            result: pd.DataFrame = await hsm.inference(...)
 
         but this would require us to explicitly wait for training to complete
+
+        .. code-block:: python
 
             await hsm.wait_for_training()
             result: pd.DataFrame = await hsm.inference(...)
@@ -614,6 +638,11 @@ class AsyncQcogClient(
         version : str
             the qcog version to use. Must be no smaller than `OLDEST_VERSION`
             and no greater than `NEWEST_VERSION`
+
+        Returns
+        -------
+        AsyncQcogClient
+            the client object
         """
         hsm = cls()
         hsm.version = version

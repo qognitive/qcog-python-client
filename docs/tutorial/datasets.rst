@@ -40,9 +40,6 @@ Uploading to the API
 
 First we'll instantiate our client object.
 
-.. note::
-    We should have more defaults and fix the DNS
-
 .. code-block:: python
 
     from qcog_python_client import QcogClient

@@ -39,15 +39,7 @@ You can print the dataframe returned and see how close it gets to what we expect
 Loading a pre-trained model
 ----------------------------
 
-If you have trained a model in a different script, session, or process you can load it back into the qcml object and then use it for inference, that way you do not have to deal with the dataset or the parameters again.
-
-First make sure you get and save the ID of your model after you train it.
-
-.. code:: python
-
-    model_id = qcml.trained_model["guid"]
-
-Then you can load the model back in using the ID. You will need to instantiate a ``qcml`` object but you do not need to provide any other parameters other than the trained model ID to proceed with inference.
+If you have trained a model in a different script, session, or process you can load it back into the qcml object and then use it for inference as was discussed in the training section.
 
 .. code:: python
 

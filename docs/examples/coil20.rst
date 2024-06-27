@@ -97,13 +97,7 @@ Let's instantiate a client object and set the dataset to COIL20.  We're only goi
 .. code-block:: python
 
     from qcog_python_client import QcogClient
-    qcml = QcogClient.create(
-        token=API_TOKEN,
-        hostname="api.qognitive.io",
-        port=443,
-        verify=False,
-        secure=True,
-    )
+    qcml = QcogClient.create(token=API_TOKEN)
     qcml.data(df_train)
 
 

@@ -157,12 +157,10 @@ class QcogClient(
         cls,
         *,
         token: str | None = None,
-        hostname: str | None = None,
-        port: str | int | None = None,
+        hostname: str = "dev.qognitive.io",
+        port: int = 443,
         api_version: str = "v1",
-        secure: bool = True,
         safe_mode: bool = False,
-        verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> QcogClient:
@@ -241,21 +239,15 @@ class QcogClient(
             A valid API token granting access optional
             when unset (or None) expects to find the proper
             value as QCOG_API_TOKEN environment variable
-        hostname : str | None
-            optional string of the hostname. Currently default
-            to a standard api endpoint
-        port : str | int | None
-            port value default to https 443
+        hostname : str
+            API endpoint hostname, currently defaults to dev.qognitive.io
+        port : int
+            port value, default to https 443
         api_version : str
             the "vX" part of the url for the api version
-        secure : bool
-            if true use https else use http mainly for local
-            testing
         safe_mode : bool
             if true runs healthchecks before running any api call
             sequences
-        verify : bool
-            ignore ssl provenance for testing purposes
         test_projest : bool
             For testing purposes. if the project resolvers finds
             no project, create one. For testing purposes
@@ -275,8 +267,6 @@ class QcogClient(
             hostname=hostname,
             port=port,
             api_version=api_version,
-            secure=secure,
-            verify=verify,
         )
 
         if safe_mode:
@@ -572,12 +562,10 @@ class AsyncQcogClient(
         cls,
         *,
         token: str | None = None,
-        hostname: str | None = None,
-        port: str | int | None = None,
+        hostname: str = "dev.qognitive.io",
+        port: int = 443,
         api_version: str = "v1",
-        secure: bool = True,
         safe_mode: bool = False,
-        verify: bool = True,  # for debugging until ssl is fixed
         test_project: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> AsyncQcogClient:
@@ -617,21 +605,15 @@ class AsyncQcogClient(
             A valid API token granting access optional
             when unset (or None) expects to find the proper
             value as QCOG_API_TOKEN environment veriable
-        hostname : str | None
-            optional string of the hostname. Currently default
-            to a standard api endpoint
-        port : str | int | None
+        hostname : str
+            API endpoint hostname, currently defaults to dev.qognitive.io
+        port : int
             port value default to https 443
         api_version : str
             the "vX" part of the url for the api version
-        secure : bool
-            if true use https else use http mainly for local
-            testing
         safe_mode : bool
             if true runs healthchecks before running any api call
             sequences
-        verify : bool
-            ignore ssl provenance for testing purposes
         test_projest : bool
             For testing purposes. if the project resolvers finds
             no project, create one. For testing purposes
@@ -651,8 +633,6 @@ class AsyncQcogClient(
             hostname=hostname,
             port=port,
             api_version=api_version,
-            secure=secure,
-            verify=verify,
         )
 
         if safe_mode:

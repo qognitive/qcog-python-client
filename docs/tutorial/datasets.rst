@@ -43,13 +43,7 @@ First we'll instantiate our client object.
 .. code-block:: python
 
     from qcog_python_client import QcogClient
-    qcml = QcogClient.create(
-        token=API_TOKEN,
-        hostname="api.qognitive.io",
-        port=443,
-        verify=False,
-        secure=True,
-    )
+    qcml = QcogClient.create(token=API_TOKEN)
 
 Now we'll upload our data to the API.
 
@@ -67,13 +61,7 @@ We can do the same operations but using our Async client for those whose infrast
 .. code-block:: python
 
     from qcog_python_client import AsyncQcogClient
-    qcml = await AsyncQcogClient.create(
-        token=API_TOKEN,
-        hostname="api.qognitive.io",
-        port=443,
-        verify=False,
-        secure=True,
-    )
+    qcml = await AsyncQcogClient.create(token=API_TOKEN)
     await qcml.data(dataset)
 
 Asyncronous programming is very powerful when your applications become ``io`` bound, either by the network (APIs, Databases, etc) or through file operations. This allows you to keep the CPU busy while waiting for the IO to complete. For more detail about using asyncronous programming in python `the python asyncio docs are a good place to start <https://docs.python.org/3/library/asyncio.html>`_.

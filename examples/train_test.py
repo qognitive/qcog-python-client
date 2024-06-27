@@ -34,11 +34,7 @@ training_parameters = {
 
 def main():
     hsm = QcogClient.create(
-        token=API_TOKEN,
-        hostname=HOSTNAME,
-        port=HOSTPORT,
-        verify=False,
-        secure=SECURE_MODE,
+        token=API_TOKEN
     ).ensemble(
         operators=["X", "Y", "Z"],
         dim=4,
@@ -51,11 +47,7 @@ def main():
 
 async def async_main():
     hsm = (await AsyncQcogClient.create(
-        token=API_TOKEN,
-        hostname=HOSTNAME,
-        port=HOSTPORT,
-        verify=False,
-        secure=SECURE_MODE,
+        token=API_TOKEN
     )).ensemble(
         operators=["X", "Y", "Z"],
         dim=4,

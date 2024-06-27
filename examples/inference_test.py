@@ -35,11 +35,7 @@ parameters = {
 
 def main():
     hsm = QcogClient.create(
-        token=API_TOKEN,
-        hostname=HOSTNAME,
-        port=HOSTPORT,
-        verify=False,
-        secure=SECURE_MODE,
+        token=API_TOKEN
     ).preloaded_model(TRAINED_MODEL_GUID)
     print(hsm.status())
     print(hsm.wait_for_training().inference(forecast_data, parameters))
@@ -49,11 +45,7 @@ async def async_main():
     hsm = (
         await (
             await AsyncQcogClient.create(
-                token=API_TOKEN,
-                hostname=HOSTNAME,
-                port=HOSTPORT,
-                verify=False,
-                secure=SECURE_MODE,
+                token=API_TOKEN
             )
         ).preloaded_model(TRAINED_MODEL_GUID)
 

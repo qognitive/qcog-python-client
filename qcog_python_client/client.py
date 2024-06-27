@@ -99,39 +99,30 @@ class _HTTPClient:
     """
 
     TOKEN: str = os.environ.get("QCOG_API_TOKEN", "")
-    HOSTNAME: str = os.environ.get("QCOG_HOSTNAME", "api.qognitive.io")
-    PORT: str = os.environ.get("QCOG_PORT", "443")
 
     def __init__(
         self,
         *,
         token: str | None = None,
-        hostname: str | None = None,
-        port: str | int | None = None,
+        hostname: str = "dev.qognitive.io",
+        port: int = 443,
         api_version: str = "v1",
-        secure: bool = True,
-        verify: bool = True,  # for debugging until ssl is fixed
         retries: int = 3
     ):
         """
         Parameters:
         -----------
-        token: str | None
+        token : str | None
             A valid API token granting access optional
             when unset (or None) expects to find the proper
             value as QCOG_API_TOKEN environment veriable
-        hostname: str | None
+        hostname : str | None
             optional string of the hostname. Currently default
             to a standard api endpoint
-        port: str | int | None
+        port : str | int | None
             port value default to https 443
-        api_version: str
+        api_version : str
             the "vX" part of the url for the api version
-        secure: bool
-            if true use https else use http mainly for local
-            testing
-        verify: bool
-            ignore ssl provenance for testing purposes
         retries: int
             number of attempts in cases of bad gateway
         """
@@ -140,21 +131,15 @@ class _HTTPClient:
         if not self.token:
             raise RuntimeError("missing token")
 
-        self.hostname: str = hostname if isinstance(
-            hostname, str
-        ) else self.HOSTNAME
-        self.port: str | int = str(port) if isinstance(
-            port, str | int
-        ) else self.PORT
+        self.hostname: str = hostname
+        self.port: int = port
         self.api_version: str = api_version
 
         self.headers = {
             "Authorization": f"Bearer {self.token}"
         }
-        prefix: str = "https://" if secure else "http://"
-        base_url: str = f"{prefix}{self.hostname}:{self.port}"
+        base_url: str = f"https://{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
-        self.verify: bool = verify
         self.retries: int = retries
 
 
@@ -196,7 +181,6 @@ class RequestsClient(_HTTPClient):
                     uri,
                     json=data,
                     headers=self.headers,
-                    verify=self.verify
                 )
                 resp.raise_for_status()
 
@@ -298,7 +282,6 @@ class AIOHTTPClient(_HTTPClient):
                         method.value,
                         uri,
                         json=data,
-                        ssl=self.verify,
                     )
                     retval: dict = await resp.json()
 

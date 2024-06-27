@@ -181,7 +181,6 @@ class RequestsClient(_HTTPClient):
                     uri,
                     json=data,
                     headers=self.headers,
-                    verify=self.verify
                 )
                 resp.raise_for_status()
 
@@ -283,7 +282,6 @@ class AIOHTTPClient(_HTTPClient):
                         method.value,
                         uri,
                         json=data,
-                        ssl=self.verify,
                     )
                     retval: dict = await resp.json()
 

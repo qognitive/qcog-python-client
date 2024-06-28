@@ -70,6 +70,73 @@ def numeric_version(version: str) -> list[int]:
     return [int(w) for w in numbers]
 
 
+# Shamefull function to create a jsonable dict and keep compatibility
+# with the current API schema. This will be removed once the schema
+# is defined and updated.
+def jsonable_parameters(params: TrainingParameters) -> dict:
+
+    # Expected params for the API.
+    # This will eventually change when the
+    # schema is defined and updates
+
+    class ExpectedWeightParams(BaseModel):
+        learning_rate: float = 0.0
+        iterations: int = 0
+        step_size: float = 0.0
+        first_moment_decay: float = 0.0
+        second_moment_decay: float = 0.0
+        epsilon: float = 0.0
+        optimization_method: OptimizationMethod
+
+        model_config = {"extra": "ignore"}
+
+    ExpectedWeightParams.model_rebuild()
+
+    class ExpectedStateParams(BaseModel):
+        state_method: StateMethod
+        iterations: int = 0
+        learning_rate_axes: float = 0.0
+
+        model_config = {"extra": "ignore"}
+
+    ExpectedStateParams.model_rebuild()
+
+    state_kwargs = params["state_kwargs"]
+    weight_kwargs = params["weight_optimization_kwargs"]
+
+    # Define empty dicts for the parameters
+    weight_params = {}
+    state_params = {}
+
+    # If an object is actually passed
+    if state_kwargs:
+        # Dump the actual schema (based on the documentation)
+        state_dict = state_kwargs.model_dump()
+        # Parse it in order to only keep the actual expected parameters.
+        # This step is necessary to have compatibility with the current
+        # API schema.
+        state_params = ExpectedStateParams.model_validate(state_dict).model_dump()
+
+    # Repeate same process for the weight optimization parameters
+    if weight_kwargs:
+        weight_dict = weight_kwargs.model_dump()
+        weight_params = ExpectedWeightParams.model_validate(weight_dict).model_dump()
+
+
+    retval = {
+        "batch_size": params["batch_size"],
+        "num_passes": params["num_passes"],
+    }
+
+    if weight_params:
+        retval["weight_optimization_kwargs"] = weight_params
+
+    if state_params:
+        retval["state_kwargs"] = state_params
+
+    return retval
+
+
 class BaseQcogClient(Generic[CLIENT]):
 
     def __init__(self) -> None:
@@ -295,69 +362,6 @@ class QcogClient(
         params: TrainingParameters
             Valid TypedDict of the training parameters
         """
-
-        def jsonable_parameters(params: TrainingParameters) -> dict:
-
-            # Expected params for the API.
-            # This will eventually change when the
-            # schema is defined and updates
-            class ExpectedWeightParams(BaseModel):
-                learning_rate: float = 0.0
-                iterations: int = 0
-                step_size: float = 0.0
-                first_moment_decay: float = 0.0
-                second_moment_decay: float = 0.0
-                epsilon: float = 0.0
-                optimization_method: OptimizationMethod
-
-                model_config = {"extra": "ignore"}
-
-            ExpectedWeightParams.model_rebuild()
-
-            class ExpectedStateParams(BaseModel):
-                state_method: StateMethod
-                iterations: int = 0
-                learning_rate_axes: float = 0.0
-
-                model_config = {"extra": "ignore"}
-
-            ExpectedStateParams.model_rebuild()
-
-            state_kwargs = params["state_kwargs"]
-            weight_kwargs = params["weight_optimization_kwargs"]
-
-            # Define empty dicts for the parameters
-            weight_params = {}
-            state_params = {}
-
-            print("---------------------------")
-            print("state_kwargs", state_kwargs)
-            print("weight_kwargs", weight_kwargs)
-            print("---------------------------")
-            # If an object is actually passed
-            if state_kwargs:
-                # Dump the actual schema (based on the documentation)
-                state_dict = state_kwargs.model_dump()
-                # Parse it in order to only keep the actual expected parameters.
-                # This step is necessary to have compatibility with the current
-                # API schema.
-                state_params = ExpectedStateParams.model_validate(state_dict).model_dump()
-
-            # Repeate same process for the weight optimization parameters
-            if weight_kwargs:
-                weight_dict = weight_kwargs.model_dump()
-                weight_params = ExpectedWeightParams.model_validate(weight_dict).model_dump()
-
-            return {
-                "batch_size": params["batch_size"],
-                "num_passes": params["num_passes"],
-                "weight_optimization_kwargs": weight_params,
-                "state_kwargs": state_params
-            }
-
-        jsonable = jsonable_parameters(params)
-
-        print("---> params", jsonable)
 
         self.training_parameters = self.http_client.post(
             "training_parameters",
@@ -673,6 +677,7 @@ class AsyncQcogClient(
         params: TrainingParameters
             Valid TypedDict of the training parameters
         """
+
         self.training_parameters = await self.http_client.post(
             "training_parameters",
             {
@@ -680,7 +685,7 @@ class AsyncQcogClient(
                 "model": self.model.value,
                 "parameters": {
                     "model": self.model.params
-                } | params
+                } | jsonable_parameters(params)
             }
         )
 
@@ -886,23 +891,3 @@ class AsyncQcogClient(
         return base642dataframe(
             self.inference_result["response"]["data"],
         )
-
-
-# {
-#     'batch_size': 1000,
-#     'num_passes': 10,
-#     'weight_optimization_kwargs':
-#         {
-#             'state_method': 'GRAD',
-#             'iterations': 10,
-#             'learning_rate_axes': 0.0
-#         },
-#     'state_kwargs': {
-#         'learning_rate': 0.001,
-#         'iterations': 10,
-#         'step_size': 0.0,
-#         'first_moment_decay': 0.0,
-#         'second_moment_decay': 0.0,
-#         'epsilon': 0.0,
-#         'optimization_method': 'GRAD'
-#     }}

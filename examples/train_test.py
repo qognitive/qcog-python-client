@@ -41,6 +41,8 @@ def main():
 
 async def async_main():
     hsm = (await AsyncQcogClient.create(
+        hostname="127.0.0.1",
+        port=8000,
         token=API_TOKEN
     )).ensemble(
         operators=["X", "Y", "Z"],
@@ -51,14 +53,8 @@ async def async_main():
     await hsm.train(
         batch_size=1000,
         num_passes=10,
-        weight_optimization=GradOptimizationParameters(
-            iterations=10,
-            learning_rate=1e-3,
-        ),
-        get_states_extra=GradStateParameters(
-            iterations=10,
-            learning_rate_axes=0.01,
-        )
+        weight_optimization={},
+        get_states_extra={}
     )
     print(hsm.trained_model)
     return hsm.trained_model["guid"]

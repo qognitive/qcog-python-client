@@ -272,35 +272,9 @@ class QcogClient(
         if safe_mode:
             hsm.http_client.get("status")
 
-        hsm._resolve_project(test_project)
+        hsm.project = hsm.http_client.get("bootstrap")
 
         return hsm
-
-    def _resolve_project(self, test_project: bool) -> None:
-        """
-        NOTE: CURRENTLY A STUB
-        This method is a utility method of the class __init__
-        method that resolves the project(s) accessible for this
-        "token-as-proxy-for-org/user"
-
-        Implements a "test mode" that will create a project
-
-        Parameters
-        ----------
-        test_project : bool
-            If true, the class creation will create a new project and
-            store its GUID in the PROJECT_GUID_TEMPORARY variable
-        """
-
-        if test_project:
-            self.PROJECT_GUID_TEMPORARY = self.http_client.post(
-                "project",
-                {
-                    "name": "poc-train-simple-model",
-                    "bucket_name": "ubiops-qognitive-default"
-                }
-            )["guid"]
-        self.project = self.http_client.get("bootstrap")
 
     def _preload(self, ep: str, guid: str) -> dict:
         """
@@ -638,35 +612,14 @@ class AsyncQcogClient(
         if safe_mode:
             await hsm.http_client.get("status")
 
-        await hsm._resolve_project(test_project)
+        hsm.project = RequestsClient(
+            token=token,
+            hostname=hostname,
+            port=port,
+            api_version=api_version,
+        ).get("bootstrap")
 
         return hsm
-
-    async def _resolve_project(self, test_project: bool) -> None:
-        """NOTE: CURRENTLY A STUB
-
-        This method is a utility method of the class __init__
-        method that resolves the project(s) accessible for this
-        "token-as-proxy-for-org/user"
-
-        Implements a "test mode" that will create a project
-
-        Parameters
-        ----------
-        test_project : bool
-            If true, the class creation will create a new project and
-            store its GUID in the PROJECT_GUID_TEMPORARY variable
-        """
-
-        if test_project:
-            self.PROJECT_GUID_TEMPORARY = (await self.http_client.post(
-                "project",
-                {
-                    "name": "poc-train-simple-model",
-                    "bucket_name": "ubiops-qognitive-default"
-                }
-            ))["guid"]
-        self.project = await self.http_client.get("bootstrap")
 
     async def _preload(self, ep: str, guid: str) -> dict:
         """

@@ -4,10 +4,7 @@ import numpy as np
 
 from qcog_python_client import QcogClient, AsyncQcogClient
 
-HOSTNAME = os.environ["HOSTNAME"]
 API_TOKEN = os.environ["API_TOKEN"]
-HOSTPORT = os.environ.get("HOSTPORT", 443)
-SECURE_MODE = os.environ.get("SECURE_MODE", "true").lower() == "true"
 TRAINED_MODEL_GUID = os.environ.get("TRAINED_MODEL", "9d1432c3-6f43-4c90-aa32-1ac2d54e9a3c")
 
 print("################################")

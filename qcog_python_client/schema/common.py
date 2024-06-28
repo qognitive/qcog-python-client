@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import TypedDict, TypeAlias, Any, Protocol
 from typing_extensions import NotRequired
+from .parameters import WeightParams, StateParams
 
 import numpy as np
 import pandas as pd
@@ -35,16 +36,6 @@ class Dataset(TypedDict):
     project_guid: str
 
 
-class WeightParams(TypedDict):
-    learning_rate: float
-    iterations: int
-    optimization_method: str
-    step_size: float
-    first_moment_decay: float
-    second_moment_decay: float
-    epsilon: float
-
-
 class FisherParams(TypedDict):
     learning_rate: NotRequired[float]
     init_update_n: int
@@ -54,15 +45,15 @@ class FisherParams(TypedDict):
     use_hessian: bool
 
 
-class StateParams(TypedDict):
-    state_method: str
-    iterations: int
-    learning_rate_axes: float
-    # TODO we should remove the "kwargs"
-    # from the names and favor explicit
-    # definittions
-    fisher_axes_kwargs: NotRequired[FisherParams]
-    fisher_state_kwargs: NotRequired[FisherParams]
+# class StateParams(TypedDict):
+#     state_method: str
+#     iterations: int
+#     learning_rate_axes: float
+#     # TODO we should remove the "kwargs"
+#     # from the names and favor explicit
+#     # definittions
+#     fisher_axes_kwargs: NotRequired[FisherParams]
+#     fisher_state_kwargs: NotRequired[FisherParams]
 
 
 class InferenceParameters(TypedDict):
@@ -82,9 +73,6 @@ NotRequiredStateParams: TypeAlias = StateParams | EMPTY_DICTIONARY
 class TrainingParameters(TypedDict):
     batch_size: int
     num_passes: int
-    # TODO we should remove the "kwargs"
-    # from the names and favor explicit
-    # definittions
     weight_optimization_kwargs: NotRequiredWeightParams
     state_kwargs: NotRequiredStateParams
 

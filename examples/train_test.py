@@ -2,11 +2,11 @@ import os
 import pandas
 
 from qcog_python_client import AsyncQcogClient, QcogClient
+from qcog_python_client.schema import GradOptimizationParameters, GradStateParameters
 
-
-HOSTNAME = os.environ["HOSTNAME"]
+HOSTNAME = os.environ.get("HOSTNAME", "http://localhost")
 API_TOKEN = os.environ["API_TOKEN"]
-HOSTPORT = os.environ.get("HOSTPORT", 443)
+HOSTPORT = os.environ.get("HOSTPORT", 8000)
 SECURE_MODE = os.environ.get("SECURE_MODE", "true").lower() == "true"
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -39,7 +39,18 @@ def main():
         operators=["X", "Y", "Z"],
         dim=4,
         num_axes=16
-    ).data(df).train(**training_parameters)
+    ).data(df).train(
+        batch_size=1000,
+        num_passes=10,
+        weight_optimization=GradOptimizationParameters(
+            iterations=10,
+            learning_rate=1e-3,
+        ),
+        get_states_extra=GradStateParameters(
+            iterations=10,
+            learning_rate_axes=0.01,
+        )
+    )
 
     print(hsm.trained_model)
     return hsm.trained_model["guid"]

@@ -164,8 +164,6 @@ class QcogClient(
         api_version: str = "v1",
         secure: bool = True,
         safe_mode: bool = False,
-        verify: bool = True,  # for debugging until ssl is fixed
-        test_project: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> QcogClient:
         """
@@ -598,8 +596,6 @@ class AsyncQcogClient(
         api_version: str = "v1",
         secure: bool = True,
         safe_mode: bool = False,
-        verify: bool = True,  # for debugging until ssl is fixed
-        test_project: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> AsyncQcogClient:
         """Asyncronous Qcog api client implementation
@@ -637,8 +633,6 @@ class AsyncQcogClient(
             hostname=hostname,
             port=port,
             api_version=api_version,
-            secure=secure,
-            verify=verify,
         )
 
         if safe_mode:

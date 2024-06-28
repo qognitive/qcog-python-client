@@ -161,7 +161,6 @@ class QcogClient(
         port: int = 443,
         api_version: str = "v1",
         safe_mode: bool = False,
-        test_project: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> QcogClient:
         """Factory method to create a client with intializations from the API.
@@ -540,7 +539,6 @@ class AsyncQcogClient(
         port: int = 443,
         api_version: str = "v1",
         safe_mode: bool = False,
-        test_project: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> AsyncQcogClient:
         """Asyncronous Qcog api client implementation

@@ -16,7 +16,7 @@ import enum
 ############################################
 
 
-class OptimizationMethod(enum.Enum):
+class OptimizationMethod(str, enum.Enum):
     GRAD = "GRAD"
     ADAM = "ADAM"
     ANALYTIC = "ANALYTIC"
@@ -96,7 +96,7 @@ class AnalyticOptimizationParameters(BaseModel):
 ############################################
 
 
-class StateMethod(enum.Enum):
+class StateMethod(str, enum.Enum):
     LOBPCG_FAST = "LOBPCG_FAST"
     POWER_ITER = "POWER_ITER"
     EIGS = "EIGS"
@@ -274,4 +274,5 @@ StateParams: TypeAlias = (
     | EIGHStateParameters
     | EIGSStateParameters
     | NPEIGHStateParameters
+    | GradStateParameters
 )

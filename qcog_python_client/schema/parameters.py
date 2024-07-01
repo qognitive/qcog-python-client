@@ -5,10 +5,11 @@ validation.
 """
 
 from __future__ import annotations
-from pydantic import BaseModel, Field
-from typing import Literal, TypeAlias
-import enum
 
+import enum
+from typing import Literal, TypeAlias
+
+from pydantic import BaseModel, Field
 
 ############################################
 # Optimization Parameters
@@ -16,6 +17,8 @@ import enum
 
 
 class OptimizationMethod(str, enum.Enum):
+    """Enum definition for the optimization methods."""
+
     GRAD = "GRAD"
     ADAM = "ADAM"
     ANALYTIC = "ANALYTIC"
@@ -23,6 +26,7 @@ class OptimizationMethod(str, enum.Enum):
 
 class GradOptimizationParameters(BaseModel):
     """Parameters for gradient descent optimization.
+
     ----------
 
     iterations: **int**
@@ -39,15 +43,16 @@ class GradOptimizationParameters(BaseModel):
         Recommended values are around `1e-3`.
     """
 
-    optimization_method: Literal[OptimizationMethod.GRAD] = \
-        OptimizationMethod.GRAD
+    optimization_method: Literal[OptimizationMethod.GRAD] = OptimizationMethod.GRAD
     iterations: int
     learning_rate: float
 
 
 class AdamOptimizationParameters(BaseModel):
     """Parameters for Adam optimization.
+
     ----------
+
     iterations: **int**
         This is how many gradient descent steps will be made before considering
         the state to have converged. Having more iterations and a lower
@@ -75,8 +80,7 @@ class AdamOptimizationParameters(BaseModel):
         quadratic in the gradient. Recommended values are around 0.999.
     """
 
-    optimization_method: Literal[OptimizationMethod.ADAM] = \
-        OptimizationMethod.ADAM
+    optimization_method: Literal[OptimizationMethod.ADAM] = OptimizationMethod.ADAM
     iterations: int
     step_size: float = Field(default=1e-3)
     epsilon: float = Field(default=1e-8)
@@ -85,9 +89,13 @@ class AdamOptimizationParameters(BaseModel):
 
 
 class AnalyticOptimizationParameters(BaseModel):
-    """The analytic optimizer is a closed form solution to the internal
+    """Analytic optimizer.
+
+    The analytic optimizer is a closed form solution to the internal
     weight matrix in our model. The analytic optimizer takes no parameters.
+
     ----------
+
     """
 
     optimization_method: OptimizationMethod = OptimizationMethod.ANALYTIC
@@ -99,6 +107,8 @@ class AnalyticOptimizationParameters(BaseModel):
 
 
 class StateMethod(str, enum.Enum):
+    """Enum definition for the state methods."""
+
     LOBPCG_FAST = "LOBPCG_FAST"
     POWER_ITER = "POWER_ITER"
     EIGS = "EIGS"
@@ -110,6 +120,7 @@ class StateMethod(str, enum.Enum):
 
 class LOBPCGFastStateParameters(BaseModel):
     """Parameters for the LOBPCG_FAST state method.
+
     ----------
 
     iterations: **int**
@@ -145,6 +156,7 @@ class LOBPCGFastStateParameters(BaseModel):
 
 class PowerIterStateParameters(BaseModel):
     """Parameters for the POWER_ITER state method.
+
     ----------
 
     iterations: **int**
@@ -186,6 +198,7 @@ class PowerIterStateParameters(BaseModel):
 
 class EIGHStateParameters(BaseModel):
     """EIGH state method takes no parameters.
+
     ----------
     """
 
@@ -194,6 +207,7 @@ class EIGHStateParameters(BaseModel):
 
 class EIGSStateParameters(BaseModel):
     """EIGS state method takes no parameters.
+
     ----------
     """
 
@@ -202,7 +216,9 @@ class EIGSStateParameters(BaseModel):
 
 class NPEIGHStateParameters(BaseModel):
     """NP_EIGH state method takes no parameters.
+
     ----------
+
     """
 
     state_method: Literal[StateMethod.NP_EIGH] = StateMethod.NP_EIGH
@@ -210,6 +226,7 @@ class NPEIGHStateParameters(BaseModel):
 
 class LOBPCGStateParameters(BaseModel):
     """Parameters for the LOBPCG state method.
+
     ----------
 
     iterations: **int**
@@ -243,6 +260,7 @@ class LOBPCGStateParameters(BaseModel):
 
 class GradStateParameters(BaseModel):
     """Parameters for gradient descent optimization.
+
     ----------
 
     iterations: **int**

@@ -1,21 +1,22 @@
+"""Ensemble model schema."""
+
 from __future__ import annotations
 
-from typing import TypedDict, Protocol
+from typing import Protocol, TypedDict
 
 from .common import (
+    InferenceProtocol,
     Model,
     Operator,
     TrainProtocol,
-    InferenceProtocol,
     ValueMixin,
 )
 
 
 class EnsembleProtocol(Protocol):
-    """
-    Ensemble model class "prototype"
-    """
-    def __init__(
+    """Ensemble model class "prototype"."""
+
+    def __init__(  # noqa: D107
         self,
         operators: list[Operator],
         dim: int,
@@ -51,18 +52,18 @@ class EnsembleSchema(EnsembleProtocol, TrainProtocol, InferenceProtocol):
     seed : int
         A random seed which is used to initialize the model, you can set this
         in order to increase reproducibility.
+
     """
+
     pass
 
 
 class EnsembleModel(EnsembleProtocol, ValueMixin):
-    """
-    client side schema implementation
-    """
+    """Client side schema implementation."""
 
     model = Model.ensemble
 
-    class payload(TypedDict):
+    class payload(TypedDict):  # noqa: N801, D106
         operators: list[Operator]
         dim: int
         num_axes: int
@@ -71,7 +72,7 @@ class EnsembleModel(EnsembleProtocol, ValueMixin):
         seed: int
         target_operators: list[Operator]
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         operators: list[Operator],
         dim: int,

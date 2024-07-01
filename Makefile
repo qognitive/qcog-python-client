@@ -6,9 +6,13 @@ build:
 	python -m build .
 
 .PHONY: clean
+
 clean:
 	rm -rf build dist
 
-lint:
-	flake8 qcog_python_client
-	mypy qcog_python_client
+lint-check:
+	ruff check ./qcog_python_client && \
+	mypy ./qcog_python_client
+
+lint-write:
+	ruff format ./qcog_python_client

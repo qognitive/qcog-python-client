@@ -138,7 +138,7 @@ class _HTTPClient:
         self.headers = {
             "Authorization": f"Bearer {self.token}"
         }
-        base_url: str = f"http://{self.hostname}:{self.port}"
+        base_url: str = f"https://{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
         self.retries: int = retries
 

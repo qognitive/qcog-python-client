@@ -163,8 +163,7 @@ class QcogClient(
         safe_mode: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> QcogClient:
-        """
-        Factory method to create a client with intializations from the API.
+        """Factory method to create a client with initializations from the API.
 
         Since __init__ is always sync we cannot call to the API using that
         method of class creation. If we need to fetch things such as the
@@ -183,6 +182,7 @@ class QcogClient(
         The class definition is such that every parameter must be used
         explicitly:
 
+        .. code-block:: python
             hsm_client = QcogClient(token="value", version="0.0.45")
 
         Each "public" method return "self" to chain method calls unless
@@ -193,7 +193,9 @@ class QcogClient(
 
         In practice, the 2 main expected usage would be for a fresh training:
 
-        hsm = QcogClient.create(...).pauli(...).data(...).train(...)
+        .. code-block:: python
+            hsm = QcogClient.create(...).pauli(...).data(...).train(...)
+
 
         where the "..." would be replaced with desired parametrization
 
@@ -212,6 +214,7 @@ class QcogClient(
         storage. Training parameters? Storage. That way one can
         rebuild the client to run inference:
 
+        .. code-block:: python
         hsm = QcogClient.create(...).preloaded_model(trained_model_guid)
 
         for df in list_of_dataframes:
@@ -226,7 +229,7 @@ class QcogClient(
         token: str | None
             A valid API token granting access optional
             when unset (or None) expects to find the proper
-            value as QCOG_API_TOKEN environment veriable
+            value as QCOG_API_TOKEN environment variable
         hostname: str | None
             optional string of the hostname. Currently default
             "dev.qognitive.io"

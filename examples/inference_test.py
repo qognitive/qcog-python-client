@@ -32,7 +32,9 @@ parameters = {
 
 def main():
     hsm = QcogClient.create(
-        token=API_TOKEN
+        token=API_TOKEN,
+        hostname="127.0.0.1",
+        port=8000
     ).preloaded_model(TRAINED_MODEL_GUID)
     print(hsm.status())
     print(hsm.wait_for_training().inference(forecast_data, parameters))

@@ -29,6 +29,10 @@ dev = [
   "types-requests",
   "setuptools_scm[toml]>=8",
 ]
+examples = [
+  "scikit-learn",
+  "torch",
+]
 
 [tool.setuptools_scm]
 version_file = "qcog_python_client/__version__.py"

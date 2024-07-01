@@ -145,6 +145,16 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         )
         return self
 
+    def train(
+        self,
+        batch_size: int,
+        num_passes: int,
+        weight_optimization: NotRequiredWeightParams,
+        get_states_extra: NotRequiredStateParams,
+    ) -> ...:
+        """Train the model."""
+        ...
+
 
 class QcogClient(  # noqa: D101
     BaseQcogClient[RequestsClient],
@@ -520,6 +530,16 @@ class QcogClient(  # noqa: D101
         return base642dataframe(
             inference_result["response"]["data"],
         )
+
+    def ensemble(self,
+        operators: list[str | int],
+        dim: int = 16, num_axes: int = 4,
+        sigma_sq: dict[str, float] = {},
+        sigma_sq_optimization: dict[str, float] = {},
+        seed: int = 42,
+        target_operator: list[str | int] = []
+    ) -> QcogClient:
+        ...
 
 
 class AsyncQcogClient(  # noqa: D101

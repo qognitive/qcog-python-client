@@ -1,11 +1,13 @@
 
 
-import os
 from pydantic import BaseModel
 from qcog_python_client.qcog import jsonable_parameters
 from qcog_python_client.schema.common import TrainingParameters
 from qcog_python_client.schema.parameters import AdamOptimizationParameters, AnalyticOptimizationParameters, GradOptimizationParameters, LOBPCGFastStateParameters, PowerIterStateParameters, EIGHStateParameters, EIGSStateParameters, NPEIGHStateParameters, LOBPCGStateParameters, GradStateParameters
 
+# This test is meant to ensure that all the pydantic models,
+# once parsed in the jsonable_parameters function, dont't produce
+# any validation errors with the ExpectedWeightParams and ExpectedStateParams
 
 weight_parameters: tuple = (
     GradOptimizationParameters(iterations=10, learning_rate=1e-3),

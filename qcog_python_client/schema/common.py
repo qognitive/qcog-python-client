@@ -45,17 +45,6 @@ class FisherParams(TypedDict):
     use_hessian: bool
 
 
-# class StateParams(TypedDict):
-#     state_method: str
-#     iterations: int
-#     learning_rate_axes: float
-#     # TODO we should remove the "kwargs"
-#     # from the names and favor explicit
-#     # definittions
-#     fisher_axes_kwargs: NotRequired[FisherParams]
-#     fisher_state_kwargs: NotRequired[FisherParams]
-
-
 class InferenceParameters(TypedDict):
     operators_to_forecast: list[str] | None
     states: np.ndarray | None

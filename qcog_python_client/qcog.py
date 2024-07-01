@@ -29,6 +29,7 @@ from .schema import (
     GeneralModel,
 )
 
+from ._jsonable_parameters import jsonable_parameters
 
 TrainingModel: TypeAlias = PauliModel | EnsembleModel | GeneralModel
 CLIENT = TypeVar("CLIENT")
@@ -163,7 +164,7 @@ class QcogClient(
         safe_mode: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
     ) -> QcogClient:
-        """Factory method to create a client with intializations from the API.
+        """Factory method to create a client with initialization from the API.
 
         Since __init__ is always sync we cannot call to the API using that
         method of class creation. If we need to fetch things such as the
@@ -247,9 +248,6 @@ class QcogClient(
         safe_mode : bool
             if true runs healthchecks before running any api call
             sequences
-        test_projest : bool
-            For testing purposes. if the project resolvers finds
-            no project, create one. For testing purposes
         version : str
             the qcog version to use. Must be no smaller than `OLDEST_VERSION`
             and no greater than `NEWEST_VERSION`
@@ -309,7 +307,7 @@ class QcogClient(
                 "model": self.model.value,
                 "parameters": {
                     "model": self.model.params
-                } | params
+                } | jsonable_parameters(params)
             }
         )
 
@@ -576,7 +574,7 @@ class AsyncQcogClient(
         token : str | None
             A valid API token granting access optional
             when unset (or None) expects to find the proper
-            value as QCOG_API_TOKEN environment veriable
+            value as QCOG_API_TOKEN environment variable
         hostname : str
             API endpoint hostname, currently defaults to dev.qognitive.io
         port : int
@@ -586,9 +584,6 @@ class AsyncQcogClient(
         safe_mode : bool
             if true runs healthchecks before running any api call
             sequences
-        test_projest : bool
-            For testing purposes. if the project resolvers finds
-            no project, create one. For testing purposes
         version : str
             the qcog version to use. Must be no smaller than `OLDEST_VERSION`
             and no greater than `NEWEST_VERSION`
@@ -653,7 +648,7 @@ class AsyncQcogClient(
                 "model": self.model.value,
                 "parameters": {
                     "model": self.model.params
-                } | params
+                } | jsonable_parameters(params)
             }
         )
 

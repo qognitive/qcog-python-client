@@ -9,8 +9,6 @@ from typing import TypeAlias
 import enum
 
 
-
-
 ############################################
 # Optimization Parameters
 ############################################
@@ -203,7 +201,7 @@ class NPEIGHStateParameters(BaseModel):
     ----------
     """
 
-    state_methd: StateMethod = StateMethod.NP_EIGH
+    state_method: StateMethod = StateMethod.NP_EIGH
 
 
 class LOBPCGStateParameters(BaseModel):

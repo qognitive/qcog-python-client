@@ -53,8 +53,11 @@ async def async_main():
     await hsm.train(
         batch_size=1000,
         num_passes=10,
-        weight_optimization={},
-        get_states_extra={}
+        weight_optimization=GradOptimizationParameters(
+            iterations=10,
+            learning_rate=1e-3,
+        ),
+        get_states_extra=states_extra
     )
     print(hsm.trained_model)
     return hsm.trained_model["guid"]

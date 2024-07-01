@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-
 from .common import (  # noqa: F401
     Model,
     Dataset,

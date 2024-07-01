@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Generic, Type, TypeAlias, TypeVar
+from typing import Any, Generic, Type, TypeAlias, TypeVar
 import json
 import time
 import pandas as pd
@@ -115,15 +115,22 @@ def jsonable_parameters(params: TrainingParameters) -> dict:
         # Parse it in order to only keep the actual expected parameters.
         # This step is necessary to have compatibility with the current
         # API schema.
-        state_params = ExpectedStateParams.model_validate(state_dict).model_dump()
+        state_params = (
+            ExpectedStateParams
+            .model_validate(state_dict)
+            .model_dump()
+        )
 
     # Repeate same process for the weight optimization parameters
     if weight_kwargs:
         weight_dict = weight_kwargs.model_dump()
-        weight_params = ExpectedWeightParams.model_validate(weight_dict).model_dump()
+        weight_params = (
+            ExpectedWeightParams
+            .model_validate(weight_dict)
+            .model_dump()
+        )
 
-
-    retval = {
+    retval: dict[str, Any] = {
         "batch_size": params["batch_size"],
         "num_passes": params["num_passes"],
     }
@@ -326,7 +333,6 @@ class QcogClient(
             hostname=hostname,
             port=port,
             api_version=api_version,
-            # verify=verify,
         )
 
         if safe_mode:

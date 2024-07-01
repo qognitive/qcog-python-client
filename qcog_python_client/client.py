@@ -148,7 +148,7 @@ class _HTTPClient:
         self.api_version: str = api_version
 
         self.headers = {"Authorization": f"Bearer {self.token}"}
-        protocol = "https" if port == 443 else "http"
+        protocol = "http" if hostname in {"localhost", "127.0.0.1"} else "https"
         base_url: str = f"{protocol}://{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
         self.retries: int = retries

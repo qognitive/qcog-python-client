@@ -1,15 +1,18 @@
 on: push
+
 permissions:
   id-token: write   # This is required for requesting the JWT
   contents: read    # This is required for actions/checkout
 
 jobs:
   build-custom-branch:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+
     steps:
     - name: checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
     - name: Setup python, Lint Code and test
       uses: ./.github/actions/setup_lint_and_test

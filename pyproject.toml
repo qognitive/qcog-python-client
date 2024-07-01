@@ -88,6 +88,16 @@ indent-width = 4
 target-version="py38"
 
 [tool.ruff.lint]
-# See rules defined here https://docs.astral.sh/ruff/rules/
+
+# Ruff Rules https://docs.astral.sh/ruff/rules/
+# F - [PyFlakes](https://docs.astral.sh/ruff/rules/#pyflakes-f)
+# E, W - [pycodestyle](https://docs.astral.sh/ruff/rules/#pycodestyle-e-w)
+# I  - [Isort](https://docs.astral.sh/ruff/rules/#isort-i)
+# N - [PEP-8 Naming](https://docs.astral.sh/ruff/rules/#pep8-naming-n)
+# D - [pydocstyle](https://docs.astral.sh/ruff/rules/#pydocstyle-d)
+# YTT - [flake8-2020](https://docs.astral.sh/ruff/rules/#flake8-2020-ytt)
+# ASYNC [flake8-async](https://docs.astral.sh/ruff/rules/#flake8-async-async)
+
 select = ["F", "E", "W", "I", "N", "D", "YTT", "ASYNC"]
+
 ignore = []

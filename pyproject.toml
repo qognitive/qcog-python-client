@@ -27,7 +27,6 @@ dev = [
   "pytest",
   "pandas-stubs",
   "types-requests",
-  "pre-commit",
   "setuptools_scm[toml]>=8",
 ]
 

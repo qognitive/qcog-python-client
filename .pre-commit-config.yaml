@@ -1,5 +1,0 @@
-repos:
-- repo: "test"
-  rev: v1.0.0
-  hooks:
-  -   id: check-yaml

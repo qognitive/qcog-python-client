@@ -1,21 +1,22 @@
+"""Pauli model schema definition."""
+
 from __future__ import annotations
 
-from typing import TypedDict, Protocol
+from typing import Protocol, TypedDict
 
 from .common import (
+    InferenceProtocol,
     Model,
     Operator,
     TrainProtocol,
-    InferenceProtocol,
     ValueMixin,
 )
 
 
 class PauliProtocol(Protocol):
-    """
-    Pauli model class "prototype"
-    """
-    def __init__(
+    """Pauli model class "prototype"."""
+
+    def __init__(  # noqa: D107
         self,
         operators: list[Operator],
         qbits: int,
@@ -50,18 +51,18 @@ class PauliSchema(PauliProtocol, TrainProtocol, InferenceProtocol):
     seed : int
         A random seed which is used to initialize the model, you can set this
         in order to increase reproducibility.
+
     """
+
     pass
 
 
 class PauliModel(PauliProtocol, ValueMixin):
-    """
-    client side schema implementation
-    """
+    """client side schema implementation."""
 
     model = Model.pauli
 
-    class payload(TypedDict):
+    class payload(TypedDict):  # noqa: N801, D106
         operators: list[Operator]
         qbits: int
         pauli_weight: int
@@ -70,7 +71,7 @@ class PauliModel(PauliProtocol, ValueMixin):
         seed: int
         target_operators: list[Operator]
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         operators: list[Operator],
         qbits: int,

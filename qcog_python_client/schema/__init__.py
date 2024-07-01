@@ -1,32 +1,32 @@
-from .common import (  # noqa: F401
-    Model,
-    Dataset,
-    AsyncTrainProtocol,
-    TrainProtocol,
-    TrainingParameters,
-    AsyncInferenceProtocol,
-    InferenceProtocol,
-    InferenceParameters,
-    Operator,
-    NotRequiredWeightParams,
-    NotRequiredStateParams,
-)
+"""Schema module."""
 
+from .common import (  # noqa: F401
+    AsyncInferenceProtocol,
+    AsyncTrainProtocol,
+    Dataset,
+    InferenceParameters,
+    InferenceProtocol,
+    Model,
+    NotRequiredStateParams,
+    NotRequiredWeightParams,
+    Operator,
+    TrainingParameters,
+    TrainProtocol,
+)
+from .ensemble import EnsembleModel, EnsembleSchema  # noqa: F401
+from .general import GeneralModel, GeneralSchema  # noqa: F401
 from .parameters import (  # noqa: F401
-    OptimizationMethod,
-    GradOptimizationParameters,
     AdamOptimizationParameters,
     AnalyticOptimizationParameters,
-    WeightParams,
-    StateMethod,
-    PowerIterStateParameters,
     EIGHStateParameters,
     EIGSStateParameters,
-    NPEIGHStateParameters,
-    LOBPCGStateParameters,
+    GradOptimizationParameters,
     GradStateParameters,
+    LOBPCGStateParameters,
+    NPEIGHStateParameters,
+    OptimizationMethod,
+    PowerIterStateParameters,
+    StateMethod,
+    WeightParams,
 )
-
-from .pauli import PauliSchema, PauliModel  # noqa: F401
-from .ensemble import EnsembleSchema, EnsembleModel  # noqa: F401
-from .general import GeneralSchema, GeneralModel  # noqa: F401
+from .pauli import PauliModel, PauliSchema  # noqa: F401

@@ -1,3 +1,5 @@
+"""HTTP API client for Qognitive."""
+
 from __future__ import annotations
 
 import asyncio
@@ -5,40 +7,45 @@ import base64
 import io
 import json
 import os
+import random
 import time
 from enum import Enum
 from typing import TypedDict
 
 import aiohttp
-import requests
-import random
-
 import pandas as pd
+import requests
 
 
 class HttpMethod(Enum):
+    """HTTP method enum."""
+
     get = "get"
     post = "post"
 
 
 class DataFramePayload(TypedDict):
+    """DataFrame payload."""
+
     blob: str
     indexing: list[int]
 
 
 def decode_base64(encoded_string: str) -> str:
-    """
+    """Decode base64 string.
+
     From a base64 encoded str type, decode into original
     string str type
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     encoded_string: str
         encoded base64 string
 
-    Returns:
-    --------
+    Returns
+    -------
     str: decoded string
+
     """
     base64_bytes: bytes = encoded_string.encode("ascii")
     decoded_bytes: bytes = base64.b64decode(base64_bytes)
@@ -46,18 +53,20 @@ def decode_base64(encoded_string: str) -> str:
 
 
 def base642dataframe(encoded_string: str) -> pd.DataFrame:
-    """
+    """Decode base64 string and parse as csv dataframe.
+
     From a base64 encoded str type, decode into original
     string str type and parse as csv dataframe using io
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     encoded_string: str
         encoded base64 string
 
-    Returns:
-    --------
+    Returns
+    -------
     pd.DataFrame: parsed csv dataframe
+
     """
     decoded_string: str = decode_base64(encoded_string)
     raw_dict: dict = json.loads(decoded_string)
@@ -70,16 +79,20 @@ def base642dataframe(encoded_string: str) -> pd.DataFrame:
 
 
 def encode_base64(data: pd.DataFrame) -> str:
-    """
-    take a normal pandas dataframe and encode as
+    """Base64 encode a pandas dataframe.
+
+    Take a normal pandas dataframe and encode as
     base64 "string" of csv export
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data: pd.DataFrame
+        dataframe to encode
 
-    Returns:
+    Returns
+    -------
     str: encoded base64 string
+
     """
     indexing: list[int] = list(range(data.index.nlevels))
     raw_string: str = data.to_csv()
@@ -94,9 +107,7 @@ def encode_base64(data: pd.DataFrame) -> str:
 
 
 class _HTTPClient:
-    """
-    This class is the https API client
-    """
+    """HTTPS API client."""
 
     TOKEN: str = os.environ.get("QCOG_API_TOKEN", "")
 
@@ -107,11 +118,12 @@ class _HTTPClient:
         hostname: str = "dev.qognitive.io",
         port: int = 443,
         api_version: str = "v1",
-        retries: int = 3
+        retries: int = 3,
     ):
-        """
-        Parameters:
-        -----------
+        """HTTP client constructor.
+
+        Parameters
+        ----------
         token : str | None
             A valid API token granting access optional
             when unset (or None) expects to find the proper
@@ -125,8 +137,8 @@ class _HTTPClient:
             the "vX" part of the url for the api version
         retries: int
             number of attempts in cases of bad gateway
-        """
 
+        """
         self.token: str = token if isinstance(token, str) else self.TOKEN
         if not self.token:
             raise RuntimeError("missing token")
@@ -135,16 +147,14 @@ class _HTTPClient:
         self.port: int = port
         self.api_version: str = api_version
 
-        self.headers = {
-            "Authorization": f"Bearer {self.token}"
-        }
+        self.headers = {"Authorization": f"Bearer {self.token}"}
         base_url: str = f"https://{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
         self.retries: int = retries
 
 
 class RequestsClient(_HTTPClient):
-    """This class is the synchronous implementation of the API client."""
+    """Synchronous implementation of the API client."""
 
     def _request_retry(
         self,
@@ -152,10 +162,10 @@ class RequestsClient(_HTTPClient):
         method: HttpMethod,
         data: dict | None = None,
     ) -> requests.Response:
-        """Execute the get "requests" by adding class-level settings
+        """Execute the get "requests" by adding class-level settings.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         uri: str
             Full http url
         data: dict
@@ -163,11 +173,12 @@ class RequestsClient(_HTTPClient):
         method: HttpMethod
             method enum
 
-        Returns:
-        --------
+        Returns
+        -------
         requests.Response object
             will raise_for_status so caller
             may use .json()
+
         """
         random.seed()
         sleep_for: int = random.randrange(1, 5)
@@ -175,7 +186,6 @@ class RequestsClient(_HTTPClient):
 
         for retry in range(self.retries):
             try:
-
                 resp = requests.request(
                     method.value,
                     uri,
@@ -187,7 +197,6 @@ class RequestsClient(_HTTPClient):
                 return resp
 
             except Exception as e:
-
                 time.sleep(sleep_for)
                 sleep_for = random.randrange(sleep_for, 2 * sleep_for)
                 exception = e
@@ -195,18 +204,20 @@ class RequestsClient(_HTTPClient):
         raise exception
 
     def get(self, endpoint: str) -> dict:
-        """
+        """Execute a get request.
+
         Convenience wrapper around requests.get (called via _get method)
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         endpoint: str
             a valid prefix to the orchestration API (including guid
             if applicable) and will add to the dns prefix
 
-        Returns:
-        --------
+        Returns
+        -------
             dict: unpacked json dict
+
         """
         retval: dict = self._request_retry(
             f"{self.url}/{endpoint}/",
@@ -216,20 +227,22 @@ class RequestsClient(_HTTPClient):
         return retval
 
     def post(self, endpoint: str, data: dict) -> dict:
-        """
+        """Execute a post request.
+
         Convenience wrapper around requests.post (called via _post method)
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         endpoint: str
             a valid prefix to the orchestration API (including guid
             if applicable) and will add to the dns prefix
         data: dict
             json-able data payload
 
-        Returns:
-        --------
+        Returns
+        -------
             dict: unpacked json dict
+
         """
         retval: dict = self._request_retry(
             f"{self.url}/{endpoint}/",
@@ -241,7 +254,10 @@ class RequestsClient(_HTTPClient):
 
 
 class AIOHTTPClient(_HTTPClient):
-    """This class is the async implementation of the API client"""
+    """Async API client.
+
+    This class is the async implementation of the API client
+    """
 
     async def _request_retry(
         self,
@@ -249,11 +265,10 @@ class AIOHTTPClient(_HTTPClient):
         method: HttpMethod,
         data: dict | None = None,
     ) -> dict:
-        """
-        Execute the async get "aiohttp" by adding class-level settings
+        """Execute the async get "aiohttp" by adding class-level settings.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         uri: str
             Full http url
         data: dict
@@ -261,11 +276,12 @@ class AIOHTTPClient(_HTTPClient):
         method: HttpMethod
             request type enum
 
-        Returns:
-        --------
+        Returns
+        -------
         FIXME.Response object
             will raise_for_status so caller
             may use .json()
+
         """
         random.seed()
         sleep_for: int = random.randrange(1, 5)
@@ -274,10 +290,8 @@ class AIOHTTPClient(_HTTPClient):
         for retry in range(self.retries):
             try:
                 async with aiohttp.ClientSession(
-                    headers=self.headers,
-                    raise_for_status=True
+                    headers=self.headers, raise_for_status=True
                 ) as session:
-
                     resp = await session.request(
                         method.value,
                         uri,
@@ -288,7 +302,6 @@ class AIOHTTPClient(_HTTPClient):
                     return retval
 
             except aiohttp.client_exceptions.ClientResponseError as e:
-
                 await asyncio.sleep(sleep_for)
                 sleep_for = random.randrange(sleep_for, 2 * sleep_for)
                 exception = e
@@ -296,17 +309,20 @@ class AIOHTTPClient(_HTTPClient):
         raise exception
 
     async def get(self, endpoint: str) -> dict:
-        """Convenience wrapper around aiohttp.get (called via _get method)
+        """Execute a get request.
 
-        Parameters:
-        -----------
+        Convenience wrapper around aiohttp.get (called via _get method)
+
+        Parameters
+        ----------
         endpoint: str
             a valid prefix to the orchestration API (including guid
             if applicable) and will add to the dns prefix
 
-        Returns:
-        --------
+        Returns
+        -------
             dict: unpacked json dict
+
         """
         return await self._request_retry(
             f"{self.url}/{endpoint}/",
@@ -314,19 +330,22 @@ class AIOHTTPClient(_HTTPClient):
         )
 
     async def post(self, endpoint: str, data: dict) -> dict:
-        """Convenience wrapper around requests.post (called via _post method)
+        """Execute a post request.
 
-        Parameters:
-        -----------
+        Convenience wrapper around requests.post (called via _post method)
+
+        Parameters
+        ----------
         endpoint: str
             a valid prefix to the orchestration API (including guid
             if applicable) and will add to the dns prefix
         data: dict
             json-able data payload
 
-        Returns:
-        --------
+        Returns
+        -------
             dict: unpacked json dict
+
         """
         return await self._request_retry(
             f"{self.url}/{endpoint}/",

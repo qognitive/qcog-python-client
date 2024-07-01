@@ -1,35 +1,36 @@
+"""Common types and classes used in the client."""
+
 from __future__ import annotations
 
 from enum import Enum
-from typing import TypedDict, TypeAlias, Any, Protocol
-from typing_extensions import NotRequired
-from .parameters import WeightParams, StateParams
+from typing import Any, Protocol, TypeAlias, TypedDict
 
 import numpy as np
 import pandas as pd
+from typing_extensions import NotRequired
 
+from .parameters import StateParams, WeightParams
 
 Operator: TypeAlias = str | int
 
 
 class Model(Enum):
-    """
-    List of available models
-    """
+    """List of available models."""
+
     pauli = "pauli"
     ensemble = "ensemble"
     general = "general"
 
 
-class EMPTY_DICTIONARY(TypedDict):
-    """
-    For TypedDict that are optional
-    allow empty dict rather than use None
-    """
+class EmptyDictionary(TypedDict):
+    """For TypedDict that are optional allow empty dict rather than use None."""
+
     pass
 
 
 class Dataset(TypedDict):
+    """Dataset Parameters."""
+
     format: str
     source: str
     data: str
@@ -37,6 +38,8 @@ class Dataset(TypedDict):
 
 
 class FisherParams(TypedDict):
+    """Fisher Parameters."""
+
     learning_rate: NotRequired[float]
     init_update_n: int
     update_frequency: int
@@ -46,6 +49,8 @@ class FisherParams(TypedDict):
 
 
 class InferenceParameters(TypedDict):
+    """Inference Parameters."""
+
     operators_to_forecast: list[str] | None
     states: np.ndarray | None
     return_states: bool
@@ -55,11 +60,31 @@ class InferenceParameters(TypedDict):
     kwargs: dict
 
 
-NotRequiredWeightParams: TypeAlias = WeightParams | EMPTY_DICTIONARY
-NotRequiredStateParams: TypeAlias = StateParams | EMPTY_DICTIONARY
+NotRequiredWeightParams: TypeAlias = WeightParams | EmptyDictionary
+NotRequiredStateParams: TypeAlias = StateParams | EmptyDictionary
 
 
 class TrainingParameters(TypedDict):
+    """Training Parameters.
+
+    Dictionary of training parameters.
+
+    ----------
+
+    batch_size : int
+        Number of samples to use in each training batch.
+
+    num_passes : int
+        Number of passes through the dataset.
+
+    weight_optimization_kwargs : NotRequiredWeightParams
+        Weight optimization parameters.
+
+    state_kwargs : NotRequiredStateParams
+        State optimization parameters.
+
+    """
+
     batch_size: int
     num_passes: int
     weight_optimization_kwargs: NotRequiredWeightParams
@@ -67,10 +92,9 @@ class TrainingParameters(TypedDict):
 
 
 class AsyncTrainProtocol(Protocol):
-    """
-    Train method "prototype"
-    """
-    async def train(
+    """Train method "prototype"."""
+
+    async def train(  # noqa: D102
         self,
         batch_size: int,
         num_passes: int,
@@ -81,10 +105,9 @@ class AsyncTrainProtocol(Protocol):
 
 
 class AsyncInferenceProtocol(Protocol):
-    """
-    Inference method "prototype"
-    """
-    async def inference(
+    """Inference method "prototype"."""
+
+    async def inference(  # noqa: D102
         self,
         data: pd.DataFrame,
         parameters: InferenceParameters,
@@ -93,10 +116,9 @@ class AsyncInferenceProtocol(Protocol):
 
 
 class TrainProtocol(Protocol):
-    """
-    Train method "prototype"
-    """
-    def train(
+    """Train method "prototype"."""
+
+    def train(  # noqa: D102
         self,
         batch_size: int,
         num_passes: int,
@@ -107,10 +129,9 @@ class TrainProtocol(Protocol):
 
 
 class InferenceProtocol(Protocol):
-    """
-    Inference method "prototype"
-    """
-    def inference(
+    """Inference method "prototype"."""
+
+    def inference(  # noqa: D102
         self,
         data: pd.DataFrame,
         parameters: InferenceParameters,
@@ -119,11 +140,11 @@ class InferenceProtocol(Protocol):
 
 
 class ValueMixin:
-    """
-    Utility mixin for the client Models
-    """
+    """Utility mixin for the client Models."""
+
     model: Model
 
     @property
     def value(self) -> str:
+        """Return the model value."""
         return self.model.value

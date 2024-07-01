@@ -23,10 +23,11 @@ dynamic = ["version"]
 dev = [
   "build",
   "mypy",
-  "flake8",
+  "ruff",
   "pytest",
   "pandas-stubs",
   "types-requests",
+  "pre-commit",
   "setuptools_scm[toml]>=8",
 ]
 
@@ -51,3 +52,43 @@ strict_optional = true
 ignore_missing_imports = true
 
 exclude = []
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+line-length = 88
+indent-width = 4
+
+target-version="py38"
+
+[tool.ruff.lint]
+# See rules defined here https://docs.astral.sh/ruff/rules/
+select = ["F", "E", "W", "I", "N", "D", "YTT", "ASYNC"]
+ignore = []

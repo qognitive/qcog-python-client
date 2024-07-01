@@ -11,11 +11,8 @@ runs:
   - name: install dev dependencies
     run: pip install ".[dev]"
     shell: bash
-  - name: run flake8
-    run: flake8 qcog_python_client
-    shell: bash
-  - name: run mypy
-    run: mypy qcog_python_client
+  - name: run linting
+    run: make run lint-check
     shell: bash
   - name: Test with pytest
     run: |

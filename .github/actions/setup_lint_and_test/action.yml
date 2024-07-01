@@ -12,7 +12,7 @@ runs:
     run: pip install ".[dev]"
     shell: bash
   - name: run linting
-    run: make run lint-check
+    run: make lint-check
     shell: bash
   - name: Test with pytest
     run: |

@@ -229,22 +229,14 @@ class QcogClient(
             value as QCOG_API_TOKEN environment veriable
         hostname: str | None
             optional string of the hostname. Currently default
-            to a standard api endpoint
+            "dev.qognitive.io"
         port: str | int | None
             port value default to https 443
         api_version: str
             the "vX" part of the url for the api version
-        secure: bool
-            if true use https else use http mainly for local
-            testing
         safe_mode: bool
             if true runs healthchecks before running any api call
             sequences
-        verify: bool
-            ignore ssl provenance for testing purposes
-        test_projest: bool
-            For testing purposes. if the project resolvers finds
-            no project, create one. For testing purposes
         version: str
             the qcog version to use. Must be no smaller than OLDEST_VERSION
             and no greater than NEWEST_VERSION.

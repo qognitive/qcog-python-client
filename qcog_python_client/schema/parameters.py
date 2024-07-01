@@ -4,8 +4,9 @@ Parameters are defined as Pydantic models, providing type hints and runtime
 validation.
 """
 
+from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TypeAlias
+from typing import Literal, TypeAlias
 import enum
 
 
@@ -38,7 +39,7 @@ class GradOptimizationParameters(BaseModel):
         Recommended values are around `1e-3`.
     """
 
-    optimization_method: OptimizationMethod = OptimizationMethod.GRAD
+    optimization_method: Literal[OptimizationMethod.GRAD] = OptimizationMethod.GRAD
     iterations: int
     learning_rate: float
 
@@ -73,7 +74,7 @@ class AdamOptimizationParameters(BaseModel):
         quadratic in the gradient. Recommended values are around 0.999.
     """
 
-    optimization_method: OptimizationMethod = OptimizationMethod.ADAM
+    optimization_method: Literal[OptimizationMethod.ADAM] = OptimizationMethod.ADAM
     iterations: int
     step_size: float = Field(default=1e-3)
     epsilon: float = Field(default=1e-8)
@@ -86,6 +87,7 @@ class AnalyticOptimizationParameters(BaseModel):
     weight matrix in our model. The analytic optimizer takes no parameters.
     ----------
     """
+
     optimization_method: OptimizationMethod = OptimizationMethod.ANALYTIC
 
 
@@ -136,7 +138,7 @@ class LOBPCGFastStateParameters(BaseModel):
 
     iterations: int
     tol: float = Field(default=0.2)
-    state_method: StateMethod = StateMethod.LOBPCG_FAST
+    state_method: Literal[StateMethod.LOBPCG_FAST] = StateMethod.LOBPCG_FAST
 
 
 class PowerIterStateParameters(BaseModel):
@@ -177,7 +179,7 @@ class PowerIterStateParameters(BaseModel):
     iterations: int
     tol: float = Field(default=0.2)
     max_eig_iter: int = Field(default=5)
-    state_method: StateMethod = StateMethod.POWER_ITER
+    state_method: Literal[StateMethod.POWER_ITER] = StateMethod.POWER_ITER
 
 
 class EIGHStateParameters(BaseModel):
@@ -185,7 +187,7 @@ class EIGHStateParameters(BaseModel):
     ----------
     """
 
-    state_method: StateMethod = StateMethod.EIGH
+    state_method: Literal[StateMethod.EIGH] = StateMethod.EIGH
 
 
 class EIGSStateParameters(BaseModel):
@@ -193,7 +195,7 @@ class EIGSStateParameters(BaseModel):
     ----------
     """
 
-    state_method: StateMethod = StateMethod.EIGS
+    state_method: Literal[StateMethod.EIGS] = StateMethod.EIGS
 
 
 class NPEIGHStateParameters(BaseModel):
@@ -201,7 +203,7 @@ class NPEIGHStateParameters(BaseModel):
     ----------
     """
 
-    state_method: StateMethod = StateMethod.NP_EIGH
+    state_method: Literal[StateMethod.NP_EIGH] = StateMethod.NP_EIGH
 
 
 class LOBPCGStateParameters(BaseModel):
@@ -234,7 +236,7 @@ class LOBPCGStateParameters(BaseModel):
 
     iterations: int
     tol: float = Field(default=0.2)
-    state_method: StateMethod = StateMethod.LOBPCB
+    state_method: Literal[StateMethod.LOBPCB] = StateMethod.LOBPCB
 
 
 class GradStateParameters(BaseModel):
@@ -257,7 +259,7 @@ class GradStateParameters(BaseModel):
 
     iterations: int
     learning_rate: float
-    state_method: StateMethod = StateMethod.GRAD
+    state_method: Literal[StateMethod.GRAD] = StateMethod.GRAD
 
 
 WeightParams: TypeAlias = (
@@ -274,3 +276,13 @@ StateParams: TypeAlias = (
     | NPEIGHStateParameters
     | GradStateParameters
 )
+
+GradOptimizationParameters.model_rebuild()
+AdamOptimizationParameters.model_rebuild()
+AnalyticOptimizationParameters.model_rebuild()
+LOBPCGFastStateParameters.model_rebuild()
+PowerIterStateParameters.model_rebuild()
+EIGHStateParameters.model_rebuild()
+EIGSStateParameters.model_rebuild()
+NPEIGHStateParameters.model_rebuild()
+LOBPCGStateParameters.model_rebuild()

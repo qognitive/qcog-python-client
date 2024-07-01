@@ -5,7 +5,7 @@
 
 The Qognitive Python Client library is a programmatic way of interacting with Qognitive's cloud computation API for running Quantum Cognition Machine Learning (QCML) models.
 
-More information on QCML can be found at our website <qognitive.io> and from our initial [white paper](https://www.qognitive.io/QCML%20-%20Qognitive,%20Inc.pdf)
+More information on QCML can be found at our website <https://qognitive.io> and from our initial [white paper](https://www.qognitive.io/QCML%20-%20Qognitive,%20Inc.pdf)
 
 ## Documentation
 

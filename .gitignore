@@ -165,3 +165,6 @@ HOSTNAME
 *.json
 
 __version__.py
+
+.ruff_cache/
+.vscode/

@@ -194,7 +194,7 @@ class QcogClient(
         In practice, the 2 main expected usage would be for a fresh training:
 
         .. code-block:: python
-            hsm = QcogClient.create(...).pauli(...).data(...).train(...)
+        hsm = QcogClient.create(...).pauli(...).data(...).train(...)
 
 
         where the "..." would be replaced with desired parametrization
@@ -482,9 +482,9 @@ class QcogClient(
 
         Parameters:
         -----------
-        data: pd.DataFrame:
+        data: pd.DataFrame
             the dataset as a DataFrame
-        parameters: dict:
+        parameters: dict
             inference parameters
 
         Returns:
@@ -532,9 +532,10 @@ class AsyncQcogClient(
 
         For example:
 
-        hsm = (await AsyncQcogClient.create(...)).pauli(...)
-        await hsm.data(...)
-        await hsm.train(...)
+        .. code-block:: python
+            hsm = (await AsyncQcogClient.create(...)).pauli(...)
+            await hsm.data(...)
+            await hsm.train(...)
 
         where the "..." would be replaced with desired parametrization
 
@@ -544,6 +545,7 @@ class AsyncQcogClient(
 
         but this would require us to explicitly wait for training to complete
 
+        .. code-block:: python
             await hsm.wait_for_training()
             result: pd.DataFrame = await hsm.inference(...)
 
@@ -795,7 +797,7 @@ class AsyncQcogClient(
         -----------
         data: pd.DataFrame:
             the dataset as a DataFrame
-        parameters: dict:
+        parameters: dict
             inference parameters
 
         Returns:

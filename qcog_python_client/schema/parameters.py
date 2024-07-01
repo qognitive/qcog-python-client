@@ -39,7 +39,8 @@ class GradOptimizationParameters(BaseModel):
         Recommended values are around `1e-3`.
     """
 
-    optimization_method: Literal[OptimizationMethod.GRAD] = OptimizationMethod.GRAD
+    optimization_method: Literal[OptimizationMethod.GRAD] = \
+        OptimizationMethod.GRAD
     iterations: int
     learning_rate: float
 
@@ -74,7 +75,8 @@ class AdamOptimizationParameters(BaseModel):
         quadratic in the gradient. Recommended values are around 0.999.
     """
 
-    optimization_method: Literal[OptimizationMethod.ADAM] = OptimizationMethod.ADAM
+    optimization_method: Literal[OptimizationMethod.ADAM] = \
+        OptimizationMethod.ADAM
     iterations: int
     step_size: float = Field(default=1e-3)
     epsilon: float = Field(default=1e-8)

@@ -194,7 +194,7 @@ class QcogClient(
         In practice, the 2 main expected usage would be for a fresh training:
 
         .. code-block:: python
-        hsm = QcogClient.create(...).pauli(...).data(...).train(...)
+            hsm = QcogClient.create(...).pauli(...).data(...).train(...)
 
 
         where the "..." would be replaced with desired parametrization
@@ -215,10 +215,10 @@ class QcogClient(
         rebuild the client to run inference:
 
         .. code-block:: python
-        hsm = QcogClient.create(...).preloaded_model(trained_model_guid)
+            hsm = QcogClient.create(...).preloaded_model(trained_model_guid)
 
-        for df in list_of_dataframes:
-            result: Dataframe = hsm.inference(...)
+            for df in list_of_dataframes:
+                result: Dataframe = hsm.inference(...)
 
         Most methods class order is not important with 3 exceptions:
             1. train may only be called after data, and named model
@@ -500,7 +500,6 @@ class QcogClient(
             },
         )
 
-        print("---resultst of inference---")
         print(inference_result)
 
         return base642dataframe(

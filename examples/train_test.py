@@ -48,7 +48,7 @@ def main():
 async def async_main():
     """Run training async."""
     hsm = (
-        await AsyncQcogClient.create(hostname="127.0.0.1", port=8000, token=API_TOKEN)
+        await AsyncQcogClient.create(token=API_TOKEN)
     ).ensemble(operators=["X", "Y", "Z"], dim=4, num_axes=16)
     await hsm.data(df)
     await hsm.train(

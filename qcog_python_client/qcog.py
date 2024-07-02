@@ -9,7 +9,10 @@ from typing import Generic, Type, TypeAlias, TypeVar
 
 import pandas as pd
 
-from ._jsonable_parameters import jsonable_parameters
+from ._jsonable_parameters import (
+    jsonable_inference_parameters,
+    jsonable_train_parameters,
+)
 from .client import (
     AIOHTTPClient,
     RequestsClient,
@@ -144,16 +147,6 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
             target_operator,
         )
         return self
-
-    def train(
-        self,
-        batch_size: int,
-        num_passes: int,
-        weight_optimization: NotRequiredWeightParams,
-        get_states_extra: NotRequiredStateParams,
-    ) -> ...:
-        """Train the model."""
-        ...
 
 
 class QcogClient(  # noqa: D101
@@ -315,7 +308,7 @@ class QcogClient(  # noqa: D101
                 "project_guid": self.project["guid"],
                 "model": self.model.value,
                 "parameters": {"model": self.model.params}
-                | jsonable_parameters(params),
+                | jsonable_train_parameters(params),
             },
         )
 
@@ -522,24 +515,15 @@ class QcogClient(  # noqa: D101
             f"model/{self.trained_model['guid']}/inference",
             {
                 "data": encode_base64(data),
-                "parameters": parameters,
+                "parameters": jsonable_inference_parameters(parameters),
             },
         )
+
         print(inference_result)
 
         return base642dataframe(
             inference_result["response"]["data"],
         )
-
-    def ensemble(self,
-        operators: list[str | int],
-        dim: int = 16, num_axes: int = 4,
-        sigma_sq: dict[str, float] = {},
-        sigma_sq_optimization: dict[str, float] = {},
-        seed: int = 42,
-        target_operator: list[str | int] = []
-    ) -> QcogClient:
-        ...
 
 
 class AsyncQcogClient(  # noqa: D101
@@ -667,7 +651,7 @@ class AsyncQcogClient(  # noqa: D101
                 "project_guid": self.project["guid"],
                 "model": self.model.value,
                 "parameters": {"model": self.model.params}
-                | jsonable_parameters(params),
+                | jsonable_train_parameters(params),
             },
         )
 
@@ -873,7 +857,7 @@ class AsyncQcogClient(  # noqa: D101
             f"model/{self.trained_model['guid']}/inference",
             {
                 "data": encode_base64(data),
-                "parameters": parameters,
+                "parameters": jsonable_inference_parameters(parameters),
             },
         )
 

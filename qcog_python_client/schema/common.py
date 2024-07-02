@@ -5,7 +5,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Protocol, TypeAlias, TypedDict
 
-import numpy as np
 import pandas as pd
 from typing_extensions import NotRequired
 
@@ -52,12 +51,7 @@ class InferenceParameters(TypedDict):
     """Inference Parameters."""
 
     operators_to_forecast: list[str] | None
-    states: np.ndarray | None
-    return_states: bool
-    # TODO we should remove the "kwargs"
-    # from the names and favor explicit
-    # definittions
-    kwargs: dict
+    state_parameters: StateParams
 
 
 NotRequiredWeightParams: TypeAlias = WeightParams | EmptyDictionary

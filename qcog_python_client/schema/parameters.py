@@ -118,7 +118,12 @@ class StateMethod(str, enum.Enum):
     GRAD = "GRAD"
 
 
-class LOBPCGFastStateParameters(BaseModel):
+class _OptionalEnsemble(BaseModel):
+    learning_rate_axes: float = 0.0
+    normalize_axes: bool = False
+
+
+class LOBPCGFastStateParameters(_OptionalEnsemble):
     """Parameters for the LOBPCG_FAST state method.
 
     ----------
@@ -154,7 +159,7 @@ class LOBPCGFastStateParameters(BaseModel):
     state_method: Literal[StateMethod.LOBPCG_FAST] = StateMethod.LOBPCG_FAST
 
 
-class PowerIterStateParameters(BaseModel):
+class PowerIterStateParameters(_OptionalEnsemble):
     """Parameters for the POWER_ITER state method.
 
     ----------
@@ -196,7 +201,7 @@ class PowerIterStateParameters(BaseModel):
     state_method: Literal[StateMethod.POWER_ITER] = StateMethod.POWER_ITER
 
 
-class EIGHStateParameters(BaseModel):
+class EIGHStateParameters(_OptionalEnsemble):
     """EIGH state method takes no parameters.
 
     ----------
@@ -205,7 +210,7 @@ class EIGHStateParameters(BaseModel):
     state_method: Literal[StateMethod.EIGH] = StateMethod.EIGH
 
 
-class EIGSStateParameters(BaseModel):
+class EIGSStateParameters(_OptionalEnsemble):
     """EIGS state method takes no parameters.
 
     ----------
@@ -214,7 +219,7 @@ class EIGSStateParameters(BaseModel):
     state_method: Literal[StateMethod.EIGS] = StateMethod.EIGS
 
 
-class NPEIGHStateParameters(BaseModel):
+class NPEIGHStateParameters(_OptionalEnsemble):
     """NP_EIGH state method takes no parameters.
 
     ----------
@@ -224,7 +229,7 @@ class NPEIGHStateParameters(BaseModel):
     state_method: Literal[StateMethod.NP_EIGH] = StateMethod.NP_EIGH
 
 
-class LOBPCGStateParameters(BaseModel):
+class LOBPCGStateParameters(_OptionalEnsemble):
     """Parameters for the LOBPCG state method.
 
     ----------
@@ -258,7 +263,7 @@ class LOBPCGStateParameters(BaseModel):
     state_method: Literal[StateMethod.LOBPCB] = StateMethod.LOBPCB
 
 
-class GradStateParameters(BaseModel):
+class GradStateParameters(_OptionalEnsemble):
     """Parameters for gradient descent optimization.
 
     ----------

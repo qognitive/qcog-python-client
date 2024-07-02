@@ -1,9 +1,18 @@
-
-
 from pydantic import BaseModel
-from qcog_python_client.qcog import jsonable_parameters
+from qcog_python_client.qcog import jsonable_train_parameters
 from qcog_python_client.schema.common import TrainingParameters
-from qcog_python_client.schema.parameters import AdamOptimizationParameters, AnalyticOptimizationParameters, GradOptimizationParameters, LOBPCGFastStateParameters, PowerIterStateParameters, EIGHStateParameters, EIGSStateParameters, NPEIGHStateParameters, LOBPCGStateParameters, GradStateParameters
+from qcog_python_client.schema.parameters import (
+    AdamOptimizationParameters,
+    AnalyticOptimizationParameters,
+    GradOptimizationParameters,
+    LOBPCGFastStateParameters,
+    PowerIterStateParameters,
+    EIGHStateParameters,
+    EIGSStateParameters,
+    NPEIGHStateParameters,
+    LOBPCGStateParameters,
+    GradStateParameters,
+)
 
 # This test is meant to ensure that all the pydantic models,
 # once parsed in the jsonable_parameters function, dont't produce
@@ -17,11 +26,11 @@ weight_parameters: tuple = (
         step_size=1e03,
         epsilon=1e-3,
         first_moment_decay=-0.3,
-        second_moment_decay=0.8888
+        second_moment_decay=0.8888,
     ),
     # Adam keep defaults
     AdamOptimizationParameters(iterations=10),
-    AnalyticOptimizationParameters()
+    AnalyticOptimizationParameters(),
 )
 
 state_parameters: tuple = (
@@ -45,24 +54,26 @@ state_parameters: tuple = (
 
 
 def test_parameters_api_adapting():
-    """Currently some of the parameters are not taken in consideration by the
+    """Test API parameters adapter.
+
+    Currently some of the parameters are not taken in consideration by the
     API. This test is to ensure that the parameters are correctly adapted,
     the default values are correctly preserved and the overriden values are
     correctly set.
     """
-
     for weight_param in weight_parameters:
         for state_param in state_parameters:
-
             assert isinstance(weight_param, BaseModel)
             assert isinstance(state_param, BaseModel)
 
-            params = jsonable_parameters(TrainingParameters(
-                batch_size=1000,
-                num_passes=10,
-                weight_optimization_kwargs=weight_param,
-                state_kwargs=state_param
-            ))
+            params = jsonable_train_parameters(
+                TrainingParameters(
+                    batch_size=1000,
+                    num_passes=10,
+                    weight_optimization_kwargs=weight_param,
+                    state_kwargs=state_param,
+                )
+            )
 
             # For each parameter, check if there is a corresponding paramter
             # in the jsonable_parameters dictionary. If there is, make sure
@@ -73,11 +84,9 @@ def test_parameters_api_adapting():
                 if param:
                     assert params[param] == v
 
-
             # Do the same for the state parameters
             for k, v in state_param.model_dump().items():
                 param = params.get(k)
 
                 if param:
                     assert params[param] == v
-

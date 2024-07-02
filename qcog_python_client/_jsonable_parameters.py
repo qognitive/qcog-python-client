@@ -12,11 +12,11 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from qcog_python_client.schema.common import TrainingParameters
+from qcog_python_client.schema.common import InferenceParameters, TrainingParameters
 from qcog_python_client.schema.parameters import OptimizationMethod, StateMethod
 
 
-def jsonable_parameters(params: TrainingParameters) -> dict:
+def jsonable_train_parameters(params: TrainingParameters) -> dict:
     # Expected params for the API.
     # This will eventually change when the
     # schema is defined and updates
@@ -75,3 +75,12 @@ def jsonable_parameters(params: TrainingParameters) -> dict:
         retval["state_kwargs"] = state_params
 
     return retval
+
+
+def jsonable_inference_parameters(params: InferenceParameters) -> dict:
+    parameters = {}
+
+    if params["state_parameters"]:
+        parameters = params["state_parameters"].model_dump()
+
+    return parameters

@@ -16,23 +16,27 @@ states_extra = GradStateParameters(
     learning_rate=0.01,
 )
 
+
 def main():
-    hsm = QcogClient.create(
-        token=API_TOKEN,
-        hostname="127.0.0.1",
-        port=8000
-    ).ensemble(
-        operators=["X", "Y", "Z"],
-        dim=4,
-        num_axes=16,
-    ).data(df).train(
-        batch_size=1000,
-        num_passes=10,
-        weight_optimization=GradOptimizationParameters(
-            iterations=10,
-            learning_rate=1e-3,
-        ),
-        get_states_extra=states_extra
+    hsm = (
+        QcogClient.create(
+            token=API_TOKEN,
+        )
+        .ensemble(
+            operators=["X", "Y", "Z"],
+            dim=4,
+            num_axes=16,
+        )
+        .data(df)
+        .train(
+            batch_size=1000,
+            num_passes=10,
+            weight_optimization=GradOptimizationParameters(
+                iterations=10,
+                learning_rate=1e-3,
+            ),
+            get_states_extra=states_extra,
+        )
     )
 
     print(hsm.trained_model)
@@ -40,15 +44,9 @@ def main():
 
 
 async def async_main():
-    hsm = (await AsyncQcogClient.create(
-        hostname="127.0.0.1",
-        port=8000,
-        token=API_TOKEN
-    )).ensemble(
-        operators=["X", "Y", "Z"],
-        dim=4,
-        num_axes=16
-    )
+    hsm = (
+        await AsyncQcogClient.create(hostname="127.0.0.1", port=8000, token=API_TOKEN)
+    ).ensemble(operators=["X", "Y", "Z"], dim=4, num_axes=16)
     await hsm.data(df)
     await hsm.train(
         batch_size=1000,
@@ -57,7 +55,7 @@ async def async_main():
             iterations=10,
             learning_rate=1e-3,
         ),
-        get_states_extra=states_extra
+        get_states_extra=states_extra,
     )
     print(hsm.trained_model)
     return hsm.trained_model["guid"]
@@ -72,6 +70,7 @@ if __name__ == "__main__":
     print("# ASYNC                        #")
     print("################################")
     import asyncio
+
     asyncio.run(async_main())
     print("done")
 

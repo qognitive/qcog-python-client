@@ -14,5 +14,8 @@ lint-check:
 	ruff check ./qcog_python_client && \
 	mypy ./qcog_python_client
 
+lint-fix:
+	ruff check --fix ./qcog_python_client
+
 lint-write:
 	ruff format ./qcog_python_client

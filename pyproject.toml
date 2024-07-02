@@ -29,6 +29,8 @@ dev = [
   "pandas-stubs",
   "types-requests",
   "setuptools_scm[toml]>=8",
+  "sphinx",
+  "sphinx_rtd_theme"
 ]
 examples = [
   "scikit-learn",

@@ -1,17 +1,17 @@
 from pydantic import BaseModel
+
 from qcog_python_client.qcog import jsonable_train_parameters
 from qcog_python_client.schema.common import TrainingParameters
 from qcog_python_client.schema.parameters import (
     AdamOptimizationParameters,
     AnalyticOptimizationParameters,
-    GradOptimizationParameters,
-    LOBPCGFastStateParameters,
-    PowerIterStateParameters,
     EIGHStateParameters,
     EIGSStateParameters,
-    NPEIGHStateParameters,
+    GradOptimizationParameters,
+    LOBPCGFastStateParameters,
     LOBPCGStateParameters,
-    GradStateParameters,
+    NPEIGHStateParameters,
+    PowerIterStateParameters,
 )
 
 # This test is meant to ensure that all the pydantic models,

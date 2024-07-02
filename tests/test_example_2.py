@@ -1,16 +1,38 @@
+"""In order to run the tests, you need to have a valid API_TOKEN.
+
+**Run train test**
+```bash
+export API_TOKEN=<your_api_token>
+pytest tests/test_example_2.py -s -vv -k test_train_two
+
+Once the test is executed you should get the id of the trained model.
+
+**Run inference test**
+```bash
+export API_TOKEN=<your_api_token>
+export TRAINED_MODEL=<trained_model_id>
+pytest tests/test_example_2.py -s -vv -k test_inference_two
+```
+"""
+
+
+import os
+import re
+import tempfile
+import zipfile
+
 import numpy as np
 import pandas as pd
-import torch
-import os
 import requests
-import re
-import zipfile
-import tempfile
-
-from sklearn.model_selection import train_test_split
+import torch
 from PIL import Image
-from qcog_python_client.qcog import AsyncQcogClient, QcogClient
-from qcog_python_client.schema.parameters import AnalyticOptimizationParameters, LOBPCGFastStateParameters
+from sklearn.model_selection import train_test_split
+
+from qcog_python_client.qcog import QcogClient
+from qcog_python_client.schema.parameters import (
+    AnalyticOptimizationParameters,
+    LOBPCGFastStateParameters,
+)
 
 API_TOKEN = os.getenv("API_TOKEN")
 
@@ -82,7 +104,8 @@ df_target = pd.DataFrame(test_target, columns=label_operators)
 API_TOKEN = os.getenv("API_TOKEN")
 TRAINED_MODEL = os.getenv("TRAINED_MODEL")
 
-def test_train_example_two():
+def test_train_two():
+    """Run training test."""
     qcml = QcogClient.create(
         token=API_TOKEN,
         hostname="localhost",
@@ -127,7 +150,8 @@ def test_train_example_two():
     print(qcml.trained_model["guid"])
 
 
-def test_inference_example_two():
+def test_inference_two():
+    """Run inference test."""
     if API_TOKEN is None:
         raise ValueError("API_TOKEN is not set")
 

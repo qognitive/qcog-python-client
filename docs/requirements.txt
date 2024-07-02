@@ -5,3 +5,4 @@ pandas
 numpy
 aiohttp
 typing_extensions
+pydantic

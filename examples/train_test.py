@@ -1,9 +1,10 @@
+"""Example of training a model."""
 import os
+
 import pandas
 
 from qcog_python_client import AsyncQcogClient, QcogClient
 from qcog_python_client.schema import GradOptimizationParameters, GradStateParameters
-
 
 API_TOKEN = os.environ["API_TOKEN"]
 
@@ -18,6 +19,7 @@ states_extra = GradStateParameters(
 
 
 def main():
+    """Run training."""
     hsm = (
         QcogClient.create(
             token=API_TOKEN,
@@ -44,6 +46,7 @@ def main():
 
 
 async def async_main():
+    """Run training async."""
     hsm = (
         await AsyncQcogClient.create(hostname="127.0.0.1", port=8000, token=API_TOKEN)
     ).ensemble(operators=["X", "Y", "Z"], dim=4, num_axes=16)

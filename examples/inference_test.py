@@ -1,8 +1,11 @@
+"""Example of inference with a preloaded model."""
 import os
-import pandas
-import numpy as np
 
-from qcog_python_client import QcogClient, AsyncQcogClient
+import numpy as np
+import pandas
+
+from qcog_python_client import AsyncQcogClient, QcogClient
+from qcog_python_client.schema.parameters import LOBPCGFastStateParameters
 
 API_TOKEN = os.environ["API_TOKEN"]
 TRAINED_MODEL_GUID = os.environ.get(
@@ -24,29 +27,34 @@ forecast_data = pandas.DataFrame(
     index=range(n_forecastdata),
     columns=["X", "Y"],
 )
-parameters = {
-    "state_method": "LOBPCG_FAST",
-    "iterations": 5,
-    "learning_rate_axes": 0,
-    "learning_rate_psi": 0.1,
-}
-
 
 def main():
+    """Run training."""
     hsm = QcogClient.create(
         token=API_TOKEN,
     ).preloaded_model(TRAINED_MODEL_GUID)
     print(hsm.status())
-    print(hsm.wait_for_training().inference(forecast_data, parameters))
+    print(hsm.wait_for_training().inference(forecast_data, {
+        "state_parameters": LOBPCGFastStateParameters(
+            iterations=5,
+            learning_rate_axes=0,
+        )
+    }))
 
 
 async def async_main():
+    """Run training async."""
     hsm = await (await AsyncQcogClient.create(token=API_TOKEN)).preloaded_model(
         TRAINED_MODEL_GUID
     )
     print(await hsm.status())
     await hsm.wait_for_training()
-    print(await hsm.inference(forecast_data, parameters))
+    print(await hsm.inference(forecast_data, {
+        "state_parameters": LOBPCGFastStateParameters(
+            iterations=5,
+            learning_rate_axes=0,
+        )
+    }))
 
 
 if __name__ == "__main__":

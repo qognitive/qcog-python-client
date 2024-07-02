@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import time
-from typing import Generic, Type, TypeAlias, TypeVar
+from typing import Any, Generic, Type, TypeAlias, TypeVar
 
 import pandas as pd
 
@@ -113,7 +113,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         sigma_sq_optimization: dict[str, float] = {},
         seed: int = 42,
         target_operator: list[Operator] = [],
-    ) -> BaseQcogClient:
+    ) -> Any:
         """Select PauliModel for the training."""
         self.model = PauliModel(
             operators,
@@ -135,7 +135,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         sigma_sq_optimization: dict[str, float] = {},
         seed: int = 42,
         target_operator: list[Operator] = [],
-    ) -> BaseQcogClient:
+    ) -> Any:
         """Select EnsembleModel for the training."""
         self.model = EnsembleModel(
             operators,
@@ -525,6 +525,50 @@ class QcogClient(  # noqa: D101
             inference_result["response"]["data"],
         )
 
+    def pauli(  # noqa: D102
+        self,
+        operators: list[Operator],
+        qbits: int = 2,
+        pauli_weight: int = 2,
+        sigma_sq: dict[str, float] = {},
+        sigma_sq_optimization: dict[str, float] = {},
+        seed: int = 42,
+        target_operator: list[Operator] = [],
+    ) -> QcogClient:
+        self = super().pauli(
+            operators,
+            qbits,
+            pauli_weight,
+            sigma_sq,
+            sigma_sq_optimization,
+            seed,
+            target_operator,
+        )
+
+        return self
+
+    def ensemble(  # noqa: D102
+        self,
+        operators: list[Operator],
+        dim: int = 16,
+        num_axes: int = 4,
+        sigma_sq: dict[str, float] = {},
+        sigma_sq_optimization: dict[str, float] = {},
+        seed: int = 42,
+        target_operator: list[Operator] = [],
+    ) -> QcogClient:
+        self = super().ensemble(
+            operators,
+            dim,
+            num_axes,
+            sigma_sq,
+            sigma_sq_optimization,
+            seed,
+            target_operator,
+        )
+
+        return self
+
 
 class AsyncQcogClient(  # noqa: D101
     BaseQcogClient[AIOHTTPClient],
@@ -864,3 +908,47 @@ class AsyncQcogClient(  # noqa: D101
         return base642dataframe(
             self.inference_result["response"]["data"],
         )
+
+    def pauli(  # noqa: D102
+        self,
+        operators: list[Operator],
+        qbits: int = 2,
+        pauli_weight: int = 2,
+        sigma_sq: dict[str, float] = {},
+        sigma_sq_optimization: dict[str, float] = {},
+        seed: int = 42,
+        target_operator: list[Operator] = [],
+    ) -> AsyncQcogClient:
+        self = super().pauli(
+            operators,
+            qbits,
+            pauli_weight,
+            sigma_sq,
+            sigma_sq_optimization,
+            seed,
+            target_operator,
+        )
+
+        return self
+
+    def ensemble(  # noqa: D102
+        self,
+        operators: list[Operator],
+        dim: int = 16,
+        num_axes: int = 4,
+        sigma_sq: dict[str, float] = {},
+        sigma_sq_optimization: dict[str, float] = {},
+        seed: int = 42,
+        target_operator: list[Operator] = [],
+    ) -> AsyncQcogClient:
+        self = super().ensemble(
+            operators,
+            dim,
+            num_axes,
+            sigma_sq,
+            sigma_sq_optimization,
+            seed,
+            target_operator,
+        )
+
+        return self

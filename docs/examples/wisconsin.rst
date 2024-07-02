@@ -95,20 +95,23 @@ Now set some training specific parameters and execute the training.
 
 .. code-block:: python
 
+    grad_optimization_params = GradOptimizationParameters(
+        iterations=5,
+        learning_rate=1e-3,
+    )
+
+    lobpcg_fast_state_params = LOBPCGFastStateParameters(
+        iterations=10,
+        learning_rate_axes=1e-3
+    )
+
     qcml = qcml.train(
         batch_size=64,
         num_passes=10,
-        weight_optimization={
-            "learning_rate": 1e-3,
-            "iterations": 5,
-            "optimization_method": "GRAD"
-        },
-        get_states_extra={
-            "state_method": "LOBPCG_FAST",
-            "iterations": 10,
-            "learning_rate_axes": 1e-3
-        }
+        weight_optimization=grad_optimization_params,
+        get_states_extra=lobpcg_fast_state_params
     )
+
     qcml.wait_for_training()
     print(qcml.trained_model["guid"])
 
@@ -133,17 +136,22 @@ With our trained model loaded into the client, we can now run inference on the d
 
 .. code-block:: python
 
+    lobpcg_fast_state_params = LOBPCGFastStateParameters(
+        iterations=10,
+        learning_rate_axes=1e-3
+    )
+
     result_df = qcml.inference(
         data=df_test,
         parameters={
-            "state_method": "LOBPCG_FAST",
-            "iterations": 20,
-            "tolerance": 1e-6
+            "state_parameters": lobpcg_fast_state_params
         }
     )
+
     num_correct = (
         result_df.idxmax(axis=1) == df_target.idxmax(axis=1)
     ).sum()
+
     print(f"Correct: {num_correct * 100 / len(df_test):.2f}% out of {len(df_test)}")
 
 Results

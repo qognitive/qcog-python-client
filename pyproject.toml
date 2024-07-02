@@ -32,6 +32,7 @@ dev = [
 examples = [
   "scikit-learn",
   "torch",
+  "pillow",
 ]
 
 [tool.setuptools_scm]

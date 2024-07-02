@@ -94,6 +94,7 @@ Training the Model
 Now set some training specific parameters and execute the training.
 
 .. code-block:: python
+
     from qcog_python_client.schema.parameters import GradOptimizationParameters, LOBPCGFastStateParameters
 
     qcml = qcml.train(

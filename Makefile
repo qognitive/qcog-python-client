@@ -10,6 +10,10 @@ build:
 clean:
 	rm -rf build dist
 
+docs-build:
+	cd docs && \
+	python -m sphinx -T -W --keep-going -b html -d _build/doctrees -D language=en . ./html
+
 lint-check:
 	ruff check ./qcog_python_client && \
 	mypy ./qcog_python_client

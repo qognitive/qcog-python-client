@@ -242,6 +242,7 @@ Training the Model
 Now set some training specific parameters and execute the training.
 
 .. code-block:: python
+
     from qcog_python_client.schema.parameters import LOBPCGStateParameters, GradOptimizationParameters
 
     qcml = qcml.train(
@@ -280,6 +281,7 @@ If you are running in the same session you can skip the next step, but if you ar
 With our trained model loaded into the client, we can now run inference on the dataset.
 
 .. code-block:: python
+
     from qcog_python_client.schema.parameters import LOBPCGFastStateParameters
 
     result_df = qcml.inference(

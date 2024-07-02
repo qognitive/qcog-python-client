@@ -168,3 +168,5 @@ __version__.py
 
 .ruff_cache/
 .vscode/
+
+html/

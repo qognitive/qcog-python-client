@@ -1,7 +1,8 @@
 # Qognitive Python Client Library
 
+[![Documentation Status](https://readthedocs.com/projects/qognitive-qcog-python-client/badge/?version=latest)](https://qognitive-qcog-python-client.readthedocs-hosted.com/en/latest/?badge=latest)
+
 [![.github/workflows/pypi.yml](https://github.com/qognitive/qcog-python-client/actions/workflows/pypi.yml/badge.svg)](https://github.com/qognitive/qcog-python-client/actions/workflows/pypi.yml)
-[![.github/workflows/merge_to_develop.yml](https://github.com/qognitive/qcog-python-client/actions/workflows/merge_to_develop.yml/badge.svg?branch=develop)](https://github.com/qognitive/qcog-python-client/actions/workflows/merge_to_develop.yml)
 
 The Qognitive Python Client library is a programmatic way of interacting with Qognitive's cloud computation API for running Quantum Cognition Machine Learning (QCML) models.
 

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Time Series Regression &mdash; qcog-python-client  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pauli QCML" href="../models/pauli.html" />
+    <link rel="prev" title="COIL20" href="coil20.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            qcog-python-client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/install.html">Installation Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/datasets.html">Introduction to Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/models.html">Model Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/training.html">Running a training job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/inference.html">Inference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="wisconsin.html">Wisconsin Breast Cancer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coil20.html">COIL20</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Time Series Regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#uploading-the-dataset">Uploading the Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameterizing-our-model">Parameterizing our Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-the-model">Training the Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#executing-inference">Executing Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#results">Results</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../models/pauli.html">Pauli QCML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/ensemble.html">Ensemble QCML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/optimization.html">Optimization Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/state.html">State Parameters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/base_client.html">Base Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/async_client.html">Async Client</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">qcog-python-client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Time Series Regression</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/timeseries.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="time-series-regression">
+<h1>Time Series Regression<a class="headerlink" href="#time-series-regression" title="Link to this heading"></a></h1>
+<p>Our other examples have been classification examples, but let us switch to a different regime. One of the most powerful features of QCML is that the same model architectures can function well across many different problem regimes. Here we’ll apply it to time series forecasting.</p>
+<p>The data set that we are using for this example contains the responses of a gas multisensor device deployed in an Italian city. Hourly responses averages are recorded along with gas concentrations references from a certified analyzer. See the <a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S0925400507007691?via%3Dihub">paper</a> and <a class="reference external" href="https://archive.ics.uci.edu/ml/datasets/Air+Quality">dataset</a> for more information.</p>
+<p>In this example we will use QCML models to predict all observed features for a given horizon using a specified lookback window.</p>
+<section id="uploading-the-dataset">
+<h2>Uploading the Dataset<a class="headerlink" href="#uploading-the-dataset" title="Link to this heading"></a></h2>
+<p>First we need to get our hands on the data and upload it to the qognitive servers. We use the <a class="reference external" href="https://archive.ics.uci.edu/">UC Irvine Machine Learning Repository</a> to download and access the data. After that, we need to convert our datetime features, scale the data, and add lagged features. Each measurement is taken hourly so we will use a lookback window of 24 hours and a horizon of 24 hours. Since the original dataset has 15 features, we will have 15*(24+24) = 720 features in total during training and each of these will correspond to an observable operator.</p>
+<p>We’ll be using some extra packages here such as <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code> and <code class="docutils literal notranslate"><span class="pre">ucimlrepo</span></code>.  You can install these with the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>venv<span class="o">)</span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ucimlrepo<span class="w"> </span>scikit-learn
+</pre></div>
+</div>
+<p>Let’s download the data and format it into a dataframe suitable for training and inference.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># std</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c1"># external</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_percentage_error</span>
+<span class="kn">from</span> <span class="nn">ucimlrepo</span> <span class="kn">import</span> <span class="n">fetch_ucirepo</span>
+
+<span class="c1"># internal</span>
+<span class="kn">from</span> <span class="nn">qcog.src.classical.pauli_symbolic</span> <span class="kn">import</span> <span class="n">ClassicalPauliSymbolic</span> <span class="k">as</span> <span class="n">PauliHSM</span>
+<span class="kn">from</span> <span class="nn">qcog.utils.model_default_init</span> <span class="kn">import</span> <span class="n">default_config_map</span>
+
+
+<span class="k">def</span> <span class="nf">add_lagged_features</span><span class="p">(</span>
+    <span class="n">train_test_idx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">data_scaled</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">lookback_window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">column_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add lagged features to data.</span>
+
+<span class="sd">    This function creates and returns a new array (data_raw), where it has</span>
+<span class="sd">    introduced F*(L+H-1) new columns, where F is the number of features, L</span>
+<span class="sd">    is the size of the lookback window, and H is the size of the horizon. For</span>
+<span class="sd">    each feature, it adds values from the original data_scaled array with a</span>
+<span class="sd">    lag of 0 to L+H-1.</span>
+
+<span class="sd">    Every feature uses the same lookback window and horizon.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    train_test_idx : np.ndarray</span>
+<span class="sd">        The indices in data_scaled that will be used to create the new array for either</span>
+<span class="sd">        the train or test data.These must be in the range</span>
+<span class="sd">        [lookback_window + horizon, data_scaled.shape[0]].</span>
+<span class="sd">    data_scaled : np.ndarray</span>
+<span class="sd">        The raw data array to add the lagged features to.</span>
+<span class="sd">    features : list[str]</span>
+<span class="sd">        The list of feature names.</span>
+<span class="sd">    lookback_window : int</span>
+<span class="sd">        The size of the lookback window.</span>
+<span class="sd">    horizon : int</span>
+<span class="sd">        The size of the horizon.</span>
+<span class="sd">    column_names : list[str]</span>
+<span class="sd">        The names of the columns after adding lagged features.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        the new dataframe containing the union of old features and new lagged features.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">train_test_idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">lookback_window</span> <span class="o">+</span> <span class="n">horizon</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">train_test_idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">train_test_idx</span><span class="p">[</span><span class="n">ti</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
+            <span class="n">col_start</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="n">lookback_window</span> <span class="o">+</span> <span class="n">horizon</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lookback_window</span> <span class="o">+</span> <span class="n">horizon</span><span class="p">):</span>
+                <span class="n">data_raw</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span> <span class="n">col_start</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_scaled</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data_raw</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">load_air_quality</span><span class="p">(</span>
+    <span class="n">n_train</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_test</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">lookback_window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the air quality dataset from UCI ML repository.</span>
+
+<span class="sd">    See https://archive.ics.uci.edu/dataset/360/air+quality and the original paper</span>
+<span class="sd">    https://www.semanticscholar.org/paper/a90a54a39ff934772df57771a0012981f355949d.</span>
+
+<span class="sd">    Testing and training data are chosen from disjoint sets of data points.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_train : int</span>
+<span class="sd">        The number of data points to use for training.</span>
+<span class="sd">    n_test : int</span>
+<span class="sd">        The number of data points to use for testing.</span>
+<span class="sd">    lookback_window : int</span>
+<span class="sd">        Size of the lookback window.</span>
+<span class="sd">    horizon : int</span>
+<span class="sd">        Size of the horizon to predict</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]</span>
+<span class="sd">        Training data, test data (missing data we want to predict), and target data</span>
+<span class="sd">        (labels for test data).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> <span class="s2">&quot;air_quality.pkl&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Cache dataset</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using cached data&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">air_quality</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">air_quality</span> <span class="o">=</span> <span class="n">fetch_ucirepo</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">air_quality</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="c1"># data (as pandas dataframes)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">air_quality</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">features</span>
+    <span class="n">X</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">])</span>
+    <span class="n">X</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span>
+    <span class="n">X</span><span class="p">[</span><span class="s2">&quot;day_of_week&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">dayofweek</span>
+    <span class="n">X</span><span class="p">[</span><span class="s2">&quot;hour&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">hour</span>
+    <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span> <span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Features</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">forecast_features</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">features</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">horizon</span><span class="p">)]</span>
+    <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">features</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lookback_window</span> <span class="o">+</span> <span class="n">horizon</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Train, validation, and test boundaries in data</span>
+    <span class="c1"># Train = [0, 60%], Validation = (60%, 80%], Test = (80%, 100%]</span>
+    <span class="n">n_data</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_data</span> <span class="o">*</span> <span class="mf">0.6</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_data</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">),</span> <span class="n">n_data</span><span class="p">]</span>
+
+    <span class="c1"># Input checking</span>
+    <span class="k">if</span> <span class="n">boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lookback_window</span> <span class="o">-</span> <span class="n">horizon</span> <span class="o">-</span> <span class="n">n_train</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Not enough training data points for lookback window and horizon&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">boundaries</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">boundaries</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">lookback_window</span> <span class="o">-</span> <span class="n">horizon</span> <span class="o">-</span> <span class="n">n_test</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not enough test data points for lookback window and horizon&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Scaling data (scaled just by the training data)</span>
+    <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">df_scaled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+    <span class="c1"># Select indices</span>
+    <span class="n">train_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">lookback_window</span> <span class="o">+</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">n_train</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">test_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">lookback_window</span> <span class="o">+</span> <span class="n">horizon</span> <span class="o">+</span> <span class="n">boundaries</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">boundaries</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+        <span class="n">n_test</span><span class="p">,</span>
+        <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Dataframes with lagged features</span>
+    <span class="n">df_train</span> <span class="o">=</span> <span class="n">add_lagged_features</span><span class="p">(</span>
+        <span class="n">train_test_idx</span><span class="o">=</span><span class="n">train_idx</span><span class="p">,</span>
+        <span class="n">data_scaled</span><span class="o">=</span><span class="n">df_scaled</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="n">features</span><span class="o">=</span><span class="n">df_scaled</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">lookback_window</span><span class="o">=</span><span class="n">lookback_window</span><span class="p">,</span>
+        <span class="n">horizon</span><span class="o">=</span><span class="n">horizon</span><span class="p">,</span>
+        <span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">df_test</span> <span class="o">=</span> <span class="n">add_lagged_features</span><span class="p">(</span>
+        <span class="n">train_test_idx</span><span class="o">=</span><span class="n">test_idx</span><span class="p">,</span>
+        <span class="n">data_scaled</span><span class="o">=</span><span class="n">df_scaled</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="n">features</span><span class="o">=</span><span class="n">df_scaled</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">lookback_window</span><span class="o">=</span><span class="n">lookback_window</span><span class="p">,</span>
+        <span class="n">horizon</span><span class="o">=</span><span class="n">horizon</span><span class="p">,</span>
+        <span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">df_target</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">df_test</span><span class="p">[</span><span class="n">forecast_features</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="n">index</span><span class="o">=</span><span class="n">df_test</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">forecast_features</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">forecast_features</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Drop forecast features from test data</span>
+    <span class="n">df_test</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">forecast_features</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_train</span><span class="p">,</span> <span class="n">df_test</span><span class="p">,</span> <span class="n">df_target</span>
+</pre></div>
+</div>
+<p>Let’s instantiate a client object and set the dataset to our timeseries dataframe.  We’re only going to upload the <code class="docutils literal notranslate"><span class="pre">df_train</span></code> dataframe as the test data is only used for evaluation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qcog_python_client</span> <span class="kn">import</span> <span class="n">QcogClient</span>
+
+<span class="c1"># Set the random seed for consistent selection of training and test data</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">df_train</span><span class="p">,</span> <span class="n">df_test</span><span class="p">,</span> <span class="n">df_test_labels</span> <span class="o">=</span> <span class="n">load_air_quality</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+
+<span class="c1"># Send the training data to the server</span>
+<span class="n">qcml</span> <span class="o">=</span> <span class="n">QcogClient</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">API_TOKEN</span><span class="p">)</span>
+<span class="n">qcml</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="parameterizing-our-model">
+<h2>Parameterizing our Model<a class="headerlink" href="#parameterizing-our-model" title="Link to this heading"></a></h2>
+<p>Let’s pick a Pauli model to run.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qcml</span> <span class="o">=</span> <span class="n">qcml</span><span class="o">.</span><span class="n">pauli</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="n">df_train</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+    <span class="n">qbits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">pauli_weight</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we remember our operators have to match the dataset that we are going to run.</p>
+</section>
+<section id="training-the-model">
+<h2>Training the Model<a class="headerlink" href="#training-the-model" title="Link to this heading"></a></h2>
+<p>Now set some training specific parameters and execute the training.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qcog_python_client.schema.parameters</span> <span class="kn">import</span> <span class="n">LOBPCGStateParameters</span><span class="p">,</span> <span class="n">GradOptimizationParameters</span>
+
+<span class="n">qcml</span> <span class="o">=</span> <span class="n">qcml</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">num_passes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">weight_optimization</span><span class="o">=</span><span class="n">GradOptimizationParameters</span><span class="p">(</span>
+        <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span>
+    <span class="p">),</span>
+    <span class="n">get_states_extra</span><span class="o">=</span><span class="n">LOBPCGStateParameters</span><span class="p">(</span>
+        <span class="n">iterations</span><span class="o">=</span><span class="mi">15</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">qcml</span><span class="o">.</span><span class="n">wait_for_training</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">qcml</span><span class="o">.</span><span class="n">trained_model</span><span class="p">[</span><span class="s2">&quot;guid&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Here we use the gradient descent optimizer with a learning rate of 1e-5 and 3 iterations. We also use the LOBPCG_FAST state method with 15 iterations. We are not using the analytic solver because we are not passing the entire dataset at the same time.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The training process may take a while to complete, here we call <code class="docutils literal notranslate"><span class="pre">wait_for_training</span></code> which will block until training is complete.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We print out the trained model <code class="docutils literal notranslate"><span class="pre">guid</span></code> so we can use it in a different interpreter session if needed.</p>
+</div>
+</section>
+<section id="executing-inference">
+<h2>Executing Inference<a class="headerlink" href="#executing-inference" title="Link to this heading"></a></h2>
+<p>If you are running in the same session you can skip the next step, but if you are running in a different session you can load the model using the <code class="docutils literal notranslate"><span class="pre">guid</span></code> we printed out.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qcml</span> <span class="o">=</span> <span class="n">qcml</span><span class="o">.</span><span class="n">preloaded_model</span><span class="p">(</span><span class="n">MODEL_GUID</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With our trained model loaded into the client, we can now run inference on the dataset.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qcog_python_client.schema.parameters</span> <span class="kn">import</span> <span class="n">LOBPCGFastStateParameters</span>
+
+<span class="n">result_df</span> <span class="o">=</span> <span class="n">qcml</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">df_test</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">LOBPCGFastStateParameters</span><span class="p">(</span>
+        <span class="n">iterations</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-4</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">df_test_labels</span><span class="p">,</span> <span class="n">results_df</span><span class="p">)</span>
+<span class="n">mape</span> <span class="o">=</span> <span class="n">mean_absolute_percentage_error</span><span class="p">(</span><span class="n">df_test_labels</span><span class="p">,</span> <span class="n">results_df</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MSE:  </span><span class="si">{</span><span class="n">mse</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MAPE: </span><span class="si">{</span><span class="n">mape</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Link to this heading"></a></h2>
+<p>Some example results for various qubit counts and Pauli weights are shown below. The mean squared error (MSE) and mean absolute percentage error (MAPE) are calculated for each case.</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Sample Results</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Qubits</p></th>
+<th class="head"><p>Pauli Weight</p></th>
+<th class="head"><p>MSE</p></th>
+<th class="head"><p>MAPE</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>1</p></td>
+<td><p>1.098</p></td>
+<td><p>7.770</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>2</p></td>
+<td><p>0.983</p></td>
+<td><p>4.912</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>2</p></td>
+<td><p>0.903</p></td>
+<td><p>6.17</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="coil20.html" class="btn btn-neutral float-left" title="COIL20" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../models/pauli.html" class="btn btn-neutral float-right" title="Pauli QCML" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Qognitive Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

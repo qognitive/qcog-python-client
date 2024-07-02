@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client &mdash; qcog-python-client  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Async Client" href="async_client.html" />
+    <link rel="prev" title="Base Client" href="base_client.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            qcog-python-client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/install.html">Installation Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/datasets.html">Introduction to Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/models.html">Model Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/training.html">Running a training job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/inference.html">Inference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wisconsin.html">Wisconsin Breast Cancer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/coil20.html">COIL20</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/timeseries.html">Time Series Regression</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../models/pauli.html">Pauli QCML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/ensemble.html">Ensemble QCML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/optimization.html">Optimization Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/state.html">State Parameters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base_client.html">Base Client</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Client</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qcog_python_client.QcogClient"><code class="docutils literal notranslate"><span class="pre">QcogClient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.create"><code class="docutils literal notranslate"><span class="pre">QcogClient.create()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.data"><code class="docutils literal notranslate"><span class="pre">QcogClient.data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.ensemble"><code class="docutils literal notranslate"><span class="pre">QcogClient.ensemble()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.http_client"><code class="docutils literal notranslate"><span class="pre">QcogClient.http_client</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.inference"><code class="docutils literal notranslate"><span class="pre">QcogClient.inference()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.pauli"><code class="docutils literal notranslate"><span class="pre">QcogClient.pauli()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.preloaded_data"><code class="docutils literal notranslate"><span class="pre">QcogClient.preloaded_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.preloaded_model"><code class="docutils literal notranslate"><span class="pre">QcogClient.preloaded_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.preloaded_training_parameters"><code class="docutils literal notranslate"><span class="pre">QcogClient.preloaded_training_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.status"><code class="docutils literal notranslate"><span class="pre">QcogClient.status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.train"><code class="docutils literal notranslate"><span class="pre">QcogClient.train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.version"><code class="docutils literal notranslate"><span class="pre">QcogClient.version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qcog_python_client.QcogClient.wait_for_training"><code class="docutils literal notranslate"><span class="pre">QcogClient.wait_for_training()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="async_client.html">Async Client</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">qcog-python-client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Client</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/client.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="client">
+<h1>Client<a class="headerlink" href="#client" title="Link to this heading"></a></h1>
+<p>This class provides a synchronous interface to qognitive’s API.  Under the hood, it uses the <cite>requests</cite> library to make HTTP requests to the API.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qcog_python_client.</span></span><span class="sig-name descname"><span class="pre">QcogClient</span></span><a class="headerlink" href="#qcog_python_client.QcogClient" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base_client.html#qcog_python_client.qcog.BaseQcogClient" title="qcog_python_client.qcog.BaseQcogClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseQcogClient</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RequestsClient</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">TrainProtocol</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceProtocol</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.create">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dev.qognitive.io'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">443</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'v1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">safe_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.0.63'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.create" title="Link to this definition"></a></dt>
+<dd><p>Create a client with initialization from the API.</p>
+<p>Since __init__ is always sync we cannot call to the API using that
+method of class creation. If we need to fetch things such as the
+project ID that the token is associated with the only way to do that
+properly with async objects is to use a factory method.</p>
+<p>Here we replace init with create and then once the object is created
+(since the sync part is linked to the creation of the object in memory
+space) we are able to then call the API using our async methods and
+not block on IO.</p>
+<p>Qcog api client implementation there are 2 main expected usages:</p>
+<ol class="arabic simple">
+<li><p>Training</p></li>
+<li><p>Inference</p></li>
+</ol>
+<p>The class definition is such that every parameter must be used
+explicitly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hsm_client</span> <span class="o">=</span> <span class="n">QcogClient</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;0.0.45&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each “public” method return “self” to chain method calls unless
+it is one of the following utilities: status and inference</p>
+<p>Each method that results in an api call will store the api
+response as a json dict in a class attribute</p>
+<p>In practice, the 2 main expected usage would be for a fresh training:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hsm</span> <span class="o">=</span> <span class="n">QcogClient</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">pauli</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the “…” would be replaced with desired parametrization</p>
+<p>If we wanted, we could infer after training, right away.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">hsm</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>but this would require to run the following loop:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hsm</span><span class="o">.</span><span class="n">wait_for_training</span><span class="p">()</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to make sure training has successfully completed.</p>
+<p>To run multiple inference on a persistent trained model,
+the trained_model guid go to storage. Datasets? Also
+storage. Training parameters? Storage. That way one can
+rebuild the client to run inference:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hsm</span> <span class="o">=</span> <span class="n">QcogClient</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">preloaded_model</span><span class="p">(</span><span class="n">trained_model_guid</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">list_of_dataframes</span><span class="p">:</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">Dataframe</span> <span class="o">=</span> <span class="n">hsm</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Most methods class order is not important with 3 exceptions:</p>
+<ol class="arabic simple">
+<li><p>train may only be called after data, and named model</p></li>
+<li><p>inference and status must have a preloaded model first</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> (<em>str</em><em> | </em><em>None</em>) – A valid API token granting access optional
+when unset (or None) expects to find the proper
+value as QCOG_API_TOKEN environment variable</p></li>
+<li><p><strong>hostname</strong> (<em>str</em>) – API endpoint hostname, currently defaults to dev.qognitive.io</p></li>
+<li><p><strong>port</strong> (<em>int</em>) – port value, default to https 443</p></li>
+<li><p><strong>api_version</strong> (<em>str</em>) – the “vX” part of the url for the api version</p></li>
+<li><p><strong>safe_mode</strong> (<em>bool</em>) – if true runs healthchecks before running any api call
+sequences</p></li>
+<li><p><strong>version</strong> (<em>str</em>) – the qcog version to use. Must be no smaller than <cite>OLDEST_VERSION</cite>
+and no greater than <cite>NEWEST_VERSION</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the client object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.QcogClient">QcogClient</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.data" title="Link to this definition"></a></dt>
+<dd><p>Upload a dataset for training.</p>
+<p>For a fresh “to train” model and properly initialized model
+upload a pandas DataFrame dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame:</em>) – the dataset as a DataFrame</p></li>
+<li><p><strong>upload</strong> (<em>bool:</em>) – if true post the dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="async_client.html#qcog_python_client.AsyncQcogClient" title="qcog_python_client.AsyncQcogClient">AsyncQcogClient</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.ensemble">
+<span class="sig-name descname"><span class="pre">ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_sq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_sq_optimization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_operator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.ensemble" title="Link to this definition"></a></dt>
+<dd><p>Select EnsembleModel for the training.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.http_client">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">http_client</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CLIENT</span></em><a class="headerlink" href="#qcog_python_client.QcogClient.http_client" title="Link to this definition"></a></dt>
+<dd><p>Return the http client.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.inference">
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InferenceParameters</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.inference" title="Link to this definition"></a></dt>
+<dd><p>From a trained model query an inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – the dataset as a DataFrame</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em>) – inference parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the predictions</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.pauli">
+<span class="sig-name descname"><span class="pre">pauli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pauli_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_sq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_sq_optimization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_operator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.pauli" title="Link to this definition"></a></dt>
+<dd><p>Select PauliModel for the training.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.preloaded_data">
+<span class="sig-name descname"><span class="pre">preloaded_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.preloaded_data" title="Link to this definition"></a></dt>
+<dd><p>Retrieve a dataset that was previously uploaded from guid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>guid</strong> (<em>str</em>) – guid of a previously uploaded dataset</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>itself</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.QcogClient">QcogClient</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.preloaded_model">
+<span class="sig-name descname"><span class="pre">preloaded_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.preloaded_model" title="Link to this definition"></a></dt>
+<dd><p>Preload a model from a guid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.preloaded_training_parameters">
+<span class="sig-name descname"><span class="pre">preloaded_training_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuild</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.preloaded_training_parameters" title="Link to this definition"></a></dt>
+<dd><p>Retrieve preexisting training parameters payload.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>guid</strong> (<em>str</em>) – model guid</p></li>
+<li><p><strong>rebuild</strong> (<em>bool</em>) – if True, will initialize the class “model”
+(ex: pauli or ensemble) from the payload</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>itself</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.QcogClient">QcogClient</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.status">
+<span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.status" title="Link to this definition"></a></dt>
+<dd><p>Fetch the status of the training request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_passes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_optimization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GradOptimizationParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AdamOptimizationParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnalyticOptimizationParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">EmptyDictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_states_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LOBPCGFastStateParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PowerIterStateParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">EIGHStateParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">EIGSStateParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NPEIGHStateParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GradStateParameters</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">EmptyDictionary</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.train" title="Link to this definition"></a></dt>
+<dd><p>Start a training job.</p>
+<p>For a fresh “to train” model properly configured and initialized trigger
+a training request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch_size</strong> (<em>int</em>) – The number of samples to use in each training batch.</p></li>
+<li><p><strong>num_passes</strong> (<em>int</em>) – The number of passes through the dataset.</p></li>
+<li><p><strong>weight_optimization</strong> (<em>NotRequiredWeightParams</em>) – optimization parameters for the weights</p></li>
+<li><p><strong>get_states_extra</strong> (<em>NotRequiredStateParams</em>) – optimization parameters for the states</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="async_client.html#qcog_python_client.AsyncQcogClient" title="qcog_python_client.AsyncQcogClient">AsyncQcogClient</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qcog_python_client.QcogClient.version" title="Link to this definition"></a></dt>
+<dd><p>Qcog version.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qcog_python_client.QcogClient.wait_for_training">
+<span class="sig-name descname"><span class="pre">wait_for_training</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poll_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.qcog.QcogClient"><span class="pre">QcogClient</span></a></span></span><a class="headerlink" href="#qcog_python_client.QcogClient.wait_for_training" title="Link to this definition"></a></dt>
+<dd><p>Wait for training to complete.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function is blocking</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>poll_time</strong> (<em>int:</em>) – status checks intervals in seconds</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>itself</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qcog_python_client.QcogClient" title="qcog_python_client.QcogClient">QcogClient</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="base_client.html" class="btn btn-neutral float-left" title="Base Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="async_client.html" class="btn btn-neutral float-right" title="Async Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Qognitive Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running a training job &mdash; qcog-python-client  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Inference" href="inference.html" />
+    <link rel="prev" title="Model Selection" href="models.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            qcog-python-client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">Introduction to Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Model Selection</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running a training job</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introspecting-the-training-progress">Introspecting the training progress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-async-client">Using the Async Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saving-your-model-id">Saving your model ID</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">Inference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wisconsin.html">Wisconsin Breast Cancer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/coil20.html">COIL20</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/timeseries.html">Time Series Regression</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../models/pauli.html">Pauli QCML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/ensemble.html">Ensemble QCML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/optimization.html">Optimization Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/state.html">State Parameters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/base_client.html">Base Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/async_client.html">Async Client</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">qcog-python-client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Running a training job</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/training.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="running-a-training-job">
+<h1>Running a training job<a class="headerlink" href="#running-a-training-job" title="Link to this heading"></a></h1>
+<p>So far, the settings that parameterize our model to pertain to both the inference as well as the training phases. Now we introduce the <cite>training_parameters</cite> which __only__ affect the training of our model. We will upload these training specific parameters to qogntive’s servers so a training run can be launched.</p>
+<p>We’ll set the training parameters and trigger our training run.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qcml</span> <span class="o">=</span> <span class="n">qcml</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">num_passes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">weight_optimization</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
+        <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;optimization_method&quot;</span><span class="p">:</span> <span class="s2">&quot;GRAD&quot;</span>
+    <span class="p">},</span>
+    <span class="n">get_states_extra</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;state_method&quot;</span><span class="p">:</span> <span class="s2">&quot;LOBPCG_FAST&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="mi">10</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>While the model is training, let’s look at what these parameters here are - since they are important for your model.</p>
+<p>The first two parameters are the batch size and the number of passes. The batch size is what is also called the minibatch size, it is the size of the data that is used for training the model. In the <a class="reference internal" href="datasets.html"><span class="doc">Introduction to Datasets</span></a> section we have 4 datapoints in the training dataset that we are using. By setting our batch size to 4 we are using the entire dataset as a single batch, if we set it to 2 then each pass would consist of 2 batches of 2 datapoints. The second number is the number of passes over the entire data set, so in this case we will run our optimization over the entire data set 10 times.</p>
+<p>The next set of parameters is <code class="docutils literal notranslate"><span class="pre">weight_optimization</span></code>. This determines how the internal weights that generate the quantum representation are optimized with each pass over the data. In this example we are using gradient descent. There are more details on the optimization methods and their parameterization in the <a class="reference internal" href="../parameters/optimization.html"><span class="doc">Optimization Parameters</span></a> section. The parameters from that section are placed as a sub dictionary on the <code class="docutils literal notranslate"><span class="pre">weight_optimization</span></code> key in the training parameters.</p>
+<p>The last set of parameters are <code class="docutils literal notranslate"><span class="pre">get_states_extra</span></code>. This determines how the internal quantum state is calculated, and this is used for both the inference and for training. Since multiple passes are made over the data in training the tolerances can be lower than for inference, since only a single inference pass is made in that step. There are more details in the <a class="reference internal" href="../parameters/state.html"><span class="doc">State Parameters</span></a> section. The parameters from that section are placed as a sub dictionary on the <code class="docutils literal notranslate"><span class="pre">get_states_extra</span></code> key in the training parameters.</p>
+<section id="introspecting-the-training-progress">
+<h2>Introspecting the training progress<a class="headerlink" href="#introspecting-the-training-progress" title="Link to this heading"></a></h2>
+<p>Running <code class="docutils literal notranslate"><span class="pre">train</span></code> will trigger a training run on our servers. The model and the dataset have references saved in the <code class="docutils literal notranslate"><span class="pre">qcml</span></code> object so that is why they are not passed in here.</p>
+<p>The <cite>train</cite> method is not a blocking call, so the training job can be in progress or complete - you will need to check. The <code class="docutils literal notranslate"><span class="pre">qcml</span></code> object can be used to check the status of your training run.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qcml</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>  <span class="c1"># returns &#39;completed&#39; or &#39;processing&#39;</span>
+</pre></div>
+</div>
+<p>You can build your own poller, or you can use our builtin</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qcml</span><span class="o">.</span><span class="n">wait_for_training</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This is a blocking call that will wait for the training job to complete.</p>
+</section>
+<section id="using-the-async-client">
+<h2>Using the Async Client<a class="headerlink" href="#using-the-async-client" title="Link to this heading"></a></h2>
+<p>Using the async client is essentially calling await on the same methods</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qcml</span> <span class="o">=</span> <span class="k">await</span> <span class="n">qcml</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="o">**</span><span class="n">training_parameters</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">qcml</span><span class="o">.</span><span class="n">wait_for_training</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here the power of async calls really shines, our application will come back when training is complete but will not be blocked on the training job.</p>
+</section>
+<section id="saving-your-model-id">
+<h2>Saving your model ID<a class="headerlink" href="#saving-your-model-id" title="Link to this heading"></a></h2>
+<p>When the model has completed training we can moveon to inference. A training run is complete when the <code class="docutils literal notranslate"><span class="pre">wait_for_training()</span></code> call on either client has returned succesfully. Once it has then the <code class="docutils literal notranslate"><span class="pre">qcml</span></code> object becomes populated with a trained model ID. Here you will want to save the ID, such as in a database, so you can access the model easily later.</p>
+<p>You can access the model ID with either client in the following way:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model_id</span> <span class="o">=</span> <span class="n">qcml</span><span class="o">.</span><span class="n">trained_model</span><span class="p">[</span><span class="s2">&quot;guid&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>You can load this model into your client by instantiating a <code class="docutils literal notranslate"><span class="pre">qcml</span></code> client and passing the model ID to it as such:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qcml</span> <span class="o">=</span> <span class="n">qcml</span><span class="o">.</span><span class="n">preloaded_model</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will override any trained model in the <code class="docutils literal notranslate"><span class="pre">qcml</span></code> local client. If you are using many models at once you will need many <code class="docutils literal notranslate"><span class="pre">qcml</span></code> instances.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="models.html" class="btn btn-neutral float-left" title="Model Selection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="inference.html" class="btn btn-neutral float-right" title="Inference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Qognitive Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

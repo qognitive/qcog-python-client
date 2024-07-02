@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pauli QCML &mdash; qcog-python-client  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Ensemble QCML" href="ensemble.html" />
+    <link rel="prev" title="Time Series Regression" href="../examples/timeseries.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            qcog-python-client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/install.html">Installation Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/datasets.html">Introduction to Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/models.html">Model Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/training.html">Running a training job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/inference.html">Inference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wisconsin.html">Wisconsin Breast Cancer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/coil20.html">COIL20</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/timeseries.html">Time Series Regression</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Models</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pauli QCML</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qcog_python_client.PauliSchema"><code class="docutils literal notranslate"><span class="pre">PauliSchema</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ensemble.html">Ensemble QCML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/optimization.html">Optimization Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/state.html">State Parameters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/base_client.html">Base Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/async_client.html">Async Client</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">qcog-python-client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Pauli QCML</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/models/pauli.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pauli-qcml">
+<h1>Pauli QCML<a class="headerlink" href="#pauli-qcml" title="Link to this heading"></a></h1>
+<p>The Pauli QCML model uses tensor products of Pauli matrices in order to build a quantum representation of the problem. For the Pauli QCML model the most important parameters are the <code class="docutils literal notranslate"><span class="pre">qbits</span></code> and the <code class="docutils literal notranslate"><span class="pre">pauli_weight</span></code>. You can read about the function of these parameters below, they get passed when <code class="docutils literal notranslate"><span class="pre">qcml.pauli(...)</span></code> is called.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qcog_python_client.PauliSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qcog_python_client.</span></span><span class="sig-name descname"><span class="pre">PauliSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qcog_python_client.PauliSchema" title="Link to this definition"></a></dt>
+<dd><p>Pauli-model specific parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operators</strong> (<em>list</em><em>[</em><em>Operator</em><em>]</em>) – List of operators to be used in the model. These should be the names
+of the columns in the dataframe for the dataset being trained.</p></li>
+<li><p><strong>qbits</strong> (<em>int</em>) – Number of qubits in the model, corresponding to the dimensionality of
+our internal state.</p></li>
+<li><p><strong>pauli_weight</strong> (<em>int</em>) – This corresponds to the sparsity of our representation in our internal
+state. 1 is the most sparse and the maximum here is equal to the qbits
+specified, which would be a full dense representation.</p></li>
+<li><p><strong>sigma_sq</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em>) – Dictionary of scaling factors where the keys are the operators and the
+values are the scaling factors. These are in the form of 1/sigma so a
+small sigma will increase the weight of that operator in the model.</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – A random seed which is used to initialize the model, you can set this
+in order to increase reproducibility.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../examples/timeseries.html" class="btn btn-neutral float-left" title="Time Series Regression" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ensemble.html" class="btn btn-neutral float-right" title="Ensemble QCML" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Qognitive Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

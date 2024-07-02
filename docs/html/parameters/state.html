@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>State Parameters &mdash; qcog-python-client  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Base Client" href="../api/base_client.html" />
+    <link rel="prev" title="Optimization Parameters" href="optimization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            qcog-python-client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/install.html">Installation Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/datasets.html">Introduction to Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/models.html">Model Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/training.html">Running a training job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/inference.html">Inference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wisconsin.html">Wisconsin Breast Cancer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/coil20.html">COIL20</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/timeseries.html">Time Series Regression</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../models/pauli.html">Pauli QCML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/ensemble.html">Ensemble QCML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Parameters</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization Parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">State Parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#lobpcg-fast">LOBPCG_FAST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#power-iter">POWER_ITER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eigs">EIGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eigh">EIGH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#np-eigh">NP_EIGH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lobpcg">LOBPCG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grad">GRAD</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/base_client.html">Base Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/async_client.html">Async Client</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">qcog-python-client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">State Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/parameters/state.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="state-parameters">
+<h1>State Parameters<a class="headerlink" href="#state-parameters" title="Link to this heading"></a></h1>
+<p>Our QCML model will build a representation of the data as quantum states. The method for solving for these states is a parameter that can be chosen and usually results in a tradeoff between cost and accuracy.</p>
+<p>The recommendation from the Qognitive team is that the <code class="docutils literal notranslate"><span class="pre">state_method</span> <span class="pre">=</span> <span class="pre">'LOBPCG_FAST'</span></code> should be used for the majority of cases.</p>
+<p>The state parameterization has to be passed for both training (as the model will build quantum states of the data as it trains, refining the state representation as it goes) and for inference (the model will build a state from the provided data and generate inference from that state).</p>
+<p>This documentation is broken up by each <code class="docutils literal notranslate"><span class="pre">state_method</span></code> parameter, each having their own parameters.</p>
+<section id="lobpcg-fast">
+<h2>LOBPCG_FAST<a class="headerlink" href="#lobpcg-fast" title="Link to this heading"></a></h2>
+<p>The recommended method for most cases. This method uses the Locally Optimal Block Preconditioned Conjugate Gradient method to find the optimal state. We call this <code class="docutils literal notranslate"><span class="pre">FAST</span></code> because it reduces redundant numerical calculations when operating on a batch of data to speed up the computation versus a generic implementation of LOBPCG.</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterations</span></code>: int</dt><dd><p>The maximum number of iterations to run the LOBPCG algorithm for. You should think of this as a maximum number of internal iterations that are made to attempt the states to converge to within the tolerance. Both parameters work together, so if your tolerance is very large then you will need few iterations, so even if you set iteration count to 100 if it only takes 5 to converge to your tolerance only 5 iterations will be done. If your tolerance is very low but the iteration count is low then the algorithm will stop after the iteration count is reached, regardless of the tolerance. A good recommended range is 5-20, noting that the more iterations you do the more accurate the state will be, but the more computationally expensive it will be.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">tol</span></code>: float, default=0.2.</dt><dd><p>The tolerance for the LOBPCG algorithm. This is a relative tolerance and not an absolute one, so the units are arbitrary. Generally 0.2 which is the default is a very loose tolerance. If you want to have the output from this method close to one of the more exact solvers then try <code class="docutils literal notranslate"><span class="pre">1e-4</span> <span class="pre">-&gt;</span> <span class="pre">1e-8</span></code> for the tolerance. As per the above discussion you should also increase your iterations if you are decreasing your tolerance. The tolerance and iterations are more important for inference as the model will only pass over that data once.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td></tr></table>
+</section>
+<section id="power-iter">
+<h2>POWER_ITER<a class="headerlink" href="#power-iter" title="Link to this heading"></a></h2>
+<p>Here we use the power iteration method to find the optimal state. This method also exploits internal symmetries of the problem to speed up the computation versus more generic implementations of such as subspace solvers.</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterations</span></code>: int</dt><dd><p>The maximum number of iterations to run the POWER_ITER algorithm for. You should think of this as a maximum number of internal iterations that are made to attempt the states to converge to within the tolerance. Both parameters work together, so if your tolerance is very large then you will need few iterations, so even if you set iteration count to 100 if it only takes 5 to converge to your tolerance only 5 iterations will be done. If your tolerance is very low but the iteration count is low then the algorithm will stop after the iteration count is reached, regardless of the tolerance. A good recommended range is 5-20, noting that the more iterations you do the more accurate the state will be, but the more computationally expensive it will be.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">tol</span></code>: float, default=0.2.</dt><dd><p>The tolerance for the POWER_ITER algorithm. This is a relative tolerance and not an absolute one, so the units are arbitrary. Generally 0.2 which is the default is a very loose tolerance. If you want to have the output from this method close to one of the more exact solvers then try <code class="docutils literal notranslate"><span class="pre">1e-4</span> <span class="pre">-&gt;</span> <span class="pre">1e-8</span></code> for the tolerance. As per the above discussion you should also increase your iterations if you are decreasing your tolerance. The tolerance and iterations are more important for inference as the model will only pass over that data once.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">max_eig_iter</span></code>: int, default=5</dt><dd><p>The number of iterations to execute to find the largest eigenvalue, which is used as a parameter in a spectral shift to find the smallest eigenvalue. 5 is generally a good default.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td></tr></table>
+</section>
+<section id="eigs">
+<h2>EIGS<a class="headerlink" href="#eigs" title="Link to this heading"></a></h2>
+<p>This uses the scipy <code class="docutils literal notranslate"><span class="pre">EIGS</span></code> solver.</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">tol</span></code>: float, default=0.2.</dt><dd><p>The tolerance for the EIGS algorithm. This is a relative tolerance and not an absolute one, so the units are arbitrary. Generally 0.2 which is the default is a very loose tolerance. If you want to have the output from this method close to one of the more exact solvers then try <code class="docutils literal notranslate"><span class="pre">1e-4</span> <span class="pre">-&gt;</span> <span class="pre">1e-8</span></code> for the tolerance. You can see more details about this method <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigs.html">here</a>. Only <code class="docutils literal notranslate"><span class="pre">tol</span></code> is supported as a parameter for this method.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td></tr></table>
+</section>
+<section id="eigh">
+<h2>EIGH<a class="headerlink" href="#eigh" title="Link to this heading"></a></h2>
+<p>This uses the scipy <code class="docutils literal notranslate"><span class="pre">EIGH</span></code> solver. <code class="docutils literal notranslate"><span class="pre">EIGH</span></code> takes no parameters. You can see more details about this method <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.eigh.html#scipy.linalg.eigh">here</a>.</p>
+</section>
+<section id="np-eigh">
+<h2>NP_EIGH<a class="headerlink" href="#np-eigh" title="Link to this heading"></a></h2>
+<p>This uses the numpy <code class="docutils literal notranslate"><span class="pre">EIGH</span></code> solver. <code class="docutils literal notranslate"><span class="pre">EIGH</span></code> takes no parameters. You can see more details about this method <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigh.html">here</a>.</p>
+</section>
+<section id="lobpcg">
+<h2>LOBPCG<a class="headerlink" href="#lobpcg" title="Link to this heading"></a></h2>
+<p>This uses the scipy <code class="docutils literal notranslate"><span class="pre">LOBPCG</span></code> solver. You can see more details about this method <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.lobpcg.html">here</a>.</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterations</span></code>: int</dt><dd><p>You should think of this as a maximum number of internal iterations that are made to attempt the states to converge to within the tolerance. Both parameters work together, so if your tolerance is very large then you will need few iterations, so even if you set iteration count to 100 if it only takes 5 to converge to your tolerance only 5 iterations will be done. If your tolerance is very low but the iteration count is low then the algorithm will stop after the iteration count is reached, regardless of the tolerance. A good recommended range is 5-20, noting that the more iterations you do the more accurate the state will be, but the more computationally expensive it will be.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">tol</span></code>: float, default=0.2.</dt><dd><p>This is a relative tolerance and not an absolute one, so the units are arbitrary. Generally 0.2 which is the default is a very loose tolerance. If you want to have the output from this method close to one of the more exact solvers then try <code class="docutils literal notranslate"><span class="pre">1e-4</span> <span class="pre">-&gt;</span> <span class="pre">1e-8</span></code> for the tolerance. As per the above discussion you should also increase your iterations if you are decreasing your tolerance. The tolerance and iterations are more important for inference as the model will only pass over that data once.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td></tr></table>
+</section>
+<section id="grad">
+<h2>GRAD<a class="headerlink" href="#grad" title="Link to this heading"></a></h2>
+<p>Using a gradient descent procedure with fixed learning rate we find our way to the optimal state.</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterations</span></code>: int</dt><dd><p>This is how many gradient descent steps will be made before considering the state to have converged. Having more iterations and a lower learning rate corresponds to a better path through the energy landscape. So if you were to take 10 steps at <code class="docutils literal notranslate"><span class="pre">1e-3</span></code> learning rate that is more accurate, as we recompute our gradient 10 times, than a single step of <code class="docutils literal notranslate"><span class="pre">1e-2</span></code> learning rate. The recommended range is 3-10.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">learning_rate</span></code>: float</dt><dd><p>The learning rate for the gradient descent algorithm. This is fixed and does not decay during optimization. Recommended values are around <code class="docutils literal notranslate"><span class="pre">1e-3</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td></tr></table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="optimization.html" class="btn btn-neutral float-left" title="Optimization Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/base_client.html" class="btn btn-neutral float-right" title="Base Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Qognitive Inc.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -242,20 +242,18 @@ Training the Model
 Now set some training specific parameters and execute the training.
 
 .. code-block:: python
+    from qcog_python_client.schema.parameters import LOBPCGStateParameters, GradOptimizationParameters
 
     qcml = qcml.train(
         batch_size=32,
         num_passes=10,
-        weight_optimization={
-            "optimization_method": "GRAD",
-            "learning_rate": 1e-5,
-            "iterations": 3,
-
-        },
-        get_states_extra={
-            "state_method": "LOBPCG_FAST",
-            "iterations": 15
-        }
+        weight_optimization=GradOptimizationParameters(
+            learning_rate=1e-5,
+            iterations=3
+        ),
+        get_states_extra=LOBPCGStateParameters(
+            iterations=15
+        )
     )
     qcml.wait_for_training()
     print(qcml.trained_model["guid"])
@@ -282,17 +280,19 @@ If you are running in the same session you can skip the next step, but if you ar
 With our trained model loaded into the client, we can now run inference on the dataset.
 
 .. code-block:: python
+    from qcog_python_client.schema.parameters import LOBPCGFastStateParameters
 
     result_df = qcml.inference(
         data=df_test,
-        parameters={
-            "state_method": "LOBPCG_FAST",
-            "iterations": 25,
-            "tolerance": 1e-4
-        }
+        parameters=LOBPCGFastStateParameters(
+            iterations=25,
+            tolerance=1e-4
+        )
     )
+
     mse = mean_squared_error(df_test_labels, results_df)
     mape = mean_absolute_percentage_error(df_test_labels, results_df)
+
     print(f"MSE:  {mse:.4f}")
     print(f"MAPE: {mape:.4f}")
 

@@ -122,17 +122,15 @@ Training the Model
 Now set some training specific parameters and execute the training.
 
 .. code-block:: python
+    from qcog_python_client.schema.parameters import AnalyticOptimizationParameters, LOBPCGFastStateParameters
 
     qcml = qcml.train(
         batch_size=len(df_train),
         num_passes=10,
-        weight_optimization={
-            "optimization_method": "ANALYTIC"
-        },
-        get_states_extra={
-            "state_method": "LOBPCG_FAST",
-            "iterations": 10
-        }
+        weight_optimization=AnalyticOptimizationParameters(),
+        get_states_extra=LOBPCGFastStateParameters(
+            iterations=20
+        )
     )
     qcml.wait_for_training()
     print(qcml.trained_model["guid"])
@@ -162,11 +160,10 @@ With our trained model loaded into the client, we can now run inference on the d
 
     result_df = qcml.inference(
         data=df_test,
-        parameters={
-            "state_method": "LOBPCG_FAST",
-            "iterations": 20,
-            "tolerance": 1e-6
-        }
+        parameters=LOBPCGFastStateParameters(
+            iterations=20
+            tol=1e-6
+        )
     )
     num_correct = (
         result_df.idxmax(axis=1) == df_target.idxmax(axis=1)

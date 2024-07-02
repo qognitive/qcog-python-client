@@ -910,7 +910,7 @@ class AsyncQcogClient(  # noqa: D101
         )
 
     def pauli(  # noqa: D102
-        self,
+self,
         operators: list[Operator],
         qbits: int = 2,
         pauli_weight: int = 2,

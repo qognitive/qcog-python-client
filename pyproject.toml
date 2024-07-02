@@ -15,6 +15,7 @@ dependencies = [
   "pandas",
   "numpy",
   "aiohttp",
+  "pydantic",
   "typing_extensions",
 ]
 dynamic = ["version"]

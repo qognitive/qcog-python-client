@@ -120,7 +120,7 @@ class StateMethod(str, enum.Enum):
 
 class _OptionalEnsemble(BaseModel):
     learning_rate_axes: float = 0.0
-    normalize_axes: bool = False
+    normalize_axes: bool = True
 
 
 class LOBPCGFastStateParameters(_OptionalEnsemble):

@@ -94,23 +94,21 @@ Training the Model
 Now set some training specific parameters and execute the training.
 
 .. code-block:: python
-
-    grad_optimization_params = GradOptimizationParameters(
-        iterations=5,
-        learning_rate=1e-3,
-    )
-
-    lobpcg_fast_state_params = LOBPCGFastStateParameters(
-        iterations=10,
-        learning_rate_axes=1e-3
-    )
+    from qcog_python_client.schema.parameters import GradOptimizationParameters, LOBPCGFastStateParameters
 
     qcml = qcml.train(
         batch_size=64,
         num_passes=10,
-        weight_optimization=grad_optimization_params,
-        get_states_extra=lobpcg_fast_state_params
+        weight_optimization=GradOptimizationParameters(
+            iterations=5,
+            learning_rate=1e-3,
+        ),
+        get_states_extra=LOBPCGFastStateParameters(
+            iterations=10,
+            learning_rate_axes=1e-3
+        )
     )
+
 
     qcml.wait_for_training()
     print(qcml.trained_model["guid"])

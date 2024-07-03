@@ -79,7 +79,6 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         self._version: str
         self._http_client: CLIENT
         self.model: TrainingModel
-        self.project: dict[str, str]
         self.dataset: dict = {}
         self.training_parameters: dict = {}
         self.trained_model: dict = {}
@@ -168,9 +167,8 @@ class QcogClient(  # noqa: D101
         """Create a client with initialization from the API.
 
         Since __init__ is always sync we cannot call to the API using that
-        method of class creation. If we need to fetch things such as the
-        project ID that the token is associated with the only way to do that
-        properly with async objects is to use a factory method.
+        method of class creation. If we need to fetch things and the only way
+        to do that properly with async objects is to use a factory method.
 
         Here we replace init with create and then once the object is created
         (since the sync part is linked to the creation of the object in memory
@@ -271,8 +269,6 @@ class QcogClient(  # noqa: D101
         if safe_mode:
             hsm.http_client.get("status")
 
-        hsm.project = hsm.http_client.get("bootstrap")
-
         return hsm
 
     def _preload(self, ep: str, guid: str) -> dict:
@@ -305,7 +301,6 @@ class QcogClient(  # noqa: D101
         self.training_parameters = self.http_client.post(
             "training_parameters",
             {
-                "project_guid": self.project["guid"],
                 "model": self.model.value,
                 "parameters": {"model": self.model.params}
                 | jsonable_train_parameters(params),
@@ -334,7 +329,6 @@ class QcogClient(  # noqa: D101
             format="dataframe",
             source="client",
             data=encode_base64(data),
-            project_guid=self.project["guid"],
         )
         valid_data: dict = {k: v for k, v in data_payload.items()}  # type cast
         self.dataset = self.http_client.post("dataset", valid_data)
@@ -386,7 +380,6 @@ class QcogClient(  # noqa: D101
         """Preload a model from a guid."""
         self.trained_model = self._preload("model", guid)
 
-        self._preload("project", self.trained_model["project_guid"])
         self.version = self.trained_model["qcog_version"]
 
         self.preloaded_training_parameters(
@@ -444,7 +437,6 @@ class QcogClient(  # noqa: D101
             {
                 "training_parameters_guid": self.training_parameters["guid"],
                 "dataset_guid": self.dataset["guid"],
-                "project_guid": self.project["guid"],
                 "qcog_version": self.version,
             },
         )
@@ -653,13 +645,6 @@ class AsyncQcogClient(  # noqa: D101
         if safe_mode:
             await hsm.http_client.get("status")
 
-        hsm.project = RequestsClient(
-            token=token,
-            hostname=hostname,
-            port=port,
-            api_version=api_version,
-        ).get("bootstrap")
-
         return hsm
 
     async def _preload(self, ep: str, guid: str) -> dict:
@@ -692,7 +677,6 @@ class AsyncQcogClient(  # noqa: D101
         self.training_parameters = await self.http_client.post(
             "training_parameters",
             {
-                "project_guid": self.project["guid"],
                 "model": self.model.value,
                 "parameters": {"model": self.model.params}
                 | jsonable_train_parameters(params),
@@ -722,7 +706,6 @@ class AsyncQcogClient(  # noqa: D101
             format="dataframe",
             source="client",
             data=encode_base64(data),
-            project_guid=self.project["guid"],
         )
         valid_data: dict = {k: v for k, v in data_payload.items()}  # type cast
         self.dataset = await self.http_client.post("dataset", valid_data)
@@ -777,7 +760,6 @@ class AsyncQcogClient(  # noqa: D101
         self.version = self.trained_model["qcog_version"]
 
         await asyncio.gather(
-            self._preload("project", self.trained_model["project_guid"]),
             self.preloaded_training_parameters(
                 self.trained_model["training_parameters_guid"]
             ),
@@ -834,7 +816,6 @@ class AsyncQcogClient(  # noqa: D101
             {
                 "training_parameters_guid": self.training_parameters["guid"],
                 "dataset_guid": self.dataset["guid"],
-                "project_guid": self.project["guid"],
                 "qcog_version": self.version,
             },
         )

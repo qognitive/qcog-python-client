@@ -33,7 +33,6 @@ class Dataset(TypedDict):
     format: str
     source: str
     data: str
-    project_guid: str
 
 
 class FisherParams(TypedDict):

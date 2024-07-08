@@ -23,10 +23,12 @@ Now we will construct some inference parameters that will determine how the mode
 
 .. code:: python
 
-    parameters = {
+    from qcog_python_client.schema.parameters import LOBPCGFastStateParameters
+
+    parameters = LOBPCGFastStateParameters(
         "state_method": "LOBPCG_FAST",
         "iterations": 5
-    }
+    )
 
 Finally we execute an inference call against our trained model, providing the forecast data and the parameters.
 

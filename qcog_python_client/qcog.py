@@ -9,6 +9,13 @@ from typing import Any, Generic, Type, TypeAlias, TypeVar
 
 import pandas as pd
 
+from qcog_python_client.schema.common import Model
+from qcog_python_client.schema.generated_schema.models import (
+    ModelEnsembleParameters,
+    ModelGeneralParameters,
+    ModelPauliParameters,
+)
+
 from ._jsonable_parameters import (
     jsonable_inference_parameters,
     jsonable_train_parameters,
@@ -23,27 +30,26 @@ from .schema import (
     AsyncInferenceProtocol,
     AsyncTrainProtocol,
     Dataset,
-    EnsembleModel,
-    GeneralModel,
     InferenceParameters,
     InferenceProtocol,
-    Model,
     NotRequiredStateParams,
     NotRequiredWeightParams,
     Operator,
-    PauliModel,
     TrainingParameters,
     TrainProtocol,
 )
 
-TrainingModel: TypeAlias = PauliModel | EnsembleModel | GeneralModel
+TrainingModel: TypeAlias = (
+    ModelPauliParameters | ModelEnsembleParameters | ModelGeneralParameters
+)
+
 CLIENT = TypeVar("CLIENT")
 
 
-MODEL_MAP: dict[str, Type[TrainingModel]] = {
-    Model.pauli.value: PauliModel,
-    Model.ensemble.value: EnsembleModel,
-    Model.general.value: GeneralModel,
+ModelMap: dict[Model, Type[TrainingModel]] = {
+    Model.pauli.value: ModelPauliParameters,
+    Model.ensemble.value: ModelEnsembleParameters,
+    Model.general.value: ModelGeneralParameters,
 }
 # https://ubiops.com/docs/r_client_library/deployment_requests/#response-structure_1
 WAITING_STATUS = ("processing", "pending")
@@ -115,14 +121,14 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         target_operator: list[Operator] = [],
     ) -> Any:
         """Select PauliModel for the training."""
-        self.model = PauliModel(
-            operators,
-            qbits,
-            pauli_weight,
-            sigma_sq,
-            sigma_sq_optimization,
-            seed,
-            target_operator,
+        self.model = ModelPauliParameters(
+            operators=operators,
+            qbits=qbits,
+            pauli_weight=pauli_weight,
+            sigma_sq=sigma_sq,
+            sigma_sq_optimization_kwargs=sigma_sq_optimization,
+            seed=seed,
+            target_operators=[str(op) for op in target_operator],
         )
         return self
 
@@ -137,14 +143,15 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         target_operator: list[Operator] = [],
     ) -> Any:
         """Select EnsembleModel for the training."""
-        self.model = EnsembleModel(
-            operators,
-            dim,
-            num_axes,
-            sigma_sq,
-            sigma_sq_optimization,
-            seed,
-            target_operator,
+        # Cast all the operators to string
+        self.model = ModelEnsembleParameters(
+            operators=operators,
+            dim=dim,
+            num_axes=num_axes,
+            sigma_sq=sigma_sq,
+            sigma_sq_optimization_kwargs=sigma_sq_optimization,
+            seed=seed,
+            target_operators=[str(op) for op in target_operator],
         )
         return self
 
@@ -306,8 +313,8 @@ class QcogClient(  # noqa: D101
             "training_parameters",
             {
                 "project_guid": self.project["guid"],
-                "model": self.model.value,
-                "parameters": {"model": self.model.params}
+                "model": self.model.model_name,
+                "parameters": {"model": self.model.model_dump()}
                 | jsonable_train_parameters(params),
             },
         )
@@ -386,20 +393,20 @@ class QcogClient(  # noqa: D101
         """Preload a model from a guid."""
         self.trained_model = self._preload("model", guid)
 
-        self._preload("project", self.trained_model["project_guid"])
         self.version = self.trained_model["qcog_version"]
 
         self.preloaded_training_parameters(
             self.trained_model["training_parameters_guid"]
         )
 
-        model_params = {
-            k.replace("_kwargs", ""): v
-            for k, v in self.training_parameters["parameters"]["model"].items()
-            if k != "model"
-        }
-
-        self.model = MODEL_MAP[self.training_parameters["model"]](**model_params)
+        # The model name in order to retrieve the correct parameters
+        model_name = self.training_parameters["model"]
+        # Parameters for the model
+        model_parameters = self.training_parameters["parameters"]['model']
+        # Retrieve the validation for the model parameters
+        validate_cls = ModelMap[model_name]
+        # Validate the model parameters
+        self.model = validate_cls(**model_parameters)
         return self
 
     def train(
@@ -693,8 +700,8 @@ class AsyncQcogClient(  # noqa: D101
             "training_parameters",
             {
                 "project_guid": self.project["guid"],
-                "model": self.model.value,
-                "parameters": {"model": self.model.params}
+                "model": self.model.model_name,
+                "parameters": {"model": self.model.model_dump()}
                 | jsonable_train_parameters(params),
             },
         )
@@ -789,7 +796,7 @@ class AsyncQcogClient(  # noqa: D101
             if k != "model"
         }
 
-        self.model = MODEL_MAP[self.training_parameters["model"]](**model_params)
+        self.model = ModelMap[self.training_parameters["model"]](**model_params)
         return self
 
     async def train(
@@ -910,7 +917,7 @@ class AsyncQcogClient(  # noqa: D101
         )
 
     def pauli(  # noqa: D102
-self,
+        self,
         operators: list[Operator],
         qbits: int = 2,
         pauli_weight: int = 2,

@@ -24,7 +24,7 @@ from sklearn import datasets as sk_datasets
 from sklearn.preprocessing import StandardScaler
 
 from qcog_python_client import QcogClient
-from qcog_python_client.schema.parameters import (
+from qcog_python_client.schema import (
     GradOptimizationParameters,
     LOBPCGFastStateParameters,
 )
@@ -123,6 +123,7 @@ def test_train_one():
         get_states_extra=get_states_extra,
     )
 
+    qcml.wait_for_training()
     print(qcml.trained_model["guid"])
 
 

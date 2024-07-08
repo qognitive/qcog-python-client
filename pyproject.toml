@@ -58,7 +58,7 @@ no_implicit_optional = true
 strict_optional = true
 ignore_missing_imports = true
 
-exclude = []
+exclude = ["generated_schema"]
 
 [tool.ruff]
 exclude = [
@@ -88,6 +88,7 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
+    "generated_schema"
 ]
 
 line-length = 88
@@ -108,4 +109,6 @@ target-version="py38"
 
 select = ["F", "E", "W", "I", "N", "D", "YTT", "ASYNC"]
 
-ignore = []
+exclude = [
+  "generated_schema"
+]

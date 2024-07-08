@@ -2,23 +2,25 @@
 
 from __future__ import annotations
 
-from enum import Enum
+import enum
 from typing import Any, Protocol, TypeAlias, TypedDict
 
 import pandas as pd
-from typing_extensions import NotRequired
 
-from .parameters import StateParams, WeightParams
+from .generated_schema.models import (
+    AdamOptimizationParameters,
+    AnalyticOptimizationParameters,
+    EIGHStateParameters,
+    EIGSStateParameters,
+    GradOptimizationParameters,
+    GradStateParameters,
+    LOBPCGFastStateParameters,
+    Model,
+    NPEIGHStateParameters,
+    PowerIterStateParameters,
+)
 
 Operator: TypeAlias = str | int
-
-
-class Model(Enum):
-    """List of available models."""
-
-    pauli = "pauli"
-    ensemble = "ensemble"
-    general = "general"
 
 
 class EmptyDictionary(TypedDict):
@@ -36,15 +38,38 @@ class Dataset(TypedDict):
     project_guid: str
 
 
-class FisherParams(TypedDict):
-    """Fisher Parameters."""
+# TODO: define the state method in the backend so that the code generation
+# can be done properly in the same way we already defined the optimization
+# For now this will work as a interface in order to avoid breaking changes
+# once the schema is defined.
+class StateMethod(str, enum.Enum):
+    """Enum definition for the state methods."""
 
-    learning_rate: NotRequired[float]
-    init_update_n: int
-    update_frequency: int
-    adjust_lr: bool
-    average_over_axis: NotRequired[int]
-    use_hessian: bool
+    LOBPCG_FAST = "LOBPCG_FAST"
+    POWER_ITER = "POWER_ITER"
+    EIGS = "EIGS"
+    EIGH = "EIGH"
+    NP_EIGH = "NP_EIGH"
+    LOBPCB = "LOBPCB"
+    GRAD = "GRAD"
+
+
+StateMethodModel: TypeAlias = StateMethod
+
+WeightParams: TypeAlias = (
+    AnalyticOptimizationParameters
+    | AdamOptimizationParameters
+    | GradOptimizationParameters
+)
+
+StateParams: TypeAlias = (
+    LOBPCGFastStateParameters
+    | PowerIterStateParameters
+    | EIGHStateParameters
+    | EIGSStateParameters
+    | NPEIGHStateParameters
+    | GradStateParameters
+)
 
 
 class InferenceParameters(TypedDict):
@@ -54,8 +79,8 @@ class InferenceParameters(TypedDict):
     state_parameters: StateParams
 
 
-NotRequiredWeightParams: TypeAlias = WeightParams | EmptyDictionary
-NotRequiredStateParams: TypeAlias = StateParams | EmptyDictionary
+NotRequiredWeightParams = WeightParams | EmptyDictionary
+NotRequiredStateParams = StateParams | EmptyDictionary
 
 
 class TrainingParameters(TypedDict):

@@ -26,15 +26,19 @@ Now we will construct some inference parameters that will determine how the mode
     from qcog_python_client.schema.parameters import LOBPCGFastStateParameters
 
     parameters = LOBPCGFastStateParameters(
-        "state_method": "LOBPCG_FAST",
-        "iterations": 5
+        iterations=5
     )
 
 Finally we execute an inference call against our trained model, providing the forecast data and the parameters.
 
 .. code:: python
 
-    predicted_df = model.inference(forecast_data, parameters)
+    predicted_df = model.inference(
+        forecast_data,
+        parameters={
+            "state_parameters": parameters
+        }
+    )
 
 You can print the dataframe returned and see how close it gets to what we expect.
 
@@ -55,7 +59,12 @@ The async client has the same interface except we have to await our inference ca
 
 .. code:: python
 
-    result_df = await model.inference(forecast_data, parameters)
+    result_df = await model.inference(
+        forecast_data,
+        parameters={
+            "state_parameters": parameters
+        }
+    )
 
 
 Next Steps

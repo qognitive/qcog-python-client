@@ -59,7 +59,7 @@ def jsonable_train_parameters(params: TrainingParameters) -> dict:
 
     def enum_serializable(e: enum.Enum | str) -> str:
         if isinstance(e, enum.Enum):
-            return e.value
+            return str(e.value)
         return e
 
     # If an object is actually passed

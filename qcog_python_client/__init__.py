@@ -1,16 +1,15 @@
 """Qcog Python Client package."""
 
-
-from .qcog import AsyncQcogClient, QcogClient  # noqa: F401
-from .schema import (  # noqa: F401
-    Model,  # noqa: F401
+from .qcog import AsyncQcogClient, QcogClient
+from .schema import (
+    Model,
     ModelEnsembleParameters,
     ModelGeneralParameters,
     ModelPauliParameters,
 )
 
-EnsembleModel = Model.ensemble  # noqa: F401
-PauliModel = Model.pauli  # noqa: F401
-GeneralModel = Model.general  # noqa: F401
+EnsembleModel = Model.ensemble
+PauliModel = Model.pauli
+GeneralModel = Model.general
 EnsembleSchema = ModelEnsembleParameters
 PauliSchema = ModelPauliParameters

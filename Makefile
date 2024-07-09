@@ -15,11 +15,14 @@ docs-build:
 	python -m sphinx -T -W --keep-going -b html -d _build/doctrees -D language=en . ./html
 
 lint-check:
-	ruff check ./qcog_python_client && \
+	ruff check . && \
 	mypy ./qcog_python_client
 
 lint-fix:
-	ruff check --fix ./qcog_python_client
+	ruff check --fix .
 
 lint-write:
-	ruff format ./qcog_python_client
+	ruff format .
+
+schema-build:
+	python schema.py

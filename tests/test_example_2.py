@@ -15,7 +15,6 @@ pytest tests/test_example_2.py -s -vv -k test_inference_two
 ```
 """
 
-
 import os
 import re
 import tempfile
@@ -40,9 +39,9 @@ if API_TOKEN is None:
     raise ValueError("API_TOKEN is not set")
 
 file_path = os.path.dirname(os.path.realpath(__file__))
-data_dir = os.path.join(file_path, 'data')
-data_file = os.path.join(data_dir, 'data.npy')
-labels_file = os.path.join(data_dir, 'labels.npy')
+data_dir = os.path.join(file_path, "data")
+data_file = os.path.join(data_dir, "data.npy")
+labels_file = os.path.join(data_dir, "labels.npy")
 test_fraction = 0.2
 
 # checks whether data has been downloaded already
@@ -104,13 +103,10 @@ df_target = pd.DataFrame(test_target, columns=label_operators)
 API_TOKEN = os.getenv("API_TOKEN")
 TRAINED_MODEL = os.getenv("TRAINED_MODEL")
 
+
 def test_train_two():
     """Run training test."""
-    qcml = QcogClient.create(
-        token=API_TOKEN,
-        hostname="localhost",
-        port=8000
-    )
+    qcml = QcogClient.create(token=API_TOKEN, hostname="localhost", port=8000)
 
     # IF a trained model guid is provided,
     # load the model and check the status
@@ -131,19 +127,13 @@ def test_train_two():
     qcml.data(df_train)
 
     # Model selection
-    qcml = qcml.pauli(
-        operators=df_train.columns.to_list(),
-        qbits=5,
-        pauli_weight=2
-    )
+    qcml = qcml.pauli(operators=df_train.columns.to_list(), qbits=5, pauli_weight=2)
 
     qcml.train(
         batch_size=len(df_train),
         num_passes=10,
         weight_optimization=AnalyticOptimizationParameters(),
-        get_states_extra=LOBPCGFastStateParameters(
-            iterations=10
-        )
+        get_states_extra=LOBPCGFastStateParameters(iterations=10),
     )
 
     qcml.wait_for_training()
@@ -158,11 +148,7 @@ def test_inference_two():
     if TRAINED_MODEL is None:
         raise ValueError("TRAINED_MODEL is not set")
 
-    qcml = QcogClient.create(
-        token=API_TOKEN,
-        hostname="localhost",
-        port=8000
-    )
+    qcml = QcogClient.create(token=API_TOKEN, hostname="localhost", port=8000)
 
     print("Loading model...")
     qcml = qcml.preloaded_model(TRAINED_MODEL)
@@ -171,15 +157,10 @@ def test_inference_two():
     result_df = qcml.inference(
         data=df_test,
         parameters={
-            "state_parameters": LOBPCGFastStateParameters(
-                iterations=20,
-                tol=1e-6
-            )
-        }
+            "state_parameters": LOBPCGFastStateParameters(iterations=20, tol=1e-6)
+        },
     )
 
-    num_correct = (
-    result_df.idxmax(axis=1) == df_target.idxmax(axis=1)
-    ).sum()
+    num_correct = (result_df.idxmax(axis=1) == df_target.idxmax(axis=1)).sum()
 
     print(f"Correct: {num_correct * 100 / len(df_test):.2f}% out of {len(df_test)}")

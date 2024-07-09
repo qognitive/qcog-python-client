@@ -1,4 +1,5 @@
 """Example of inference with a preloaded model."""
+
 import os
 
 import numpy as np
@@ -28,18 +29,24 @@ forecast_data = pandas.DataFrame(
     columns=["X", "Y"],
 )
 
+
 def main():
     """Run training."""
     hsm = QcogClient.create(
         token=API_TOKEN,
     ).preloaded_model(TRAINED_MODEL_GUID)
     print(hsm.status())
-    print(hsm.wait_for_training().inference(forecast_data, {
-        "state_parameters": LOBPCGFastStateParameters(
-            iterations=5,
-            learning_rate_axes=0,
+    print(
+        hsm.wait_for_training().inference(
+            forecast_data,
+            {
+                "state_parameters": LOBPCGFastStateParameters(
+                    iterations=5,
+                    learning_rate_axes=0,
+                )
+            },
         )
-    }))
+    )
 
 
 async def async_main():
@@ -49,12 +56,17 @@ async def async_main():
     )
     print(await hsm.status())
     await hsm.wait_for_training()
-    print(await hsm.inference(forecast_data, {
-        "state_parameters": LOBPCGFastStateParameters(
-            iterations=5,
-            learning_rate_axes=0,
+    print(
+        await hsm.inference(
+            forecast_data,
+            {
+                "state_parameters": LOBPCGFastStateParameters(
+                    iterations=5,
+                    learning_rate_axes=0,
+                )
+            },
         )
-    }))
+    )
 
 
 if __name__ == "__main__":

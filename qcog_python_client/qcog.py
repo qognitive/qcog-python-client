@@ -47,10 +47,12 @@ CLIENT = TypeVar("CLIENT")
 
 
 ModelMap: dict[Model, Type[TrainingModel]] = {
-    Model.pauli.value: ModelPauliParameters,
-    Model.ensemble.value: ModelEnsembleParameters,
-    Model.general.value: ModelGeneralParameters,
+    Model.pauli: ModelPauliParameters,
+    Model.ensemble: ModelEnsembleParameters,
+    Model.general: ModelGeneralParameters,
 }
+
+# TODO: Move to the schema as Enum
 # https://ubiops.com/docs/r_client_library/deployment_requests/#response-structure_1
 WAITING_STATUS = ("processing", "pending")
 SUCCESS_STATUS = "completed"
@@ -122,13 +124,14 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
     ) -> Any:
         """Select PauliModel for the training."""
         self.model = ModelPauliParameters(
-            operators=operators,
+            operators=[str(op) for op in operators],
             qbits=qbits,
             pauli_weight=pauli_weight,
             sigma_sq=sigma_sq,
             sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,
             target_operators=[str(op) for op in target_operator],
+            model_name="pauli",
         )
         return self
 
@@ -145,13 +148,14 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         """Select EnsembleModel for the training."""
         # Cast all the operators to string
         self.model = ModelEnsembleParameters(
-            operators=operators,
+            operators=[str(op) for op in operators],
             dim=dim,
             num_axes=num_axes,
             sigma_sq=sigma_sq,
             sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,
             target_operators=[str(op) for op in target_operator],
+            model_name="ensemble",
         )
         return self
 
@@ -402,7 +406,7 @@ class QcogClient(  # noqa: D101
         # The model name in order to retrieve the correct parameters
         model_name = self.training_parameters["model"]
         # Parameters for the model
-        model_parameters = self.training_parameters["parameters"]['model']
+        model_parameters = self.training_parameters["parameters"]["model"]
         # Retrieve the validation for the model parameters
         validate_cls = ModelMap[model_name]
         # Validate the model parameters

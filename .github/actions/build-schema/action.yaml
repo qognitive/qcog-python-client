@@ -1,0 +1,16 @@
+name: "python build package"
+description: "build client wheel"
+
+runs:
+  using: "composite"
+  steps:
+  - name: Package schema
+    run: |
+      python -m pip cache purge
+      python -m pip install --upgrade pip
+      python -m pip install ".[dev]"
+    shell: bash
+  - name: Build the schema against live service
+    run: |
+      make schema-build
+    shell: bash

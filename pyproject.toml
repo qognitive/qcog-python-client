@@ -17,6 +17,7 @@ dependencies = [
   "aiohttp",
   "pydantic",
   "typing_extensions",
+  "pydantic-settings",
 ]
 dynamic = ["version"]
 
@@ -58,7 +59,7 @@ no_implicit_optional = true
 strict_optional = true
 ignore_missing_imports = true
 
-exclude = ["generated_schema"]
+exclude = ["generated_schema", "docs"]
 
 [tool.ruff]
 exclude = [
@@ -88,7 +89,8 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
-    "generated_schema"
+    "generated_schema",
+    "docs",
 ]
 
 line-length = 88
@@ -112,3 +114,6 @@ select = ["F", "E", "W", "I", "N", "D", "YTT", "ASYNC"]
 exclude = [
   "generated_schema"
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]

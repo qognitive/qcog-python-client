@@ -17,6 +17,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: Build schema
+      uses: ./.github/actions/build-schema
 
     - name: Setup python, Lint Code and test
       uses: ./.github/actions/setup_lint_and_test

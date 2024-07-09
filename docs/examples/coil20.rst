@@ -32,11 +32,6 @@ Let's download the data and format it into a dataframe suitable for training and
 
     from sklearn.model_selection import train_test_split
 
-    file_path = os.path.dirname(os.path.realpath(__file__))
-    data_dir = os.path.join(file_path, 'data')
-    data_file = os.path.join(data_dir, 'data.npy')
-    labels_file = os.path.join(data_dir, 'labels.npy')
-
     test_fraction = 0.2
 
     # checks whether data has been downloaded already

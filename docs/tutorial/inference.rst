@@ -59,7 +59,12 @@ The async client has the same interface except we have to await our inference ca
 
 .. code:: python
 
-    result_df = await model.inference(forecast_data, parameters)
+    result_df = await model.inference(
+        forecast_data,
+        parameters={
+            "state_parameters": parameters
+        }
+    )
 
 
 Next Steps

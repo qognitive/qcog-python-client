@@ -50,7 +50,7 @@ WAITING_STATUS = ("processing", "pending")
 SUCCESS_STATUS = "completed"
 
 
-DEFAULT_QCOG_VERSION = "0.0.63"
+DEFAULT_QCOG_VERSION = "0.0.70"
 
 
 def numeric_version(version: str) -> list[int]:

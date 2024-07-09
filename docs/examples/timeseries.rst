@@ -34,10 +34,6 @@ Let's download the data and format it into a dataframe suitable for training and
     from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
     from ucimlrepo import fetch_ucirepo
 
-    # internal
-    from qcog.src.classical.pauli_symbolic import ClassicalPauliSymbolic as PauliHSM
-    from qcog.utils.model_default_init import default_config_map
-
 
     def add_lagged_features(
         train_test_idx: np.ndarray,

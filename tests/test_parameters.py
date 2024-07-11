@@ -1,8 +1,9 @@
+"""Test validity of state and weight parameters."""
+
 from pydantic import BaseModel
 
 from qcog_python_client.qcog import jsonable_train_parameters
-from qcog_python_client.schema.common import TrainingParameters
-from qcog_python_client.schema.parameters import (
+from qcog_python_client.schema import (
     AdamOptimizationParameters,
     AnalyticOptimizationParameters,
     EIGHStateParameters,
@@ -13,6 +14,7 @@ from qcog_python_client.schema.parameters import (
     NPEIGHStateParameters,
     PowerIterStateParameters,
 )
+from qcog_python_client.schema.common import TrainingParameters
 
 # This test is meant to ensure that all the pydantic models,
 # once parsed in the jsonable_parameters function, dont't produce

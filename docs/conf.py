@@ -5,10 +5,10 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import sys
 import os
+import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(".."))
 
 project = "qcog-python-client"
 copyright = "2024, Qognitive Inc"
@@ -22,7 +22,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.duration",
-    "sphinx.ext.autosummary"
+    "sphinx.ext.autosummary",
 ]
 
 templates_path = ["_templates"]

@@ -1,4 +1,5 @@
 """Example of training a model."""
+
 import os
 
 import pandas
@@ -47,9 +48,9 @@ def main():
 
 async def async_main():
     """Run training async."""
-    hsm = (
-        await AsyncQcogClient.create(token=API_TOKEN)
-    ).ensemble(operators=["X", "Y", "Z"], dim=4, num_axes=16)
+    hsm = (await AsyncQcogClient.create(token=API_TOKEN)).ensemble(
+        operators=["X", "Y", "Z"], dim=4, num_axes=16
+    )
     await hsm.data(df)
     await hsm.train(
         batch_size=1000,

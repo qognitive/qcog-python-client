@@ -59,6 +59,9 @@ def jsonable_train_parameters(params: TrainingParameters) -> dict:
 
     def enum_serializable(e: enum.Enum | str) -> str:
         """Make an enum serializable by converting it to a string."""
+        if not isinstance(e, (enum.Enum, str)):
+            raise ValueError(f"Expected enum or string, got {type(e)}")
+
         if isinstance(e, enum.Enum):
             return str(e.value)
         return e
@@ -99,7 +102,9 @@ def jsonable_train_parameters(params: TrainingParameters) -> dict:
 def jsonable_inference_parameters(params: InferenceParameters) -> dict:
     parameters = {}
 
-    if "state_parameters" in params and params["state_parameters"]:
+    state_parameters = params.get("state_parameters")
+
+    if state_parameters:
         parameters = params["state_parameters"].model_dump()
 
     return parameters

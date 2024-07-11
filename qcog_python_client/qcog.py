@@ -131,7 +131,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
             sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,
             target_operators=[str(op) for op in target_operator],
-            model_name="pauli",
+            model_name=Model.pauli.value,
         )
         return self
 
@@ -155,7 +155,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
             sigma_sq_optimization_kwargs=sigma_sq_optimization,
             seed=seed,
             target_operators=[str(op) for op in target_operator],
-            model_name="ensemble",
+            model_name=Model.ensemble.value,
         )
         return self
 

@@ -28,12 +28,13 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 
 from qcog_python_client.qcog import QcogClient
-from qcog_python_client.schema.parameters import (
+from qcog_python_client.schema import (
     AnalyticOptimizationParameters,
     LOBPCGFastStateParameters,
 )
 
 API_TOKEN = os.getenv("API_TOKEN")
+QCOG_VERSION = "0.0.71"
 
 if API_TOKEN is None:
     raise ValueError("API_TOKEN is not set")
@@ -106,7 +107,9 @@ TRAINED_MODEL = os.getenv("TRAINED_MODEL")
 
 def test_train_two():
     """Run training test."""
-    qcml = QcogClient.create(token=API_TOKEN, hostname="localhost", port=8000)
+    qcml = QcogClient.create(
+        token=API_TOKEN, hostname="localhost", port=8000, version=QCOG_VERSION
+    )
 
     # IF a trained model guid is provided,
     # load the model and check the status
@@ -148,7 +151,9 @@ def test_inference_two():
     if TRAINED_MODEL is None:
         raise ValueError("TRAINED_MODEL is not set")
 
-    qcml = QcogClient.create(token=API_TOKEN, hostname="localhost", port=8000)
+    qcml = QcogClient.create(
+        token=API_TOKEN, hostname="localhost", port=8000, version=QCOG_VERSION
+    )
 
     print("Loading model...")
     qcml = qcml.preloaded_model(TRAINED_MODEL)

@@ -3,7 +3,6 @@
 from .common import (
     AsyncInferenceProtocol,
     AsyncTrainProtocol,
-    Dataset,
     InferenceParameters,
     InferenceProtocol,
     NotRequiredStateParams,
@@ -28,4 +27,8 @@ from .generated_schema.models import (
     NPEIGHStateParameters,
     OptimizationMethodModel,
     PowerIterStateParameters,
+    TrainingStatus,
+)
+from .generated_schema.models import (
+    AppSchemasDataPayloadDataPayloadInput as DatasetPayload,
 )

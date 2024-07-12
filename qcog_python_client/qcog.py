@@ -53,9 +53,7 @@ ModelMap: dict[Model, Type[TrainingModel]] = {
     Model.general: ModelGeneralParameters,
 }
 
-# TODO: Move to the schema as Enum
 # https://ubiops.com/docs/r_client_library/deployment_requests/#response-structure_1
-# WAITING_STATUS = ("processing", "pending")
 WAITING_STATUS = (TrainingStatus.processing, TrainingStatus.pending)
 SUCCESS_STATUS = (TrainingStatus.completed,)
 
@@ -365,8 +363,6 @@ class QcogClient(  # noqa: D101
         if safe_mode:
             hsm.http_client.get("status")
 
-        # hsm._project = hsm.http_client.get("bootstrap")
-
         return hsm
 
     def _preload(self, ep: str, guid: str) -> dict:
@@ -399,7 +395,6 @@ class QcogClient(  # noqa: D101
         self._training_parameters = self.http_client.post(
             "training_parameters",
             {
-                # "project_guid": self.project["guid"],
                 "model": self.model.model_name,
                 "parameters": {"model": self.model.model_dump()}
                 | jsonable_train_parameters(params),
@@ -781,7 +776,6 @@ class AsyncQcogClient(  # noqa: D101
         self._training_parameters = await self.http_client.post(
             "training_parameters",
             {
-                # "project_guid": self.project["guid"],
                 "model": self.model.model_name,
                 "parameters": {"model": self.model.model_dump()}
                 | jsonable_train_parameters(params),

@@ -29,15 +29,6 @@ class EmptyDictionary(TypedDict):
     pass
 
 
-class Dataset(TypedDict):
-    """Dataset Parameters."""
-
-    format: str
-    source: str
-    data: str
-    project_guid: str
-
-
 # TODO: define the state method in the backend so that the code generation
 # can be done properly in the same way we already defined the optimization
 # For now this will work as a interface in order to avoid breaking changes

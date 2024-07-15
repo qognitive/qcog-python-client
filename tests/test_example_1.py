@@ -31,6 +31,7 @@ from qcog_python_client.schema import (
 
 API_TOKEN = os.getenv("API_TOKEN")
 TRAINED_MODEL = os.getenv("TRAINED_MODEL")
+QCOG_VERSION = "0.0.71"
 
 data = sk_datasets.load_breast_cancer()
 
@@ -79,9 +80,7 @@ def test_train_one():
         raise ValueError("API_TOKEN not found in environment variables")
 
     qcml = QcogClient.create(
-        token=API_TOKEN,
-        hostname="localhost",
-        port=8000,
+        token=API_TOKEN, hostname="localhost", port=8000, version=QCOG_VERSION
     )
 
     # If a model is already trained and the guid is specified,
@@ -130,9 +129,7 @@ def test_train_one():
 def test_inference_one():
     """Run inference test."""
     qcml = QcogClient.create(
-        token=API_TOKEN,
-        hostname="localhost",
-        port=8000,
+        token=API_TOKEN, hostname="localhost", port=8000, version=QCOG_VERSION
     )
 
     if TRAINED_MODEL is None:

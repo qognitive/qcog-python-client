@@ -158,3 +158,6 @@ class ValueMixin:
     def value(self) -> str:
         """Return the model value."""
         return self.model.value
+
+
+Matrix: TypeAlias = list[list[int | float | Any]]

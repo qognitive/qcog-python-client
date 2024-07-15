@@ -123,7 +123,10 @@ def test_train_one():
     )
 
     qcml.wait_for_training()
+    print("----- MODEL TRAINED -----")
     print(qcml.trained_model["guid"])
+    print("----- LOSS -----")
+    print(qcml.loss)
 
 
 def test_inference_one():

@@ -6,11 +6,10 @@ build:  schema-build
 	python -m build .
 
 .PHONY: clean
-
 clean:
 	rm -rf build dist
 
-docs-build:
+docs-build: schema-build
 	cd docs && \
 	python -m sphinx -T -W --keep-going -b html -d _build/doctrees -D language=en . ./html
 

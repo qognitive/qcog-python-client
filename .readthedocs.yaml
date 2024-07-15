@@ -26,3 +26,6 @@ formats:
 python:
    install:
    - requirements: docs/requirements.txt
+   # build-customization -> https://docs.readthedocs.io/en/stable/build-customization.html
+   pre_build:
+   - python schema.py

@@ -119,6 +119,7 @@ class _HTTPClient:
         port: int = 443,
         api_version: str = "v1",
         retries: int = 3,
+        qcog_version: str,
     ):
         """HTTP client constructor.
 
@@ -137,6 +138,8 @@ class _HTTPClient:
             the "vX" part of the url for the api version
         retries: int
             number of attempts in cases of bad gateway
+        qcog_version: str
+            the version of the qcog package
 
         """
         self.token: str = token if isinstance(token, str) else self.TOKEN
@@ -147,7 +150,11 @@ class _HTTPClient:
         self.port: int = port
         self.api_version: str = api_version
 
-        self.headers = {"Authorization": f"Bearer {self.token}"}
+        self.headers = {
+            "Authorization": f"Bearer {self.token}",
+            "X-Qcog-Version": qcog_version,
+        }
+
         protocol = "http" if hostname in {"localhost", "127.0.0.1"} else "https"
         base_url: str = f"{protocol}://{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"

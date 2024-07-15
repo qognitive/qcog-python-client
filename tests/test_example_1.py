@@ -31,7 +31,7 @@ from qcog_python_client.schema import (
 
 API_TOKEN = os.getenv("API_TOKEN")
 TRAINED_MODEL = os.getenv("TRAINED_MODEL")
-QCOG_VERSION = "0.0.71"
+QCOG_VERSION = "0.0.74"
 
 data = sk_datasets.load_breast_cancer()
 

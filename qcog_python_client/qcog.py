@@ -58,7 +58,7 @@ WAITING_STATUS = (TrainingStatus.processing, TrainingStatus.pending)
 SUCCESS_STATUS = (TrainingStatus.completed,)
 
 
-DEFAULT_QCOG_VERSION = "0.0.70"
+DEFAULT_QCOG_VERSION = "0.0.74"
 
 
 def numeric_version(version: str) -> list[int]:

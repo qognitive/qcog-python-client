@@ -6,7 +6,7 @@ import numpy as np
 import pandas
 
 from qcog_python_client import AsyncQcogClient, QcogClient
-from qcog_python_client.schema.parameters import LOBPCGFastStateParameters
+from qcog_python_client.schema import LOBPCGFastStateParameters
 
 API_TOKEN = os.environ["API_TOKEN"]
 TRAINED_MODEL_GUID = os.environ.get(

@@ -593,8 +593,7 @@ class QcogClient(  # noqa: D101
         self.last_status = TrainingStatus(self.status_resp["status"])
 
         # Try to set the _loss attribute if present
-        if self.status_resp.get("loss"):
-            self._loss = self.status_resp["loss"]
+        self._loss = self.status_resp.get("loss")
 
         return self.last_status
 

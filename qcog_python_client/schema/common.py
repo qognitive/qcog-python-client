@@ -161,3 +161,7 @@ class ValueMixin:
 
 
 Matrix: TypeAlias = list[list[int | float | Any]]
+"""Matrix type alias.
+    A matrix is a list of numeric values. Each row represent the epoch (pass)
+    while each column represent the specific batch number of the data.
+"""

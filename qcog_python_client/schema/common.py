@@ -158,3 +158,10 @@ class ValueMixin:
     def value(self) -> str:
         """Return the model value."""
         return self.model.value
+
+
+Matrix: TypeAlias = list[list[int | float | Any]]
+"""Matrix type alias.
+    A matrix is a list of numeric values. Each row represent the epoch (pass)
+    while each column represent the specific batch number of the data.
+"""

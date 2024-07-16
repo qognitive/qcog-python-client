@@ -28,10 +28,11 @@ from qcog_python_client.schema import (
     GradOptimizationParameters,
     LOBPCGFastStateParameters,
 )
+from qcog_python_client.schema.generated_schema.models import TrainingStatus
 
 API_TOKEN = os.getenv("API_TOKEN")
 TRAINED_MODEL = os.getenv("TRAINED_MODEL")
-QCOG_VERSION = "0.0.71"
+QCOG_VERSION = "0.0.74"
 
 data = sk_datasets.load_breast_cancer()
 
@@ -91,7 +92,7 @@ def test_train_one():
         # Check the status of the train
         status = qcml.status()
 
-        if status != "completed":
+        if status != TrainingStatus.completed:
             raise ValueError(f"Model is not trained yet. Status: {status}")
 
         else:
@@ -123,7 +124,10 @@ def test_train_one():
     )
 
     qcml.wait_for_training()
+    print("----- MODEL TRAINED -----")
     print(qcml.trained_model["guid"])
+    print("----- LOSS -----")
+    print(qcml.loss)
 
 
 def test_inference_one():

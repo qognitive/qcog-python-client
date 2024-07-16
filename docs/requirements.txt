@@ -6,3 +6,4 @@ numpy
 aiohttp
 typing_extensions
 pydantic
+pydantic_settings

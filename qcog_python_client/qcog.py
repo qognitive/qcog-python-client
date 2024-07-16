@@ -5,11 +5,11 @@ from __future__ import annotations
 import asyncio
 import json
 import time
-from typing import Any, Generic, Type, TypeAlias, TypeVar
+from typing import Any, Coroutine, Generic, Protocol, Type, TypeAlias, TypeVar
 
 import pandas as pd
 
-from qcog_python_client.schema.common import Model
+from qcog_python_client.schema.common import Matrix, Model
 from qcog_python_client.schema.generated_schema.models import (
     ModelEnsembleParameters,
     ModelGeneralParameters,
@@ -44,7 +44,16 @@ TrainingModel: TypeAlias = (
     ModelPauliParameters | ModelEnsembleParameters | ModelGeneralParameters
 )
 
-CLIENT = TypeVar("CLIENT")
+
+class MaybeAsyncClientProtocol(Protocol):
+    """A protocol in a disperate attemt to unify the async and sync clients."""
+
+    def get(self, *args: Any, **kwargs: Any) -> Coroutine | dict:
+        """Get method."""
+        ...
+
+
+CLIENT = TypeVar("CLIENT", bound=MaybeAsyncClientProtocol)
 
 
 ModelMap: dict[Model, Type[TrainingModel]] = {
@@ -58,7 +67,7 @@ WAITING_STATUS = (TrainingStatus.processing, TrainingStatus.pending)
 SUCCESS_STATUS = (TrainingStatus.completed,)
 
 
-DEFAULT_QCOG_VERSION = "0.0.70"
+DEFAULT_QCOG_VERSION = "0.0.74"
 
 
 def numeric_version(version: str) -> list[int]:
@@ -112,6 +121,38 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         self._training_parameters: dict | None = None
         self._trained_model: dict | None = None
         self._inference_result: dict | None = None
+        self._loss: Matrix | None = None
+
+    @property
+    def loss(self) -> Matrix | None:
+        """Return the loss for a trained model.
+
+        If the training is not completed, the loss will not be available.
+        """
+        # Fetch and set a loss if it's not already set
+        if self._loss is None:
+            maybe_awaitable = self.http_client.get(
+                f"model/{self.trained_model['guid']}"
+            )
+
+            # maybe_awaitable: in order to avoid code duplication
+            # on the async and the sync client, we will check if the
+            # method has been called from the async client or not.
+
+            # If the method has been called from the async client,
+            # the `http_client.get` will return a coroutine,
+            if asyncio.iscoroutine(maybe_awaitable):
+                self.status_resp = asyncio.run(maybe_awaitable)
+
+            # Otherwise it will return a dict
+            else:
+                self.status_resp = maybe_awaitable
+
+            # Set the last status
+            self.last_status = TrainingStatus(self.status_resp["status"])
+            # Try to set the _loss attribute if present
+            self._loss = self.status_resp.get("loss")
+        return self._loss
 
     @property
     def model(self) -> TrainingModel:
@@ -358,6 +399,7 @@ class QcogClient(  # noqa: D101
             hostname=hostname,
             port=port,
             api_version=api_version,
+            qcog_version=version,
         )
 
         if safe_mode:
@@ -549,6 +591,10 @@ class QcogClient(  # noqa: D101
         )
 
         self.last_status = TrainingStatus(self.status_resp["status"])
+
+        # Try to set the _loss attribute if present
+        self._loss = self.status_resp.get("loss")
+
         return self.last_status
 
     def wait_for_training(self, poll_time: int = 60) -> QcogClient:
@@ -609,8 +655,6 @@ class QcogClient(  # noqa: D101
                 "parameters": jsonable_inference_parameters(parameters),
             },
         )
-
-        print(inference_result)
 
         return base642dataframe(
             inference_result["response"]["data"],
@@ -739,6 +783,7 @@ class AsyncQcogClient(  # noqa: D101
             hostname=hostname,
             port=port,
             api_version=api_version,
+            qcog_version=version,
         )
 
         if safe_mode:

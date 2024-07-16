@@ -135,8 +135,18 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
                 f"model/{self.trained_model['guid']}"
             )
 
+            # maybe_awaitable: in order to avoid code duplication
+            # on the async and the sync client, we will check if the
+            # method has been called from the async client or not.
+
+            # If the method has been called from the async client,
+            # the `http_client.get` will return a coroutine,
             if asyncio.iscoroutine(maybe_awaitable):
                 self.status_resp = asyncio.run(maybe_awaitable)
+
+            # Otherwise it will return a dict
+            else:
+                self.status_resp = maybe_awaitable
 
             # Set the last status
             self.last_status = TrainingStatus(self.status_resp["status"])

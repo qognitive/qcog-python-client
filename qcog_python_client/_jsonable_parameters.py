@@ -11,44 +11,16 @@ current API schema.
 import enum
 from typing import Any
 
-from pydantic import BaseModel
-
 from qcog_python_client.schema.common import (
     InferenceParameters,
-    StateMethodModel,
     TrainingParameters,
 )
-
-from .schema import OptimizationMethodModel
-
-# from qcog_python_client.schema.parameters import OptimizationMethod, StateMethod
 
 
 def jsonable_train_parameters(params: TrainingParameters) -> dict:
     # Expected params for the API.
     # This will eventually change when the
     # schema is defined and updates
-    class ExpectedWeightParams(BaseModel):
-        learning_rate: float = 0.0
-        iterations: int = 0
-        step_size: float = 0.0
-        first_moment_decay: float = 0.0
-        second_moment_decay: float = 0.0
-        epsilon: float = 0.0
-        optimization_method: OptimizationMethodModel
-
-        model_config = {"extra": "ignore"}
-
-    ExpectedWeightParams.model_rebuild()
-
-    class ExpectedStateParams(BaseModel):
-        state_method: StateMethodModel
-        iterations: int = 0
-        learning_rate_axes: float = 0.0
-
-        model_config = {"extra": "ignore"}
-
-    ExpectedStateParams.model_rebuild()
 
     state_kwargs = params["state_kwargs"]
     weight_kwargs = params["weight_optimization_kwargs"]
@@ -68,19 +40,13 @@ def jsonable_train_parameters(params: TrainingParameters) -> dict:
 
     # If an object is actually passed
     if state_kwargs:
-        # Dump the actual schema (based on the documentation)
-        state_dict = state_kwargs.model_dump()
-        # Parse it in order to only keep the actual expected parameters.
-        # This step is necessary to have compatibility with the current
-        # API schema.
-        state_params = ExpectedStateParams.model_validate(state_dict).model_dump()
+        state_params = state_kwargs.model_dump()
         # Enums are not serializable, so we need to convert them to strings
         state_params["state_method"] = enum_serializable(state_params["state_method"])
 
     # Repeate same process for the weight optimization parameters
     if weight_kwargs:
-        weight_dict = weight_kwargs.model_dump()
-        weight_params = ExpectedWeightParams.model_validate(weight_dict).model_dump()
+        weight_params = weight_kwargs.model_dump()
         weight_params["optimization_method"] = enum_serializable(
             weight_params["optimization_method"]
         )

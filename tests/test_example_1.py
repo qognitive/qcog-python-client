@@ -28,6 +28,7 @@ from qcog_python_client.schema import (
     GradOptimizationParameters,
     LOBPCGFastStateParameters,
 )
+from qcog_python_client.schema.generated_schema.models import TrainingStatus
 
 API_TOKEN = os.getenv("API_TOKEN")
 TRAINED_MODEL = os.getenv("TRAINED_MODEL")
@@ -91,7 +92,7 @@ def test_train_one():
         # Check the status of the train
         status = qcml.status()
 
-        if status != "completed":
+        if status != TrainingStatus.completed:
             raise ValueError(f"Model is not trained yet. Status: {status}")
 
         else:

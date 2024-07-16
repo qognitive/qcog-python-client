@@ -657,8 +657,6 @@ class QcogClient(  # noqa: D101
             },
         )
 
-        print(inference_result)
-
         return base642dataframe(
             inference_result["response"]["data"],
         )

@@ -24,7 +24,7 @@ def main():
     hsm = (
         QcogClient.create(
             token=API_TOKEN,
-            version="0.0.74",
+            version="0.0.75",
         )
         .ensemble(
             operators=["X", "Y", "Z"],

@@ -34,6 +34,9 @@ def main():
     """Run training."""
     hsm = QcogClient.create(
         token=API_TOKEN,
+        version="0.0.75",
+        hostname="localhost",
+        port=80,
     ).preloaded_model(TRAINED_MODEL_GUID)
     print(hsm.status())
     print(

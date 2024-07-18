@@ -32,7 +32,7 @@ from qcog_python_client.schema.generated_schema.models import TrainingStatus
 
 API_TOKEN = os.getenv("API_TOKEN")
 TRAINED_MODEL = os.getenv("TRAINED_MODEL")
-QCOG_VERSION = "0.0.74"
+QCOG_VERSION = "0.0.83"
 
 data = sk_datasets.load_breast_cancer()
 
@@ -123,7 +123,7 @@ def test_train_one():
         get_states_extra=get_states_extra,
     )
 
-    qcml.wait_for_training()
+    qcml.wait_for_training(poll_time=10)
     print("----- MODEL TRAINED -----")
     print(qcml.trained_model["guid"])
     print("----- LOSS -----")

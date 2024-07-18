@@ -50,6 +50,15 @@ You can build your own poller, or you can use our builtin
 
 This is a blocking call that will wait for the training job to complete.
 
+Once the training job is complete you can access the `loss` of the model
+on the ``.loss`` attribute of the ``qcml`` object.
+
+.. code-block:: python
+
+    print(qcml.loss)
+
+The loss is represented as a matrix, where each row is a pass over the data and each column is a batch in that pass.
+
 
 Using the Async Client
 -----------------------

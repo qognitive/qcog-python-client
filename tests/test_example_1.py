@@ -123,6 +123,7 @@ def test_train_one():
         get_states_extra=get_states_extra,
     )
 
+    print("*** WAITING FOR TRAINING ***")
     qcml.wait_for_training(poll_time=10)
     print("----- MODEL TRAINED -----")
     print(qcml.trained_model["guid"])

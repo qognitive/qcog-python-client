@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
 import time
 from typing import Any, Coroutine, Generic, Protocol, Type, TypeAlias, TypeVar
 
 import pandas as pd
 
+from qcog_python_client.log import qcoglogger
 from qcog_python_client.schema.common import Matrix, Model
 from qcog_python_client.schema.generated_schema.models import (
     ModelEnsembleParameters,
@@ -41,7 +41,8 @@ from .schema import (
     TrainProtocol,
 )
 
-logger = logging.getLogger(__name__)
+logger = qcoglogger.getChild(__name__)
+
 
 TrainingModel: TypeAlias = (
     ModelPauliParameters | ModelEnsembleParameters | ModelGeneralParameters
@@ -661,7 +662,10 @@ class QcogClient(  # noqa: D101
             itself
 
         """
-        while self.status() in WAITING_STATUS:
+        logger.info("Waiting for training to complete")
+
+        while s := self.status() in WAITING_STATUS:
+            logger.info(f"Current status: {s}")
             if self.last_status in SUCCESS_STATUS:
                 break
             time.sleep(poll_time)
@@ -1033,7 +1037,11 @@ class AsyncQcogClient(  # noqa: D101
             itself
 
         """
+        logger.info("Waiting for training to complete")
+
         while (await self.status()) in WAITING_STATUS:
+            logger.info(f"Current status: {self.last_status}")
+
             if self.last_status in SUCCESS_STATUS:
                 break
             await asyncio.sleep(poll_time)

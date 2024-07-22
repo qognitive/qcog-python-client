@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-import time
 import logging
-
+import time
 from typing import Any, Coroutine, Generic, Protocol, Type, TypeAlias, TypeVar
 
 import pandas as pd
@@ -297,10 +296,15 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
             `status` : TrainingStatus
 
         """
-        data = self.http_client.get(f"model/{self.trained_model['guid']}")
-        training_completion = data.get("training_completion")
-        current_batch_completion = data.get("current_batch_completion")
-        status = data.get("status")
+        maybe_awaitable = self.http_client.get(f"model/{self.trained_model['guid']}")
+
+        if asyncio.iscoroutine(maybe_awaitable):
+            self.status_resp = asyncio.run(maybe_awaitable)
+        else:
+            self.status_resp = maybe_awaitable
+        training_completion = self.status_resp.get("training_completion")
+        current_batch_completion = self.status_resp.get("current_batch_completion")
+        status = self.status_resp.get("status")
 
         return {
             "training_completion": training_completion,
@@ -310,9 +314,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
 
     def _status(self) -> TrainingStatus:
         """Fetch the status of the training request."""
-        maybe_awaitable = self.http_client.get(
-            f"model/{self.trained_model['guid']}"
-        )
+        maybe_awaitable = self.http_client.get(f"model/{self.trained_model['guid']}")
 
         if asyncio.iscoroutine(maybe_awaitable):
             self.status_resp = asyncio.run(maybe_awaitable)
@@ -333,6 +335,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         self._loss = self.status_resp.get("loss")
 
         return self.last_status
+
 
 class QcogClient(  # noqa: D101
     BaseQcogClient[RequestsClient],
@@ -1012,7 +1015,7 @@ class AsyncQcogClient(  # noqa: D101
 
         return self
 
-    async def status(self) -> str:
+    async def status(self) -> TrainingStatus:
         """Fetch the status of the training request. wrapped in a coroutine."""
         return self._status()
 

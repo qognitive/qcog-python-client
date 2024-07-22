@@ -308,7 +308,31 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
             "status": TrainingStatus(status),
         }
 
+    def _status(self) -> TrainingStatus:
+        """Fetch the status of the training request."""
+        maybe_awaitable = self.http_client.get(
+            f"model/{self.trained_model['guid']}"
+        )
 
+        if asyncio.iscoroutine(maybe_awaitable):
+            self.status_resp = asyncio.run(maybe_awaitable)
+        else:
+            self.status_resp = maybe_awaitable
+
+        status = TrainingStatus(self.status_resp["status"])
+        training_completion = self.status_resp.get("training_completion", 0)
+        current_batch_completion = self.status_resp.get("current_batch_completion", 0)
+
+        logger.info(f"\nStatus: {status}")
+        logger.info(f"Training completion: {training_completion} %")
+        logger.info(f"Current batch completion: {current_batch_completion} %\n")
+
+        self.last_status = TrainingStatus(self.status_resp["status"])
+
+        # Try to set the _loss attribute if present
+        self._loss = self.status_resp.get("loss")
+
+        return self.last_status
 
 class QcogClient(  # noqa: D101
     BaseQcogClient[RequestsClient],
@@ -614,26 +638,7 @@ class QcogClient(  # noqa: D101
 
     def status(self) -> TrainingStatus:
         """Fetch the status of the training request."""
-        self.status_resp: dict = self.http_client.get(
-            f"model/{self.trained_model['guid']}"
-        )
-
-        status = self.status_resp["status"]
-        training_completion = self.status_resp.get("training_completion")
-        current_batch_completion = self.status_resp.get("current_batch_completion")
-
-        logger.info("..:: Status: {1}\n".format(status))
-        logger.info("..:: Training completion: {1}\n".format)
-        logger.info("..:: Current batch completion: {1}\n".format)
-
-        self.last_status = TrainingStatus(self.status_resp["status"])
-
-
-
-        # Try to set the _loss attribute if present
-        self._loss = self.status_resp.get("loss")
-
-        return self.last_status
+        return self._status()
 
     def wait_for_training(self, poll_time: int = 60) -> QcogClient:
         """Wait for training to complete.
@@ -1008,13 +1013,8 @@ class AsyncQcogClient(  # noqa: D101
         return self
 
     async def status(self) -> str:
-        """Fetch the status of the training request."""
-        self.status_resp: dict = await self.http_client.get(
-            f"model/{self.trained_model['guid']}"
-        )
-
-        self.last_status: str = self.status_resp["status"]
-        return self.last_status
+        """Fetch the status of the training request. wrapped in a coroutine."""
+        return self._status()
 
     async def wait_for_training(self, poll_time: int = 60) -> AsyncQcogClient:
         """Wait for training to complete.

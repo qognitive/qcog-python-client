@@ -306,7 +306,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
             # Local VSCode MyPy plugin, correctly recognizes that
             # maybe_awaitable is not a coroutine, but, when
             # running the command, it throws an error.
-            self._trained_model = maybe_awaitable  # type: ignore
+            self._trained_model = maybe_awaitable
 
         return {
             "guid": self.trained_model.get("guid"),

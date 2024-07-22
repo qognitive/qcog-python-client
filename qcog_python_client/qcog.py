@@ -301,9 +301,12 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         maybe_awaitable = self.http_client.get(f"model/{self.trained_model['guid']}")
 
         if asyncio.iscoroutine(maybe_awaitable):
-            self.trained_model = asyncio.run(maybe_awaitable)
+            self._trained_model = asyncio.run(maybe_awaitable)
         else:
-            self.status_resp = maybe_awaitable
+            # Local VSCode MyPy plugin, correctly recognizes that
+            # maybe_awaitable is not a coroutine, but, when
+            # running the command, it throws an error.
+            self._trained_model = maybe_awaitable  # type: ignore
 
         return {
             "guid": self.trained_model.get("guid"),

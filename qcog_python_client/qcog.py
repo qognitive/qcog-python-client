@@ -292,6 +292,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         -------
         dict
             the current status of the training
+            `guid` : str
             `training_completion` : int
             `current_batch_completion` : int
             `status` : TrainingStatus
@@ -300,17 +301,17 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         maybe_awaitable = self.http_client.get(f"model/{self.trained_model['guid']}")
 
         if asyncio.iscoroutine(maybe_awaitable):
-            self.status_resp = asyncio.run(maybe_awaitable)
+            self.trained_model = asyncio.run(maybe_awaitable)
         else:
             self.status_resp = maybe_awaitable
-        training_completion = self.status_resp.get("training_completion")
-        current_batch_completion = self.status_resp.get("current_batch_completion")
-        status = self.status_resp.get("status")
 
         return {
-            "training_completion": training_completion,
-            "current_batch_completion": current_batch_completion,
-            "status": TrainingStatus(status),
+            "guid": self.trained_model.get("guid"),
+            "training_completion": self.status_resp.get("training_completion"),
+            "current_batch_completion": self.trained_model.get(
+                "current_batch_completion"
+            ),
+            "status": TrainingStatus(self.trained_model.get("status")),
         }
 
     def _status(self) -> TrainingStatus:

@@ -285,7 +285,7 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
         )
         return self
 
-    def progress(self) -> Any:
+    def progress(self) -> dict:
         """Return the current status of the training.
 
         Returns

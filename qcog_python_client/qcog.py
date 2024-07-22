@@ -5,6 +5,8 @@ from __future__ import annotations
 import asyncio
 import json
 import time
+import logging
+
 from typing import Any, Coroutine, Generic, Protocol, Type, TypeAlias, TypeVar
 
 import pandas as pd
@@ -39,6 +41,8 @@ from .schema import (
     TrainingParameters,
     TrainProtocol,
 )
+
+logger = logging.getLogger(__name__)
 
 TrainingModel: TypeAlias = (
     ModelPauliParameters | ModelEnsembleParameters | ModelGeneralParameters
@@ -280,6 +284,30 @@ class BaseQcogClient(Generic[CLIENT]):  # noqa: D101
             model_name=Model.ensemble.value,
         )
         return self
+
+    def progress(self) -> Any:
+        """Return the current status of the training.
+
+        Returns
+        -------
+        dict
+            the current status of the training
+            `training_completion` : int
+            `current_batch_completion` : int
+            `status` : TrainingStatus
+
+        """
+        data = self.http_client.get(f"model/{self.trained_model['guid']}")
+        training_completion = data.get("training_completion")
+        current_batch_completion = data.get("current_batch_completion")
+        status = data.get("status")
+
+        return {
+            "training_completion": training_completion,
+            "current_batch_completion": current_batch_completion,
+            "status": TrainingStatus(status),
+        }
+
 
 
 class QcogClient(  # noqa: D101
@@ -590,8 +618,18 @@ class QcogClient(  # noqa: D101
             f"model/{self.trained_model['guid']}"
         )
 
+        status = self.status_resp["status"]
+        training_completion = self.status_resp.get("training_completion")
+        current_batch_completion = self.status_resp.get("current_batch_completion")
+
+        logger.info("..:: Status: {1}\n".format(status))
+        logger.info("..:: Training completion: {1}\n".format)
+        logger.info("..:: Current batch completion: {1}\n".format)
+
         self.last_status = TrainingStatus(self.status_resp["status"])
-        print("Status response: ", self.status_resp)
+
+
+
         # Try to set the _loss attribute if present
         self._loss = self.status_resp.get("loss")
 

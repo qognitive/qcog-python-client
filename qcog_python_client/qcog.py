@@ -67,7 +67,7 @@ WAITING_STATUS = (TrainingStatus.processing, TrainingStatus.pending)
 SUCCESS_STATUS = (TrainingStatus.completed,)
 
 
-DEFAULT_QCOG_VERSION = "0.0.74"
+DEFAULT_QCOG_VERSION = "0.0.89"
 
 
 def numeric_version(version: str) -> list[int]:
@@ -591,7 +591,6 @@ class QcogClient(  # noqa: D101
         )
 
         self.last_status = TrainingStatus(self.status_resp["status"])
-
         # Try to set the _loss attribute if present
         self._loss = self.status_resp.get("loss")
 

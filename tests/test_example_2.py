@@ -34,7 +34,7 @@ from qcog_python_client.schema import (
 )
 
 API_TOKEN = os.getenv("API_TOKEN")
-QCOG_VERSION = "0.0.83"
+QCOG_VERSION = "0.0.89"
 
 if API_TOKEN is None:
     raise ValueError("API_TOKEN is not set")
@@ -136,7 +136,7 @@ def test_train_two():
         batch_size=len(df_train),
         num_passes=10,
         weight_optimization=AnalyticOptimizationParameters(),
-        get_states_extra=LOBPCGFastStateParameters(iterations=10),
+        get_states_extra=LOBPCGFastStateParameters(iterations=20),
     )
 
     qcml.wait_for_training(poll_time=10)

@@ -24,7 +24,6 @@ def main():
     hsm = (
         QcogClient.create(
             token=API_TOKEN,
-            version="0.0.74",
         )
         .ensemble(
             operators=["X", "Y", "Z"],
@@ -44,24 +43,30 @@ def main():
     )
 
     print(hsm.trained_model)
+    hsm.wait_for_training(poll_time=5)
     return hsm.trained_model["guid"]
 
 
 async def async_main():
     """Run training async."""
-    hsm = (await AsyncQcogClient.create(token=API_TOKEN)).ensemble(
-        operators=["X", "Y", "Z"], dim=4, num_axes=16
-    )
+    hsm = (
+        await AsyncQcogClient.create(
+            token=API_TOKEN,
+        )
+    ).ensemble(operators=["X", "Y", "Z"], dim=4, num_axes=16)
     await hsm.data(df)
     await hsm.train(
-        batch_size=1000,
-        num_passes=10,
+        batch_size=10,
+        num_passes=25,
         weight_optimization=GradOptimizationParameters(
             iterations=10,
             learning_rate=1e-3,
         ),
         get_states_extra=states_extra,
     )
+    await hsm.wait_for_training(poll_time=5)
+    loss = await hsm.loss()
+    print("LOSS: ", loss)
     print(hsm.trained_model)
     return hsm.trained_model["guid"]
 

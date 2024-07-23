@@ -55,7 +55,7 @@ on the ``.loss`` attribute of the ``qcml`` object.
 
 .. code-block:: python
 
-    print(qcml.loss)
+    print(qcml.loss())
 
 The loss is represented as a matrix, where each row is a pass over the data and each column is a batch in that pass.
 

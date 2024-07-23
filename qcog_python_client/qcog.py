@@ -103,25 +103,6 @@ def numeric_version(version: str) -> list[int]:
     return [int(w) for w in numbers]
 
 
-T = TypeVar("T")
-
-# def resolve_coro(c: Coroutine[T, Any, Any]) -> T:
-#     """Resolve a coroutine in a new event loop."""
-#     # Create a new event loop where the coroutine will run
-#     try:
-#         new_loop = asyncio.new_event_loop()
-#         executor = ThreadPoolExecutor(max_workers=1)
-#         executor.submit(new_loop.run_forever)
-#         asyncio.set_event_loop(new_loop)
-#         future = asyncio.run_coroutine_threadsafe(c, new_loop)
-#         result = future.result()
-#         return result
-#     finally:
-#         new_loop.call_soon_threadsafe(new_loop.stop)
-#         executor.shutdown()
-#         asyncio.set_event_loop(None)
-
-
 class StateNotSetError(Exception):
     """Exception raised when a state is not set."""
 

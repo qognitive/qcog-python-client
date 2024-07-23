@@ -4,10 +4,10 @@ description: "setup python 3.10 and execute flake8 linting"
 runs:
   using: "composite"
   steps:
-  - name: Set up Python 3.10
+  - name: Set up Python 3.12
     uses: actions/setup-python@v4
     with:
-      python-version: '3.10.4'
+      python-version: '3.12.4'
   - name: install dev dependencies
     run: pip install ".[dev]"
     shell: bash

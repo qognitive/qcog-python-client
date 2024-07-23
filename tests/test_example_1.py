@@ -128,7 +128,7 @@ def test_train_one():
     print("----- MODEL TRAINED -----")
     print(qcml.trained_model["guid"])
     print("----- LOSS -----")
-    print(qcml.loss)
+    print(qcml.loss())
 
 
 def test_inference_one():

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from concurrent import futures
 from typing import Any, Coroutine, TypeVar
 
 import pandas as pd
@@ -41,7 +42,7 @@ class QcogClient(BaseQcogClient):
         version: str = DEFAULT_QCOG_VERSION,
         httpclient: ABCRequestClient | None = None,
         dataclient: ABCDataClient | None = None,
-    ) -> "BaseQcogClient":
+    ) -> QcogClient:
         """Create a new Qcog client.
 
         TODO: docstring
@@ -55,7 +56,9 @@ class QcogClient(BaseQcogClient):
             api_version=api_version,
         )
 
-        client._data_client = dataclient or DataClient()
+        client._data_client = dataclient or DataClient(
+            http_client=client.http_client
+        )
 
         if safe_mode:
             cls.await_async(client.http_client.get("status"))
@@ -103,7 +106,7 @@ class QcogClient(BaseQcogClient):
         self.await_async(self._preloaded_training_parameters(guid))
         return self
 
-    def preload_model(self, guid: str) -> QcogClient:
+    def preloaded_model(self, guid: str) -> QcogClient:
         """Retrieve a preexisting model.
 
         Parameters
@@ -250,11 +253,12 @@ class QcogClient(BaseQcogClient):
         try:
             new_loop = asyncio.new_event_loop()
             # Create the executor
-            # executor = futures.ThreadPoolExecutor(max_workers=10)
-            # executor.submit(new_loop.run_forever)
+            executor = futures.ThreadPoolExecutor(max_workers=10)
+            executor.submit(new_loop.run_forever)
             asyncio.set_event_loop(new_loop)
             future = asyncio.run_coroutine_threadsafe(async_callable, new_loop)
             return future.result()
         finally:
-            new_loop.close()
+            new_loop.call_soon_threadsafe(new_loop.stop)
+            executor.shutdown()
             asyncio.set_event_loop(None)

@@ -49,19 +49,17 @@ class QcogClient(BaseQcogClient):
         """
         client = cls()
         client.version = version
-        client._http_client = httpclient or RequestClient(
+        client.http_client = httpclient or RequestClient(
             token=token,
             hostname=hostname,
             port=port,
             api_version=api_version,
         )
 
-        client._data_client = dataclient or DataClient(
-            http_client=client.http_client
-        )
+        client.data_client = dataclient or DataClient(http_client=client.http_client)
 
         if safe_mode:
-            cls.await_async(client.http_client.get("status"))
+            cls.await_async(client, client.http_client.get("status"))
 
         return client
 
@@ -176,6 +174,17 @@ class QcogClient(BaseQcogClient):
         return self.await_async(self._inference(data, parameters))
 
     # ###########################
+    # Public Models
+    # ###########################
+    def pauli(self, *args: Any, **kwargs: Any) -> QcogClient:
+        self.pauli(*args, **kwargs)
+        return self
+
+    def ensemble(self, *args: Any, **kwargs: Any) -> QcogClient:
+        self.ensemble(*args, **kwargs)
+        return self
+
+    # ###########################
     # Public Utilities
     # ###########################
     def progress(self) -> dict:
@@ -215,7 +224,7 @@ class QcogClient(BaseQcogClient):
         """
         return self.await_async(self._get_loss())
 
-    def wait_for_training(self) -> None:
+    def wait_for_training(self, poll_time: int = 60) -> None:
         """Wait for training to complete.
 
         Note
@@ -233,32 +242,35 @@ class QcogClient(BaseQcogClient):
             itself
 
         """
-        self.await_async(self._wait_for_training())
+        self.await_async(self._wait_for_training(poll_time))
 
     def await_async(
         self, async_callable: Coroutine[Any, Any, CallableReturnType]
     ) -> CallableReturnType:
         """Await an async callable."""
-        # If the function is running inside an event loop, get the event loop
-        # and run the coroutine.
-        loop = asyncio.get_event_loop()
+        # Check if an event loop is running
+        loop: asyncio.AbstractEventLoop | None = None
 
-        if loop.is_running():
-            return loop.run_until_complete(async_callable)
-
-        # If the function is not running inside an event loop, create a new one
-        # in its own thread and run the coroutine.
-
-        # Create a new event loop
         try:
-            new_loop = asyncio.new_event_loop()
-            # Create the executor
-            executor = futures.ThreadPoolExecutor(max_workers=10)
-            executor.submit(new_loop.run_forever)
-            asyncio.set_event_loop(new_loop)
-            future = asyncio.run_coroutine_threadsafe(async_callable, new_loop)
-            return future.result()
-        finally:
-            new_loop.call_soon_threadsafe(new_loop.stop)
-            executor.shutdown()
-            asyncio.set_event_loop(None)
+            loop = asyncio.get_running_loop()
+            return loop.run_until_complete(async_callable)
+        except RuntimeError:
+            # No event loop is running
+            # If the function is running inside an event loop, get the event loop
+            # and run the coroutine.
+            # If the function is not running inside an event loop, create a new one
+            # in its own thread and run the coroutine.
+
+            # Create a new event loop
+            try:
+                new_loop = asyncio.new_event_loop()
+                # Create the executor
+                executor = futures.ThreadPoolExecutor(max_workers=10)
+                executor.submit(new_loop.run_forever)
+                asyncio.set_event_loop(new_loop)
+                future = asyncio.run_coroutine_threadsafe(async_callable, new_loop)
+                return future.result()
+            finally:
+                new_loop.call_soon_threadsafe(new_loop.stop)
+                executor.shutdown()
+                asyncio.set_event_loop(None)

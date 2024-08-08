@@ -25,6 +25,7 @@ class DataClient(ABCDataClient):
             format="dataframe",
             source="client",
             data=encode_base64(data),
+            project_guid=None,
         ).model_dump()
 
         return await self.http_client.post("dataset", data_payload)

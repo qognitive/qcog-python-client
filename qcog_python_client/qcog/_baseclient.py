@@ -25,6 +25,7 @@ from qcog_python_client.schema.common import (
     NotRequiredWeightParams,
 )
 from qcog_python_client.schema.generated_schema.models import (
+    AcceptedResponse,
     AppSchemasDataPayloadDataPayloadResponse,
     AppSchemasParametersTrainingParametersPayloadResponse,
     Model,
@@ -66,9 +67,9 @@ class BaseQcogClient:
     """Base Qcog Client."""
 
     def __init__(self) -> None:  # noqa: D107
-        self._version: str
-        self._http_client: ABCRequestClient
-        self._data_client: ABCDataClient
+        self.http_client: ABCRequestClient
+        self.data_client: ABCDataClient
+        self._version: str = DEFAULT_QCOG_VERSION
         self._model: TrainingModel | None = None
         self._project: dict | None = None
         self._dataset: dict | None = None
@@ -87,15 +88,6 @@ class BaseQcogClient:
         return self._model
 
     @property
-    def project(self) -> dict:
-        """Return the project."""
-        if self._project is None:
-            raise StateNotSetError(
-                "No project has been found associated with this request."
-            )
-        return self._project
-
-    @property
     def dataset(self) -> dict:
         """Return the dataset."""
         if self._dataset is None:
@@ -109,7 +101,9 @@ class BaseQcogClient:
     @dataset.setter
     def dataset(self, value: dict) -> None:
         """Set and validate the dataset."""
-        self._dataset = AppSchemasDataPayloadDataPayloadResponse.model_dump(value)
+        self._dataset = AppSchemasDataPayloadDataPayloadResponse.model_validate(
+            value
+        ).model_dump()
 
     @property
     def training_parameters(self) -> dict:
@@ -126,7 +120,9 @@ class BaseQcogClient:
     def training_parameters(self, value: dict) -> None:
         """Set and validate the training parameters."""
         self._training_parameters = (
-            AppSchemasParametersTrainingParametersPayloadResponse.model_dump(value)
+            AppSchemasParametersTrainingParametersPayloadResponse.model_validate(
+                value
+            ).model_dump()
         )
 
     @property
@@ -139,6 +135,11 @@ class BaseQcogClient:
                 `preloaded_model` to load an existing one""",
             )
         return self._trained_model
+
+    @trained_model.setter
+    def trained_model(self, value: dict) -> None:
+        """Set and validate the trained model."""
+        self._trained_model = AcceptedResponse.model_validate(value).model_dump()
 
     @property
     def inference_result(self) -> dict:
@@ -159,16 +160,6 @@ class BaseQcogClient:
     def version(self, value: str) -> None:
         numeric_version(value)  # validate version format
         self._version = value
-
-    @property
-    def http_client(self) -> RequestClient:
-        """Return the http client."""
-        return self._http_client
-
-    @property
-    def data_client(self) -> ABCDataClient:
-        """Return the data client."""
-        return self._data_client
 
     ############################
     # Init Method
@@ -192,14 +183,14 @@ class BaseQcogClient:
         """
         client = cls()
         client.version = version
-        client._http_client = httpclient or RequestClient(
+        client.http_client = httpclient or RequestClient(
             token=token,
             hostname=hostname,
             port=port,
             api_version=api_version,
         )
 
-        client._data_client = dataclient or DataClient()
+        client.data_client = dataclient or DataClient(client.http_client)
 
         if safe_mode:
             await client.http_client.get("status")
@@ -309,14 +300,13 @@ class BaseQcogClient:
             state_kwargs=get_states_extra,
         )
 
-        self._training_parameters(params)
+        await self._upload_training_parameters(params)
 
         self.trained_model = await self.http_client.post(
             "model",
             {
                 "training_parameters_guid": self.training_parameters["guid"],
                 "dataset_guid": self.dataset["guid"],
-                "project_guid": self.project["guid"],
                 "qcog_version": self.version,
             },
         )
@@ -329,7 +319,7 @@ class BaseQcogClient:
         parameters: InferenceParameters,
     ) -> pd.DataFrame:
         """From a trained model query an inference."""
-        inference_result = self.http_client.post(
+        inference_result = await self.http_client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
                 "data": encode_base64(data),
@@ -397,7 +387,7 @@ class BaseQcogClient:
         # loss matrix is available only after training is completed
         if self._loss is None:
             # TODO: Validate response
-            self.status_resp = self.http_client.get(
+            self.status_resp = await self.http_client.get(
                 f"model/{self.trained_model['guid']}"
             )
             self.last_status = TrainingStatus(self.status_resp["status"])
@@ -413,10 +403,8 @@ class BaseQcogClient:
 
         if self.last_status not in SUCCESS_STATUS:
             raise RuntimeError(
-                f"Training failed: {json.dumps(self.last_status, indent=4)}"
+                f"Training failed: {json.dumps(self.status_resp, indent=4)}"
             )
-
-        return self
 
     ############################
     # Private Utility Methods #
@@ -427,9 +415,8 @@ class BaseQcogClient:
         self.training_parameters = await self.http_client.post(
             "training_parameters",
             {
-                "project_guid": self.project["guid"],
-                "model": self.model.value,
-                "parameters": {"model": self.model.params}
+                "model": self.model.model_name,
+                "parameters": {"model": self.model.model_dump()}
                 | jsonable_train_parameters(params),
             },
         )

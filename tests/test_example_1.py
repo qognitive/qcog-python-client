@@ -16,6 +16,7 @@ pytest tests/test_example_1.py -s -vv -k test_inference_one
 """
 
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -155,3 +156,12 @@ def test_inference_one():
     num_correct = result_df.idxmax(axis=1) == df_target.idxmax(axis=1)
 
     print(f"Accuracy: {num_correct.sum() / len(num_correct)}")
+
+
+if __name__ == "__main__":
+    cmd = sys.argv[1]
+
+    if cmd == "train":
+        test_train_one()
+    elif cmd == "inference":
+        test_inference_one()

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pandas as pd
 
 from qcog_python_client.qcog._baseclient import BaseQcogClient
@@ -43,14 +45,14 @@ class AsyncQcogClient(BaseQcogClient):
         """
         client = cls()
         client.version = version
-        client._http_client = httpclient or RequestClient(
+        client.http_client = httpclient or RequestClient(
             token=token,
             hostname=hostname,
             port=port,
             api_version=api_version,
         )
 
-        client._data_client = dataclient or DataClient()
+        client.data_client = dataclient or DataClient(client.http_client)
 
         if safe_mode:
             await client.http_client.get("status")
@@ -161,6 +163,17 @@ class AsyncQcogClient(BaseQcogClient):
 
         """
         return await self._inference(data, parameters)
+
+    # ###########################
+    # Public Models
+    # ###########################
+    def pauli(self, *args: Any, **kwargs: Any) -> AsyncQcogClient:
+        self.pauli(*args, **kwargs)
+        return self
+
+    def ensemble(self, *args: Any, **kwargs: Any) -> AsyncQcogClient:
+        self.ensemble(*args, **kwargs)
+        return self
 
     # ###########################
     # Public Utilities

@@ -7,7 +7,7 @@ to support multi part uploads or other types of uploads.
 from pandas.core.api import DataFrame as DataFrame
 
 from qcog_python_client.qcog._base64utils import encode_base64
-from qcog_python_client.qcog.interfaces import ABCDataClient, ABCRequestClient
+from qcog_python_client.qcog._interfaces import ABCDataClient, ABCRequestClient
 from qcog_python_client.schema import DatasetPayload
 
 

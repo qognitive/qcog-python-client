@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel
 
-from qcog_python_client.qcog import jsonable_train_parameters
+from qcog_python_client.qcog._jsonable_parameters import jsonable_train_parameters
 from qcog_python_client.schema import (
     AdamOptimizationParameters,
     AnalyticOptimizationParameters,

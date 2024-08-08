@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from concurrent import futures
 from typing import Any, Coroutine, TypeVar
 
 import pandas as pd
@@ -176,12 +175,75 @@ class QcogClient(BaseQcogClient):
     # ###########################
     # Public Models
     # ###########################
-    def pauli(self, *args: Any, **kwargs: Any) -> QcogClient:
-        self.pauli(*args, **kwargs)
+    def pauli(self, *args: Any, **kwargs: Any) -> QcogClient:  # noqa: D417
+        """Pauli model.
+
+        Select Pauli model.
+
+        Parameters
+        ----------
+        operators: list[str | int]
+            List of operators
+
+        qbits: int, default=2
+            Number of qbits
+
+        pauli_weight: int, default=2
+            Pauli weight
+
+        sigma_sq: dict, default=None
+            Sigma squared
+
+        sigma_sq_optimization: dict, default=None
+            Sigma squared optimization
+
+        seed: int, default=42
+            Seed
+
+        target_operator: list[str | int], default=None
+            Target operator
+
+
+        Returns
+        -------
+        QcogClient
+
+        """
+        super().pauli(*args, **kwargs)
         return self
 
-    def ensemble(self, *args: Any, **kwargs: Any) -> QcogClient:
-        self.ensemble(*args, **kwargs)
+    def ensemble(self, *args: Any, **kwargs: Any) -> QcogClient:  # noqa: D417
+        """Select Ensemble model.
+
+        Parameters
+        ----------
+        operators: list[str | int]
+            List of operators
+
+        dim: int, default=16
+            Dimension
+
+        num_axes: int, default=4
+            Number of axes
+
+        sigma_sq: dict, default=None
+            Sigma squared
+
+        sigma_sq_optimization: dict, default=None
+            Sigma squared optimization
+
+        seed: int, default=42
+            Seed
+
+        target_operator: list[str | int], default=None
+            Target operator
+
+        Returns
+        -------
+        AsyncQcogClient
+
+        """
+        super().ensemble(*args, **kwargs)
         return self
 
     # ###########################
@@ -248,29 +310,12 @@ class QcogClient(BaseQcogClient):
         self, async_callable: Coroutine[Any, Any, CallableReturnType]
     ) -> CallableReturnType:
         """Await an async callable."""
-        # Check if an event loop is running
-        loop: asyncio.AbstractEventLoop | None = None
-
+        # Make sure the function is not running in an event loop
         try:
-            loop = asyncio.get_running_loop()
-            return loop.run_until_complete(async_callable)
+            asyncio.get_running_loop()
+            # If a running event loop is present, we can't run async code
+            # in a synchronous function
+            raise RuntimeError("Cannot run async code in an event loop")
         except RuntimeError:
-            # No event loop is running
-            # If the function is running inside an event loop, get the event loop
-            # and run the coroutine.
-            # If the function is not running inside an event loop, create a new one
-            # in its own thread and run the coroutine.
-
-            # Create a new event loop
-            try:
-                new_loop = asyncio.new_event_loop()
-                # Create the executor
-                executor = futures.ThreadPoolExecutor(max_workers=10)
-                executor.submit(new_loop.run_forever)
-                asyncio.set_event_loop(new_loop)
-                future = asyncio.run_coroutine_threadsafe(async_callable, new_loop)
-                return future.result()
-            finally:
-                new_loop.call_soon_threadsafe(new_loop.stop)
-                executor.shutdown()
-                asyncio.set_event_loop(None)
+            # No event loop, run the async code
+            return asyncio.run(async_callable)

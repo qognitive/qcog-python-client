@@ -38,7 +38,7 @@ class AsyncQcogClient(BaseQcogClient):
         version: str = DEFAULT_QCOG_VERSION,
         httpclient: ABCRequestClient | None = None,
         dataclient: ABCDataClient | None = None,
-    ) -> "BaseQcogClient":
+    ) -> AsyncQcogClient:
         """Create a new Qcog client.
 
         TODO: docstring
@@ -97,7 +97,7 @@ class AsyncQcogClient(BaseQcogClient):
         await self._preloaded_training_parameters(guid)
         return self
 
-    async def preload_model(self, guid: str) -> AsyncQcogClient:
+    async def preloaded_model(self, guid: str) -> AsyncQcogClient:
         """Retrieve a preexisting model.
 
         Parameters
@@ -167,12 +167,73 @@ class AsyncQcogClient(BaseQcogClient):
     # ###########################
     # Public Models
     # ###########################
-    def pauli(self, *args: Any, **kwargs: Any) -> AsyncQcogClient:
-        self.pauli(*args, **kwargs)
+    def pauli(self, *args: Any, **kwargs: Any) -> AsyncQcogClient:  # noqa: D417
+        """Select Pauli model.
+
+        Parameters
+        ----------
+        operators: list[str | int]
+            List of operators
+
+        qbits: int, default=2
+            Number of qbits
+
+        pauli_weight: int, default=2
+            Pauli weight
+
+        sigma_sq: dict, default=None
+            Sigma squared
+
+        sigma_sq_optimization: dict, default=None
+            Sigma squared optimization
+
+        seed: int, default=42
+            Seed
+
+        target_operator: list[str | int], default=None
+            Target operator
+
+
+        Returns
+        -------
+        AsyncQcogClient
+
+        """
+        super().pauli(*args, **kwargs)
         return self
 
-    def ensemble(self, *args: Any, **kwargs: Any) -> AsyncQcogClient:
-        self.ensemble(*args, **kwargs)
+    def ensemble(self, *args: Any, **kwargs: Any) -> AsyncQcogClient:  # noqa: D417
+        """Select Ensemble model.
+
+        Parameters
+        ----------
+        operators: list[str | int]
+            List of operators
+
+        dim: int, default=16
+            Dimension
+
+        num_axes: int, default=4
+            Number of axes
+
+        sigma_sq: dict, default=None
+            Sigma squared
+
+        sigma_sq_optimization: dict, default=None
+            Sigma squared optimization
+
+        seed: int, default=42
+            Seed
+
+        target_operator: list[str | int], default=None
+            Target operator
+
+        Returns
+        -------
+        AsyncQcogClient
+
+        """
+        super().ensemble(*args, **kwargs)
         return self
 
     # ###########################

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import json
 from typing import Any, TypeAlias
@@ -176,7 +178,7 @@ class BaseQcogClient:
         version: str = DEFAULT_QCOG_VERSION,
         httpclient: ABCRequestClient | None = None,
         dataclient: ABCDataClient | None = None,
-    ) -> "BaseQcogClient":
+    ) -> BaseQcogClient:
         """Create a new Qcog client.
 
         TODO: docstring
@@ -205,20 +207,22 @@ class BaseQcogClient:
         operators: list[Operator],
         qbits: int = 2,
         pauli_weight: int = 2,
-        sigma_sq: dict[str, float] = {},
-        sigma_sq_optimization: dict[str, float] = {},
+        sigma_sq: dict[str, float] | None = None,
+        sigma_sq_optimization: dict[str, float] | None = None,
         seed: int = 42,
-        target_operator: list[Operator] = [],
-    ) -> "BaseQcogClient":
+        target_operator: list[Operator] | None = None,
+    ) -> BaseQcogClient:
         """Select PauliModel for the training."""
         self._model = ModelPauliParameters(
             operators=[str(op) for op in operators],
             qbits=qbits,
             pauli_weight=pauli_weight,
-            sigma_sq=sigma_sq,
-            sigma_sq_optimization_kwargs=sigma_sq_optimization,
+            sigma_sq=sigma_sq or {},
+            sigma_sq_optimization_kwargs=sigma_sq_optimization or {},
             seed=seed,
-            target_operators=[str(op) for op in target_operator],
+            target_operators=[str(op) for op in target_operator]
+            if target_operator
+            else [],
             model_name=Model.pauli.value,
         )
         return self
@@ -228,37 +232,39 @@ class BaseQcogClient:
         operators: list[Operator],
         dim: int = 16,
         num_axes: int = 4,
-        sigma_sq: dict[str, float] = {},
-        sigma_sq_optimization: dict[str, float] = {},
+        sigma_sq: dict[str, float] | None = None,
+        sigma_sq_optimization: dict[str, float] | None = None,
         seed: int = 42,
-        target_operator: list[Operator] = [],
+        target_operator: list[Operator] | None = None,
     ) -> Any:
         """Select EnsembleModel for the training."""
         self._model = ModelEnsembleParameters(
             operators=[str(op) for op in operators],
             dim=dim,
             num_axes=num_axes,
-            sigma_sq=sigma_sq,
-            sigma_sq_optimization_kwargs=sigma_sq_optimization,
+            sigma_sq=sigma_sq or {},
+            sigma_sq_optimization_kwargs=sigma_sq_optimization or {},
             seed=seed,
-            target_operators=[str(op) for op in target_operator],
+            target_operators=[str(op) for op in target_operator]
+            if target_operator
+            else [],
             model_name=Model.ensemble.value,
         )
         return self
 
-    async def _data(self, data: pd.DataFrame) -> "BaseQcogClient":
+    async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
         """Upload Data."""
         # Delegating the upload function to the data client
         # So any change in the logic or service will not affect the client
         self.dataset = await self.data_client.upload_data(data)
         return self
 
-    async def _preloaded_data(self, guid: str) -> "BaseQcogClient":
+    async def _preloaded_data(self, guid: str) -> BaseQcogClient:
         """Async method to retrieve a dataset that was previously uploaded from guid."""
         self.dataset = await self.http_client.get(f"dataset/{guid}")
         return self
 
-    async def _preloaded_training_parameters(self, guid: str) -> "BaseQcogClient":
+    async def _preloaded_training_parameters(self, guid: str) -> BaseQcogClient:
         """Retrieve preexisting training parameters payload.
 
         Parameters
@@ -280,7 +286,7 @@ class BaseQcogClient:
         )
         return self
 
-    async def _preloaded_model(self, guid: str) -> "BaseQcogClient":
+    async def _preloaded_model(self, guid: str) -> BaseQcogClient:
         """Retrieve preexisting model payload."""
         self.trained_model = await self.http_client.get(f"model/{guid}")
         return self
@@ -291,7 +297,7 @@ class BaseQcogClient:
         num_passes: int,
         weight_optimization: NotRequiredWeightParams,
         get_states_extra: NotRequiredStateParams,
-    ) -> "BaseQcogClient":
+    ) -> BaseQcogClient:
         """Start a training job."""
         params: TrainingParameters = TrainingParameters(
             batch_size=batch_size,

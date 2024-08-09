@@ -17,6 +17,7 @@ from qcog_python_client.qcog._jsonable_parameters import (
 )
 from qcog_python_client.qcog._status import SUCCESS_STATUS, WAITING_STATUS
 from qcog_python_client.qcog._version import DEFAULT_QCOG_VERSION, numeric_version
+from qcog_python_client.qcog.pytorch.agent import PyTorchAgent
 from qcog_python_client.schema import (
     InferenceParameters,
     TrainingParameters,
@@ -251,6 +252,15 @@ class BaseQcogClient:
             model_name=Model.ensemble.value,
         )
         return self
+
+    def pytorch(
+        self,
+        model_name: str,
+        model_path: str,
+    ) -> Any:
+        """Select a Pythorch architecture defined by the user."""
+        agent = PyTorchAgent()
+        agent.init(model_path, model_name)
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
         """Upload Data."""

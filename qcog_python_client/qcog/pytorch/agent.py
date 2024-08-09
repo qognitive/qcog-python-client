@@ -11,7 +11,7 @@ from qcog_python_client.qcog.pytorch.handler import Handler
 class PyTorchAgent:
     """PyTorch Agent."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the PyTorch Agent."""
         self.chain = self._init(DiscoverHandler(), ValidateHandler(), UploadHandler())
 
@@ -37,8 +37,9 @@ class PyTorchAgent:
 
     async def train(self, data: Any) -> dict:
         """Train the model."""
-        pass
+        raise NotImplementedError()
 
     async def inference(self, data: Any, model_name: str) -> Any:
         """Run inference."""
-        pass
+        raise NotImplementedError()
+

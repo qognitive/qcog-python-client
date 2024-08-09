@@ -28,14 +28,14 @@ class Command(enum.Enum):
 class Handler(ABC, Generic[CommandPayloadType]):
     """Interface for the chain of responsibility pattern."""
 
-    next: Handler | None
-    executed: bool
-    retries: int = 3
+    head: Handler  # Reference to the head of the chain
+    next: Handler | None = None
+    attempts: int = 3
     retry_after: int = 3
     command: Command
 
     @abstractmethod
-    def handle(self, payload: CommandPayloadType) -> CommandPayloadType:
+    def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:
         """Handle the data."""
         ...
 
@@ -44,36 +44,38 @@ class Handler(ABC, Generic[CommandPayloadType]):
         """Revert the changes."""
         ...
 
-    def set_next(self, next_component: Handler) -> Handler:
+    def set_next(self, next_component: Handler, head: Handler) -> Handler:
         """Set the next component."""
         self.next = next_component
+        self.head = head
         return next_component
 
-    def handle_or_next(self, payload: CommandPayloadType) -> CommandPayloadType:
-        """Handle the data or pass it to the next handler."""
+    def dispatch(self, payload: CommandPayloadType) -> Handler:
+        """Dispatch the payload through the chain."""
         # If the handler matches the command in the payload
         # Attempt the execution of the command
         if self.command == payload.command:
-            for i in range(self.retries):
+            for i in range(self.attempts):
                 try:
-                    result = self.handle(payload)
-                    # If the command was successfully executed
-                    # Set the executed flag to True
-                    self.executed = True
-                    # If there is a next handler
-                    # Pass the payload to the next handler
-                    if self.next:
-                        return self.next.handle_or_next(result)
+                    next_command = self.handle(payload)
+                    # If another command has been issued by the handler
+                    # dispatch
+                    if next_command:
+                        self.head.dispatch(next_command)
 
+                    # Otherwise return the handler
+                    return self
                 except Exception as e:
+                    print(f"Error executing command {self.command}: {e}")
                     # Try to handle the exception and retry the command
-                    print(f"Exception at {self.command}: {e}")
-                    print(f"Retrying {self.command}...")
-                    print(f"Attempt {i+1}/{self.retries}")
                     self.revert()
                     # Try executing the command again
                     self.handle(payload)
                     time.sleep(self.retry_after)
 
+        # Otherwise dispatch to the next handler
         if self.next:
-            return self.next.handle_or_next(payload)
+            return self.next.dispatch(payload)
+
+    def __repr__(self) -> str:  # noqa: D105
+        return f"{self.__class__.__name__}({self.command})"

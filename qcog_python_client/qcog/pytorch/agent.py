@@ -17,17 +17,22 @@ class PyTorchAgent:
 
     def _init(self, *chain: Handler) -> Handler:
         """Initialize the Responsibility Chain."""
-        for i in range(len(chain) - 1):
-            chain[i].set_next(chain[i + 1])
+        if len(chain) == 1:
+            raise ValueError("Chain must have at least 2 handlers.")
+        head = chain[0]
 
-        return chain[0]
+        for i in range(len(chain) - 1):
+            current_handler = chain[i]
+            next_handler = chain[i + 1]
+            current_handler.set_next(next_handler, head)
+
+        return head
 
     def init(self, model_path: str, model_name: str) -> None:
         """Start the PyTorch Agent."""
-        self.chain.handle(payload=DiscoverPayload(
-            model_name=model_name,
-            model_path=model_path
-        ))
+        self.chain.dispatch(
+            payload=DiscoverPayload(model_name=model_name, model_path=model_path)
+        )
 
     def train(self, data: Any) -> dict:
         """Train the model."""

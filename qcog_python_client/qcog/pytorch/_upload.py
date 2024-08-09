@@ -9,12 +9,15 @@ from qcog_python_client.qcog.pytorch.handler import (
 
 @dataclass
 class UploadPayload(BoundedCommand):
-    command: Command = Command.discover
+    command: Command = Command.upload
 
 
 class UploadHandler(Handler):
+    command: Command = Command.upload
+
     def handle(self, payload: UploadPayload):
-        pass
+        print("-- Executing Upload Handler --")
+        return None
 
     def revert(self):
         pass

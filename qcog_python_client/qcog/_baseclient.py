@@ -253,14 +253,14 @@ class BaseQcogClient:
         )
         return self
 
-    def pytorch(
+    async def pytorch(
         self,
         model_name: str,
         model_path: str,
     ) -> Any:
         """Select a Pythorch architecture defined by the user."""
         agent = PyTorchAgent()
-        agent.init(model_path, model_name)
+        await agent.init(model_path, model_name)
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
         """Upload Data."""

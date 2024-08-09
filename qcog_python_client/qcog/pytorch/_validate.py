@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-from qcog_python_client.qcog.pytorch._upload import UploadPayload
+from qcog_python_client.qcog.pytorch._upload import UploadCommand
 from qcog_python_client.qcog.pytorch.handler import BoundedCommand, Command, Handler
 
 
 @dataclass
-class ValidatePayload(BoundedCommand):
+class ValidateCommand(BoundedCommand):
     relevant_files: dict
     command: Command = Command.validate
 
@@ -13,12 +13,12 @@ class ValidatePayload(BoundedCommand):
 class ValidateHandler(Handler):
     command: Command = Command.validate
 
-    def handle(self, payload: ValidatePayload):
+    async def handle(self, payload: ValidateCommand) -> UploadCommand:
         print("-- Executing Validate Handler --")
         print("Validating relevant files: ", payload.relevant_files)
         # Once validation has been completed,
-        # Issue the next command that is the upload
-        return UploadPayload()
+        # Issue an upload command
+        return UploadCommand()
 
-    def revert(self):
+    async def revert(self) -> None:
         pass

@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from qcog_python_client.qcog.pytorch._discover import DiscoverHandler, DiscoverPayload
+from qcog_python_client.qcog.pytorch._discover import DiscoverCommand, DiscoverHandler
 from qcog_python_client.qcog.pytorch._upload import UploadHandler
 from qcog_python_client.qcog.pytorch._validate import ValidateHandler
 from qcog_python_client.qcog.pytorch.handler import Handler
@@ -28,16 +28,17 @@ class PyTorchAgent:
 
         return head
 
-    def init(self, model_path: str, model_name: str) -> None:
+    async def init(self, model_path: str, model_name: str) -> None:
         """Start the PyTorch Agent."""
-        self.chain.dispatch(
-            payload=DiscoverPayload(model_name=model_name, model_path=model_path)
+        # Init Command will dispatch a Discover Command
+        await self.chain.dispatch(
+            payload=DiscoverCommand(model_name=model_name, model_path=model_path)
         )
 
-    def train(self, data: Any) -> dict:
+    async def train(self, data: Any) -> dict:
         """Train the model."""
         pass
 
-    def inference(self, data: Any, model_name: str) -> Any:
+    async def inference(self, data: Any, model_name: str) -> Any:
         """Run inference."""
         pass

@@ -8,16 +8,16 @@ from qcog_python_client.qcog.pytorch.handler import (
 
 
 @dataclass
-class UploadPayload(BoundedCommand):
+class UploadCommand(BoundedCommand):
     command: Command = Command.upload
 
 
-class UploadHandler(Handler):
+class UploadHandler(Handler[UploadCommand]):
     command: Command = Command.upload
 
-    def handle(self, payload: UploadPayload):
+    async def handle(self, payload: UploadCommand) -> None:
         print("-- Executing Upload Handler --")
         return None
 
-    def revert(self):
+    async def revert(self) -> None:
         pass

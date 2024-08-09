@@ -34,6 +34,7 @@ dev = [
   "sphinx_rtd_theme",
   "pydantic-settings",
   "datamodel-code-generator",
+  "pytest-asyncio"
 ]
 examples = [
   "scikit-learn",
@@ -119,3 +120,5 @@ exclude = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401"]
+# Remove D rules from tests
+"**/tests/**" = ["D"]

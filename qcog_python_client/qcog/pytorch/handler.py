@@ -1,9 +1,19 @@
-"""Defines the interface for the chain of responsibility pattern."""
+"""Defines the interface for the chain of responsibility pattern.
+
+Commands get dispatched through the chain of handlers. Each handler
+checks if it can handle the command. If it can, it executes the command.
+If the handler returns a new command, it gets dispatched again though the chain.
+
+Each handler implements an automatic retry mechanism.
+The number of attempts and the time to wait can be configured for each handler.
+
+In case of error, the `revert` method is called to undo any changes made by the handler.
+"""
 
 from __future__ import annotations
 
+import asyncio
 import enum
-import time
 from abc import ABC, abstractmethod
 from typing import Generic, Protocol, TypeVar
 
@@ -23,6 +33,7 @@ class Command(enum.Enum):
     discover = "discover"
     validate = "validate"
     upload = "upload"
+    revert_all = "revert_all"
 
 
 class Handler(ABC, Generic[CommandPayloadType]):
@@ -30,17 +41,18 @@ class Handler(ABC, Generic[CommandPayloadType]):
 
     head: Handler  # Reference to the head of the chain
     next: Handler | None = None
+    executed: bool = False
     attempts: int = 3
     retry_after: int = 3
     command: Command
 
     @abstractmethod
-    def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:
+    async def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:
         """Handle the data."""
         ...
 
     @abstractmethod
-    def revert(self) -> None:
+    async def revert(self) -> None:
         """Revert the changes."""
         ...
 
@@ -50,32 +62,55 @@ class Handler(ABC, Generic[CommandPayloadType]):
         self.head = head
         return next_component
 
-    def dispatch(self, payload: CommandPayloadType) -> Handler:
+    async def dispatch(self, payload: CommandPayloadType) -> Handler:
         """Dispatch the payload through the chain."""
+        # If the command is a `revert_all` command
+        # and the handler has already been executed
+        # we want to revert the state of the handler
+        # and pass the command to the next handler
+        if payload.command == Command.revert_all and self.executed:
+            await self.revert()
+            if self.next:
+                return await self.next.dispatch(payload)
+            return self
+
         # If the handler matches the command in the payload
         # Attempt the execution of the command
         if self.command == payload.command:
             for i in range(self.attempts):
                 try:
-                    next_command = self.handle(payload)
-                    # If another command has been issued by the handler
-                    # dispatch
-                    if next_command:
-                        self.head.dispatch(next_command)
-
-                    # Otherwise return the handler
-                    return self
+                    return await execute_and_dispatch_next(self, payload)
                 except Exception as e:
-                    print(f"Error executing command {self.command}: {e}")
-                    # Try to handle the exception and retry the command
-                    self.revert()
-                    # Try executing the command again
-                    self.handle(payload)
-                    time.sleep(self.retry_after)
+                    # Try again based on the number of attempts.
+                    # 1 - revert the state of the handler
+                    # 2 - wait for the specified time
+                    # 3 - try again
+                    print(f"Attempt {i}, error: {e}")
+                    await self.revert()
+                    await asyncio.sleep(self.retry_after)
+                    return await execute_and_dispatch_next(self, payload)
 
-        # Otherwise dispatch to the next handler
+        # If there is a next handler, dispatch the payload to the next handler
         if self.next:
-            return self.next.dispatch(payload)
+            return await self.next.dispatch(payload)
+
+        raise AttributeError(f"Command {payload.command} not found in the chain")
 
     def __repr__(self) -> str:  # noqa: D105
         return f"{self.__class__.__name__}({self.command})"
+
+
+async def execute_and_dispatch_next(
+    handler: Handler, command: CommandPayloadType
+) -> Handler:
+    """Execute the command and dispatch the next command.
+
+    If no next command is found, return the current handler.
+    """
+    next_command = await handler.handle(command)
+    handler.executed = True
+
+    if next_command and handler.next:
+        return await handler.next.dispatch(next_command)
+
+    return handler

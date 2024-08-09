@@ -42,7 +42,6 @@ Qognitive Python Client
    :hidden:
    :caption: API Reference
 
-   /api/base_client
    /api/client
    /api/async_client
 

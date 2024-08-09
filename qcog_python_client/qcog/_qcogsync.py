@@ -63,7 +63,18 @@ class QcogClient(BaseQcogClient):
         return client
 
     def data(self, data: pd.DataFrame) -> QcogClient:
-        """Create a new instance of the client."""
+        """Upload a dataset.
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            the dataset as a DataFrame
+
+        Returns
+        -------
+        QcogClient
+
+        """
         self.await_async(self._data(data))
         return self
 

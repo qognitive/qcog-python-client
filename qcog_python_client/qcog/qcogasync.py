@@ -8,12 +8,12 @@ import pandas as pd
 
 from qcog_python_client.qcog._baseclient import BaseQcogClient
 from qcog_python_client.qcog._data_uploader import DataClient
+from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog._interfaces import (
     ABCDataClient,
     ABCRequestClient,
 )
 from qcog_python_client.qcog._version import DEFAULT_QCOG_VERSION
-from qcog_python_client.qcog.httpclient import RequestClient
 from qcog_python_client.schema.common import (
     InferenceParameters,
     Matrix,

@@ -9,6 +9,7 @@ import pandas as pd
 from qcog_python_client.log import qcoglogger
 from qcog_python_client.qcog._base64utils import base642dataframe
 from qcog_python_client.qcog._data_uploader import DataClient, encode_base64
+from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog._interfaces import ABCDataClient, ABCRequestClient
 from qcog_python_client.qcog._jsonable_parameters import (
     jsonable_inference_parameters,
@@ -16,7 +17,6 @@ from qcog_python_client.qcog._jsonable_parameters import (
 )
 from qcog_python_client.qcog._status import SUCCESS_STATUS, WAITING_STATUS
 from qcog_python_client.qcog._version import DEFAULT_QCOG_VERSION, numeric_version
-from qcog_python_client.qcog.httpclient import RequestClient
 from qcog_python_client.schema import (
     InferenceParameters,
     TrainingParameters,

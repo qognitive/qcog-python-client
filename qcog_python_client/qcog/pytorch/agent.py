@@ -2,10 +2,13 @@
 
 from typing import Any
 
-from qcog_python_client.qcog.pytorch._discover import DiscoverCommand, DiscoverHandler
-from qcog_python_client.qcog.pytorch._upload import UploadHandler
-from qcog_python_client.qcog.pytorch._validate import ValidateHandler
+from qcog_python_client.qcog.pytorch.discover._discover import (
+    DiscoverCommand,
+    DiscoverHandler,
+)
 from qcog_python_client.qcog.pytorch.handler import Handler
+from qcog_python_client.qcog.pytorch.upload._upload import UploadHandler
+from qcog_python_client.qcog.pytorch.validate._validate import ValidateHandler
 
 
 class PyTorchAgent:
@@ -42,4 +45,3 @@ class PyTorchAgent:
     async def inference(self, data: Any, model_name: str) -> Any:
         """Run inference."""
         raise NotImplementedError()
-

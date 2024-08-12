@@ -6,8 +6,8 @@ import os
 from concurrent import futures
 from dataclasses import dataclass
 
-from qcog_python_client.qcog.pytorch._validate import ValidateCommand
 from qcog_python_client.qcog.pytorch.handler import BoundedCommand, Command, Handler
+from qcog_python_client.qcog.pytorch.validate._validate import ValidateCommand
 
 
 @dataclass
@@ -15,6 +15,11 @@ class DiscoverCommand(BoundedCommand):
     model_name: str
     model_path: str
     command: Command = Command.discover
+
+
+def pkg_name(package_path: str) -> str:
+    """From the package path, get the package name."""
+    return os.path.basename(package_path)
 
 
 class DiscoverHandler(Handler):
@@ -28,7 +33,7 @@ class DiscoverHandler(Handler):
     the user wants to install other dependencies.
     """
 
-    model_module_name = "model.py"
+    model_module_name = "model.py"  # The name of the model module
     retries = 0
     command = Command.discover
     relevant_files: dict
@@ -56,12 +61,21 @@ class DiscoverHandler(Handler):
             if item == self.model_module_name:
                 item_path = os.path.join(abs_path, item)
                 _, encoded_content = await read_async(executor, item_path)
-                self.relevant_files.update({item_path: encoded_content})
+                self.relevant_files.update(
+                    {
+                        "model_module": {
+                            "path": item_path,
+                            "content": encoded_content,
+                            "pkg_name": pkg_name(self.model_path),
+                        }
+                    }
+                )
 
         # Once the discovery has been completed,
         # Issue a validate command that will be executed next
         return ValidateCommand(
             relevant_files=self.relevant_files,
+            model_name=self.model_name,
         )
 
     async def revert(self) -> None:

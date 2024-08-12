@@ -40,17 +40,15 @@ class DiscoverHandler(Handler):
 
     async def handle(self, payload: DiscoverCommand) -> ValidateCommand:
         self.model_name = payload.model_name
-        self.model_path = payload.model_path
-
         # Get the absolute path of the model module
-        abs_path = os.path.abspath(payload.model_path)
+        self.model_path = os.path.abspath(payload.model_path)
 
         # Check if the model module exists
-        if not os.path.exists(abs_path):
+        if not os.path.exists(self.model_path):
             raise FileNotFoundError(f"Model module not found at {payload.model_path}")
 
         # Check if the folder contains the model module
-        content = os.listdir(abs_path)
+        content = os.listdir(self.model_path)
 
         # Initialize the relevant files dictionary
         self.relevant_files = {}
@@ -59,7 +57,7 @@ class DiscoverHandler(Handler):
         # NOTE: Eventually we can parallelize this operation.
         for item in content:
             if item == self.model_module_name:
-                item_path = os.path.join(abs_path, item)
+                item_path = os.path.join(self.model_path, item)
                 _, encoded_content = await read_async(executor, item_path)
                 self.relevant_files.update(
                     {
@@ -76,6 +74,7 @@ class DiscoverHandler(Handler):
         return ValidateCommand(
             relevant_files=self.relevant_files,
             model_name=self.model_name,
+            model_path=self.model_path,
         )
 
     async def revert(self) -> None:

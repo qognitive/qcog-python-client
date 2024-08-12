@@ -4,6 +4,7 @@ import asyncio
 import json
 from typing import Any, TypeAlias
 
+import aiohttp
 import pandas as pd
 
 from qcog_python_client.log import qcoglogger
@@ -260,7 +261,24 @@ class BaseQcogClient:
     ) -> Any:
         """Select a Pythorch architecture defined by the user."""
         agent = PyTorchAgent()
-        await agent.init(model_path, model_name)
+
+        # Register custom tools for the agent.
+        # The following `tools` will be available
+        # inside the handlers of the agent
+
+        async def post_multipart(url: str, data: aiohttp.FormData) -> dict:
+            return await self.http_client.post(
+                url,
+                data,
+                content_type="data",
+            )
+
+        agent.register_tool("get_request", self.http_client.get)
+        agent.register_tool("post_request", self.http_client.post)
+        agent.register_tool("post_multipart", post_multipart)
+
+        agent.init()
+        await agent.upload(model_path, model_name)
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
         """Upload Data."""

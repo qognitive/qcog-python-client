@@ -17,6 +17,7 @@ class FileToValidate(BaseModel):
     content: str
     pkg_name: str
 
+
 @dataclass
 class TrainFnAnnotation:
     arg_name: str

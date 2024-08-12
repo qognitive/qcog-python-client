@@ -6,6 +6,7 @@ import asyncio
 import os
 import random
 from enum import Enum
+from typing import Literal
 
 import aiohttp
 
@@ -77,7 +78,9 @@ class RequestClient(_HTTPClient, ABCRequestClient):
         self,
         uri: str,
         method: HttpMethod,
-        data: dict | None = None,
+        data: dict | aiohttp.FormData | None = None,
+        *,
+        content_type: Literal["json", "data"] = "json",
     ) -> dict:
         """Execute the async get "aiohttp" by adding class-level settings.
 
@@ -89,6 +92,9 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             in case of post, the posted data, empty dict otherwise
         method: HttpMethod
             request type enum
+        content_type: Literal["json", "data"]
+            type of the content to be
+            sent in the request
 
         Returns
         -------
@@ -100,17 +106,30 @@ class RequestClient(_HTTPClient, ABCRequestClient):
         random.seed()
         sleep_for: int = random.randrange(1, 5)
         exception: aiohttp.client_exceptions.ClientResponseError
-
         for retry in range(self.retries):
             try:
                 async with aiohttp.ClientSession(
                     headers=self.headers, raise_for_status=True
                 ) as session:
-                    resp = await session.request(
-                        method.value,
-                        uri,
-                        json=data,
-                    )
+                    resp: aiohttp.ClientResponse
+
+                    if content_type == "json":
+                        resp = await session.request(
+                            method.value,
+                            uri,
+                            json=data,
+                        )
+
+                    elif content_type == "data":
+                        resp = await session.request(
+                            method.value,
+                            uri,
+                            data=data,
+                        )
+
+                    else:
+                        raise ValueError(f"Invalid Content requested: {content_type}")
+
                     retval: dict = await resp.json()
 
                     return retval
@@ -143,7 +162,13 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             HttpMethod.get,
         )
 
-    async def post(self, endpoint: str, data: dict) -> dict:
+    async def post(
+        self,
+        endpoint: str,
+        data: dict | aiohttp.FormData,
+        *,
+        content_type: Literal["json", "data"] = "json",
+    ) -> dict:
         """Execute a post request.
 
         Convenience wrapper around requests.post (called via _post method)
@@ -155,6 +180,9 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             if applicable) and will add to the dns prefix
         data: dict
             json-able data payload
+        content_type: Literal['json'] | Literal['octet-stream']
+            content type of the post request. For `octet-stream` content type,
+            a FormData object is expected in the `data` parameter
 
         Returns
         -------
@@ -165,4 +193,5 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             f"{self.url}/{endpoint}/",
             HttpMethod.post,
             data,
+            content_type=content_type
         )

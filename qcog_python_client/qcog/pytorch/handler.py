@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import enum
 from abc import ABC, abstractmethod
-from typing import Generic, Protocol, TypeVar
+from typing import Any, Callable, Coroutine, Generic, Protocol, TypeAlias, TypeVar
 
 
 class BoundedCommand(Protocol):
@@ -25,7 +25,8 @@ class BoundedCommand(Protocol):
 
 
 CommandPayloadType = TypeVar("CommandPayloadType", bound=BoundedCommand)
-
+ToolName: TypeAlias = str
+ToolFn: TypeAlias = Callable[..., Coroutine[Any, Any, dict]]
 
 class Command(enum.Enum):
     """Command enum."""
@@ -45,6 +46,7 @@ class Handler(ABC, Generic[CommandPayloadType]):
     attempts: int = 3
     retry_after: int = 3
     command: Command
+    get_tool: Callable[[ToolName], ToolFn]
 
     @abstractmethod
     async def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:

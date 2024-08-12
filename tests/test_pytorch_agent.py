@@ -21,7 +21,6 @@ async def test_pytorch_agent_discovery():
         hostname="localhost",
         port=8000,
     )
-
     async def post_multipart(url: str, data: aiohttp.FormData) -> dict:
         return await request_client.post(
             url,

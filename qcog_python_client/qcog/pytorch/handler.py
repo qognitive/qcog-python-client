@@ -28,6 +28,7 @@ CommandPayloadType = TypeVar("CommandPayloadType", bound=BoundedCommand)
 ToolName: TypeAlias = str
 ToolFn: TypeAlias = Callable[..., Coroutine[Any, Any, dict]]
 
+
 class Command(enum.Enum):
     """Command enum."""
 

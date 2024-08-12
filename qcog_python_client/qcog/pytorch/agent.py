@@ -2,6 +2,8 @@
 
 from typing import Any, Callable, Coroutine
 
+import aiohttp
+
 from qcog_python_client.qcog.pytorch.discover._discover import (
     DiscoverCommand,
     DiscoverHandler,
@@ -89,3 +91,18 @@ class PyTorchAgent:
     ) -> None:
         """Register a tool to be used by the handlers in the chain."""
         self.tools[tool_name] = fn
+
+    @classmethod
+    def create_agent(
+        cls,
+        post_request: Callable[[str, dict], Coroutine[Any, Any, dict]],
+        get_request: Callable[[str], Coroutine[Any, Any, dict]],
+        post_multipart: Callable[[str, aiohttp.FormData], Coroutine[Any, Any, dict]],
+    ) -> "PyTorchAgent":
+        """Create a PyTorch Agent with a http client for making requests."""
+        agent = cls()
+        agent.register_tool("post_request", post_request)
+        agent.register_tool("get_request", get_request)
+        agent.register_tool("post_multipart", post_multipart)
+        agent.init()
+        return agent

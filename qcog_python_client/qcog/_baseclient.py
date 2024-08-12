@@ -260,11 +260,6 @@ class BaseQcogClient:
         model_path: str,
     ) -> Any:
         """Select a Pythorch architecture defined by the user."""
-        agent = PyTorchAgent()
-
-        # Register custom tools for the agent.
-        # The following `tools` will be available
-        # inside the handlers of the agent
 
         async def post_multipart(url: str, data: aiohttp.FormData) -> dict:
             return await self.http_client.post(
@@ -273,11 +268,13 @@ class BaseQcogClient:
                 content_type="data",
             )
 
-        agent.register_tool("get_request", self.http_client.get)
-        agent.register_tool("post_request", self.http_client.post)
-        agent.register_tool("post_multipart", post_multipart)
+        # Create a PyTorch agent with the http client functions
+        agent = PyTorchAgent.create_agent(
+            post_request=self.http_client.post,
+            get_request=self.http_client.get,
+            post_multipart=post_multipart,
+        )
 
-        agent.init()
         await agent.upload(model_path, model_name)
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:

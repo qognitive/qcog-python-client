@@ -10,7 +10,7 @@ from qcog_python_client.qcog.pytorch.agent import PyTorchAgent
 @pytest.mark.asyncio
 async def test_pytorch_agent_discovery():
     """Test basic discovery of PyTorchAgent"""
-    agent = PyTorchAgent()
+
     model_path = "tests/pytorch_model"
     model_name = "test_model_00"
     # Register custom tools for the agent.
@@ -26,11 +26,13 @@ async def test_pytorch_agent_discovery():
         return await request_client.post(
             url,
             data,
-            content_type="octet-stream",
+            content_type="data",
         )
 
-    agent.register_tool("get_request", request_client.get)
-    agent.register_tool("post_request", request_client.post)
-    agent.register_tool("post_multipart", post_multipart)
-    agent.init()
+    agent = PyTorchAgent.create_agent(
+        post_request=request_client.post,
+        get_request=request_client.get,
+        post_multipart=post_multipart,
+    )
+
     await agent.upload(model_path, model_name)

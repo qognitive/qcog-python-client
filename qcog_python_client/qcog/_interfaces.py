@@ -33,7 +33,7 @@ class ABCRequestClient(ABC):
         url: str,
         data: dict | aiohttp.FormData,
         *,
-        content_type: Literal["json", "data"] = "json"
+        content_type: Literal["json", "data"] = "json",
     ) -> dict:
         """Execute a post request."""
         ...

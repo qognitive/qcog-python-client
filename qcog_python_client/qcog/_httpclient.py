@@ -190,8 +190,5 @@ class RequestClient(_HTTPClient, ABCRequestClient):
 
         """
         return await self._request_retry(
-            f"{self.url}/{endpoint}/",
-            HttpMethod.post,
-            data,
-            content_type=content_type
+            f"{self.url}/{endpoint}/", HttpMethod.post, data, content_type=content_type
         )

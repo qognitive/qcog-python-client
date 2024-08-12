@@ -17,7 +17,7 @@ class FileToValidate(BaseModel):
     content: str
     pkg_name: str
 
-
+@dataclass
 class TrainFnAnnotation:
     arg_name: str
     arg_type: type
@@ -72,7 +72,15 @@ def validate_model_module(
     # Check that the model module contains a train function
     module_name = os.path.basename(file.path).replace(".py", "")
     spec = importlib.util.spec_from_file_location(module_name, file.path)
+
+    if not spec:
+        raise ValueError("Model module not found.")
+
     module = importlib.util.module_from_spec(spec)
+
+    if spec.loader is None:
+        raise ValueError("Model module loader not found.")
+
     spec.loader.exec_module(module)
 
     # Check for the `train` function
@@ -96,7 +104,7 @@ def inspect_train_fn(fn: Callable) -> dict[str, TrainFnAnnotation]:
 
     Returns a dictionary with the annotations of the function.
     """
-    retval = {}
+    retval: dict[str, TrainFnAnnotation] = {}
 
     for ann in fn.__annotations__:
         retval[ann] = TrainFnAnnotation(arg_name=ann, arg_type=fn.__annotations__[ann])

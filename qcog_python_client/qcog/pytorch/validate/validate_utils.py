@@ -53,7 +53,8 @@ def get_third_party_imports(module_path: str) -> set:  # noqa
             for alias in node.names:
                 imports.add(alias.name)
         elif isinstance(node, ast.ImportFrom):
-            imports.add(node.module)
+            if node.module:
+                imports.add(node.module)
 
     # Get list of standard library modules
     stdlib_modules = get_stdlib_modules()

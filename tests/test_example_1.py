@@ -33,6 +33,7 @@ TRAINED_MODEL = os.getenv("TRAINED_MODEL")
 
 df_train, df_test, df_target = get_wbc_data()
 
+
 @pytest.mark.skip(reason="Run this test manually")
 def test_train_one():
     """Run training test."""

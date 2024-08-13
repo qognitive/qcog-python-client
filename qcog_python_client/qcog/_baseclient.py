@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from typing import Any, TypeAlias
 
 import aiohttp
@@ -9,8 +8,7 @@ import pandas as pd
 
 from qcog_python_client.log import qcoglogger
 from qcog_python_client.qcog._base64utils import base642dataframe
-from qcog_python_client.qcog._data_uploader import DataClient, encode_base64
-from qcog_python_client.qcog._httpclient import RequestClient
+from qcog_python_client.qcog._data_uploader import encode_base64
 from qcog_python_client.qcog._interfaces import ABCDataClient, ABCRequestClient
 from qcog_python_client.qcog._jsonable_parameters import (
     jsonable_inference_parameters,
@@ -29,9 +27,9 @@ from qcog_python_client.schema.common import (
     NotRequiredWeightParams,
 )
 from qcog_python_client.schema.generated_schema.models import (
-    AcceptedResponse,
     AppSchemasDataPayloadDataPayloadResponse,
     AppSchemasParametersTrainingParametersPayloadResponse,
+    AppSchemasTrainTrainedModelPayloadResponse,
     Model,
     ModelEnsembleParameters,
     ModelGeneralParameters,
@@ -143,7 +141,9 @@ class BaseQcogClient:
     @trained_model.setter
     def trained_model(self, value: dict) -> None:
         """Set and validate the trained model."""
-        self._trained_model = AcceptedResponse.model_validate(value).model_dump()
+        self._trained_model = AppSchemasTrainTrainedModelPayloadResponse.model_validate(
+            value
+        ).model_dump()
 
     @property
     def inference_result(self) -> dict:
@@ -164,42 +164,6 @@ class BaseQcogClient:
     def version(self, value: str) -> None:
         numeric_version(value)  # validate version format
         self._version = value
-
-    ############################
-    # Init Method
-    ############################
-    @classmethod
-    async def _create(
-        cls,
-        *,
-        token: str | None = None,
-        hostname: str = "dev.qognitive.io",
-        port: int = 443,
-        api_version: str = "v1",
-        safe_mode: bool = False,
-        version: str = DEFAULT_QCOG_VERSION,
-        httpclient: ABCRequestClient | None = None,
-        dataclient: ABCDataClient | None = None,
-    ) -> BaseQcogClient:
-        """Create a new Qcog client.
-
-        TODO: docstring
-        """
-        client = cls()
-        client.version = version
-        client.http_client = httpclient or RequestClient(
-            token=token,
-            hostname=hostname,
-            port=port,
-            api_version=api_version,
-        )
-
-        client.data_client = dataclient or DataClient(client.http_client)
-
-        if safe_mode:
-            await client.http_client.get("status")
-
-        return client
 
     ############################
     # Model Parameters
@@ -338,7 +302,7 @@ class BaseQcogClient:
 
         await self._upload_training_parameters(params)
 
-        self.trained_model = await self.http_client.post(
+        accepted_response = await self.http_client.post(
             "model",
             {
                 "training_parameters_guid": self.training_parameters["guid"],
@@ -346,6 +310,17 @@ class BaseQcogClient:
                 "qcog_version": self.version,
             },
         )
+
+        self.trained_model = AppSchemasTrainTrainedModelPayloadResponse(
+            guid=accepted_response["guid"],
+            status=TrainingStatus.unknown,
+            training_parameters_guid=accepted_response["training_parameters_guid"],
+            loss=None,
+            training_completion=0,
+            current_batch_completion=0,
+            qcog_version=accepted_response["qcog_version"],
+            dataset_guid=accepted_response["dataset_guid"],
+        ).model_dump()
 
         return self
 
@@ -362,8 +337,6 @@ class BaseQcogClient:
                 "parameters": jsonable_inference_parameters(parameters),
             },
         )
-
-        print(inference_result)
 
         return base642dataframe(
             inference_result["response"]["data"],
@@ -385,34 +358,36 @@ class BaseQcogClient:
             `status` : TrainingStatus
 
         """
-        self._trained_model = await self.http_client.get(
-            f"model/{self.trained_model['guid']}"
-        )
+        await self._load_trained_model()
         return {
             "guid": self.trained_model.get("guid"),
-            "training_completion": self.status_resp.get("training_completion"),
+            "training_completion": self.trained_model.get("training_completion"),
             "current_batch_completion": self.trained_model.get(
                 "current_batch_completion"
             ),
             "status": TrainingStatus(self.trained_model.get("status")),
         }
 
-    async def _status(self) -> TrainingStatus:
-        """Check the status of the training job."""
-        self.status_resp: dict = await self.http_client.get(
+    async def _load_trained_model(self) -> None:
+        """Load the status of the current trained model."""
+        self.trained_model = await self.http_client.get(
             f"model/{self.trained_model['guid']}"
         )
-        status = TrainingStatus(self.status_resp["status"])
-        training_completion = self.status_resp.get("training_completion", 0)
-        current_batch_completion = self.status_resp.get("current_batch_completion", 0)
 
-        logger.info(f"\nStatus: {status}")
+    async def _status(self) -> TrainingStatus:
+        """Check the status of the training job."""
+        # Load last status
+        await self._load_trained_model()
+
+        self.last_status = TrainingStatus(self.trained_model["status"])
+        training_completion = self.trained_model.get("training_completion", 0)
+        current_batch_completion = self.trained_model.get("current_batch_completion", 0)
+
+        logger.info(f"\nStatus: {self.last_status}")
         logger.info(f"Training completion: {training_completion} %")
         logger.info(f"Current batch completion: {current_batch_completion} %\n")
 
-        self.last_status = TrainingStatus(self.status_resp["status"])
-        self._loss = self.status_resp.get("loss", None)
-
+        self._loss = self.trained_model.get("loss", None)
         return self.last_status
 
     async def _get_loss(self) -> Matrix | None:
@@ -422,12 +397,8 @@ class BaseQcogClient:
         """
         # loss matrix is available only after training is completed
         if self._loss is None:
-            # TODO: Validate response
-            self.status_resp = await self.http_client.get(
-                f"model/{self.trained_model['guid']}"
-            )
-            self.last_status = TrainingStatus(self.status_resp["status"])
-            self._loss = self.status_resp.get("loss", None)
+            await self._load_trained_model()
+            self._loss = self.trained_model.get("loss", None)
         return self._loss
 
     async def _wait_for_training(self, poll_time: int = 60) -> None:
@@ -438,9 +409,7 @@ class BaseQcogClient:
             await asyncio.sleep(poll_time)
 
         if self.last_status not in SUCCESS_STATUS:
-            raise RuntimeError(
-                f"Training failed: {json.dumps(self.status_resp, indent=4)}"
-            )
+            raise RuntimeError(f"Training failed. Status: {self.last_status}. ")
 
     ############################
     # Private Utility Methods #

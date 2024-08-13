@@ -69,10 +69,10 @@ class PyTorchAgent:
 
         return head
 
-    async def upload(self, model_path: str, model_name: str) -> None:
+    async def upload(self, model_path: str, model_name: str) -> Handler:
         """Upload the model to the server."""
         # Init Command will dispatch a Discover Command
-        await self.chain.dispatch(
+        return await self.chain.dispatch(
             payload=DiscoverCommand(model_name=model_name, model_path=model_path)
         )
 

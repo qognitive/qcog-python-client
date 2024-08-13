@@ -39,9 +39,33 @@ class AsyncQcogClient(BaseQcogClient):
         httpclient: ABCRequestClient | None = None,
         dataclient: ABCDataClient | None = None,
     ) -> AsyncQcogClient:
-        """Create a new Qcog client.
+        """Instantiate a new Qcog client.
 
-        TODO: docstring
+        This client is meant to work in an async context.
+
+        Parameters
+        ----------
+        token : str | None
+            A valid API token granting access optional
+            when unset (or None) expects to find the proper
+            value as QCOG_API_TOKEN environment variable
+        hostname : str
+            API endpoint hostname, currently defaults to dev.qognitive.io
+        port : int
+            port value, default to https 443
+        api_version : str
+            the "vX" part of the url for the api version
+        safe_mode : bool
+            if true runs healthchecks before running any api call
+            sequences
+        version : str
+            the qcog version to use. Must be no smaller than `OLDEST_VERSION`
+            and no greater than `NEWEST_VERSION`
+        httpclient : ABCRequestClient | None
+            an optional http client to use instead of the default
+        dataclient : ABCDataClient | None
+            an optional data client to use instead of the default
+
         """
         client = cls()
         client.version = version

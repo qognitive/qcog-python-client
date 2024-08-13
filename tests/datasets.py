@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import torch
@@ -25,7 +24,9 @@ def get_wbc_data(test_fraction=0.2):
         replace=False,
     )
 
-    targets = torch.nn.functional.one_hot(torch.tensor(data.target), num_classes=2).numpy()
+    targets = torch.nn.functional.one_hot(
+        torch.tensor(data.target), num_classes=2
+    ).numpy()
 
     train_data = data.data[train_idx]
     train_target = targets[train_idx]

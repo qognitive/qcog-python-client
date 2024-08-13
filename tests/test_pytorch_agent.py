@@ -3,12 +3,13 @@ import os
 import aiohttp
 import pytest
 
+from qcog_python_client.qcog import AsyncQcogClient
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog.pytorch.agent import PyTorchAgent
-from qcog_python_client.qcog import AsyncQcogClient
 from tests.datasets import get_wbc_data
 
 df_train, df_test, df_target = get_wbc_data()
+
 
 @pytest.mark.asyncio
 async def test_pytorch_agent_discovery():
@@ -24,6 +25,7 @@ async def test_pytorch_agent_discovery():
         hostname="localhost",
         port=8000,
     )
+
     async def post_multipart(url: str, data: aiohttp.FormData) -> dict:
         return await request_client.post(
             url,

@@ -290,7 +290,7 @@ class BaseQcogClient:
             current_batch_completion=0,
             qcog_version=accepted_response["qcog_version"],
             dataset_guid=accepted_response["dataset_guid"],
-        )
+        ).model_dump()
 
         return self
 

@@ -272,13 +272,24 @@ class BaseQcogClient:
 
         await self._upload_training_parameters(params)
 
-        self.trained_model = await self.http_client.post(
+        accepted_response = await self.http_client.post(
             "model",
             {
                 "training_parameters_guid": self.training_parameters["guid"],
                 "dataset_guid": self.dataset["guid"],
                 "qcog_version": self.version,
             },
+        )
+
+        self.trained_model = AppSchemasTrainTrainedModelPayloadResponse(
+            guid=accepted_response["guid"],
+            status=TrainingStatus.unknown,
+            training_parameters_guid=accepted_response["training_parameters_guid"],
+            loss=None,
+            training_completion=0,
+            current_batch_completion=0,
+            qcog_version=accepted_response["qcog_version"],
+            dataset_guid=accepted_response["dataset_guid"],
         )
 
         return self

@@ -1,4 +1,4 @@
-DEFAULT_QCOG_VERSION = "0.0.104"
+DEFAULT_QCOG_VERSION = "0.0.107"
 
 
 def numeric_version(version: str) -> list[int]:

@@ -42,9 +42,34 @@ class QcogClient(BaseQcogClient):
         httpclient: ABCRequestClient | None = None,
         dataclient: ABCDataClient | None = None,
     ) -> QcogClient:
-        """Create a new Qcog client.
+        """Instantiate a new Qcog client.
 
-        TODO: docstring
+        This client is meant to work in a synchronous context.
+        It will raise an error if used in an async context.
+
+        Parameters
+        ----------
+        token : str | None
+            A valid API token granting access optional
+            when unset (or None) expects to find the proper
+            value as QCOG_API_TOKEN environment variable
+        hostname : str
+            API endpoint hostname, currently defaults to dev.qognitive.io
+        port : int
+            port value, default to https 443
+        api_version : str
+            the "vX" part of the url for the api version
+        safe_mode : bool
+            if true runs healthchecks before running any api call
+            sequences
+        version : str
+            the qcog version to use. Must be no smaller than `OLDEST_VERSION`
+            and no greater than `NEWEST_VERSION`
+        httpclient : ABCRequestClient | None
+            an optional http client to use instead of the default
+        dataclient : ABCDataClient | None
+            an optional data client to use instead of the default
+
         """
         client = cls()
         client.version = version
@@ -324,9 +349,10 @@ class QcogClient(BaseQcogClient):
         # Make sure the function is not running in an event loop
         try:
             asyncio.get_running_loop()
-            # If a running event loop is present, we can't run async code
-            # in a synchronous function
-            raise RuntimeError("Cannot run async code in an event loop")
+            raise SystemError(
+                "Cannot run async code in an event loop. "
+                "Please run this code in a sync context."
+            )
         except RuntimeError:
             # No event loop, run the async code
             return asyncio.run(async_callable)

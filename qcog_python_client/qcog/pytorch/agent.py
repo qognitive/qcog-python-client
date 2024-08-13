@@ -42,4 +42,3 @@ class PyTorchAgent:
     async def inference(self, data: Any, model_name: str) -> Any:
         """Run inference."""
         raise NotImplementedError()
-

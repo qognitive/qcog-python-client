@@ -5,7 +5,10 @@ import pytest
 
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog.pytorch.agent import PyTorchAgent
+from qcog_python_client.qcog import AsyncQcogClient
+from tests.datasets import get_wbc_data
 
+df_train, df_test, df_target = get_wbc_data()
 
 @pytest.mark.asyncio
 async def test_pytorch_agent_discovery():
@@ -35,3 +38,18 @@ async def test_pytorch_agent_discovery():
     )
 
     await agent.upload(model_path, model_name)
+
+
+@pytest.mark.asyncio
+async def test_pytorch_workflow():
+    client = await AsyncQcogClient.create(
+        token=os.getenv("API_TOKEN"),
+        hostname="localhost",
+        port=8000,
+    )
+
+    client = await client.data(df_train)
+    client = await client.pytorch(
+        model_name="test_model_00",
+        model_path="tests/pytorch_model",
+    )

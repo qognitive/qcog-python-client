@@ -275,7 +275,12 @@ class BaseQcogClient:
             post_multipart=post_multipart,
         )
 
-        await agent.upload(model_path, model_name)
+        uploader = await agent.upload(model_path, model_name)
+
+        print("---- uploader ----")
+        print(uploader)
+
+        return self
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
         """Upload Data."""

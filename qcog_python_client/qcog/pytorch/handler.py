@@ -35,6 +35,7 @@ ToolFn: TypeAlias = Callable[..., Coroutine[Any, Any, dict]]
 class Command(enum.Enum):
     """Command enum."""
 
+    save_parameters = "save_parameters"
     discover = "discover"
     validate = "validate"
     upload = "upload"

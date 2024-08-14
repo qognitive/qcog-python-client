@@ -7,6 +7,10 @@ from qcog_python_client.qcog.pytorch.discover._discover import (
     DiscoverHandler,
 )
 from qcog_python_client.qcog.pytorch.handler import Handler, ToolFn
+from qcog_python_client.qcog.pytorch.parameters._saveparameters import (
+    SaveParametersCommand,
+    SaveParametersHandler,
+)
 from qcog_python_client.qcog.pytorch.upload._upload import UploadHandler
 from qcog_python_client.qcog.pytorch.validate._validate import ValidateHandler
 
@@ -63,16 +67,29 @@ class PyTorchAgent:
         self._chain = head
         return head
 
-    async def upload(self, model_path: str, model_name: str) -> Handler:
+    async def upload_model(self, model_path: str, model_name: str) -> None:
         """Upload the model to the server."""
         # Init Command will dispatch a Discover Command
-        return await self.chain.dispatch(
+        upload_handler = await self.chain.dispatch(
             payload=DiscoverCommand(
                 model_name=model_name,
                 model_path=model_path,
                 dispatch_next=True,  # Will follow the whole chain
             )
         )
+        print(upload_handler)
+        # We dont wanna expose the chain or the handlers outside of the PytorchAgent
+        return None
+
+    async def save_parameters(self, parameters: dict) -> dict:
+        """Save the training parameters."""
+        save_params_handler: SaveParametersHandler = await self.chain.dispatch(
+            payload=SaveParametersCommand(
+                parameters=parameters,
+            )
+        )
+
+        return save_params_handler.parameters_response
 
     async def train(self, data: Any) -> dict:
         """Train the model."""
@@ -96,5 +113,10 @@ class PyTorchAgent:
     ) -> "PyTorchAgent":
         """Create a PyTorch Agent with a http client for making requests."""
         agent = cls()
-        agent.init(DiscoverHandler(), ValidateHandler(), UploadHandler())
+        agent.init(
+            DiscoverHandler(),
+            ValidateHandler(),
+            UploadHandler(),
+            SaveParametersHandler(),
+        )
         return agent

@@ -13,18 +13,13 @@ from typing import Any
 
 from qcog_python_client.schema.common import (
     InferenceParameters,
-    PytorchTrainingParameters,
     TrainingParameters,
 )
 
 
 def jsonable_train_parameters(
-    params: TrainingParameters | PytorchTrainingParameters,
+    params: TrainingParameters,
 ) -> dict:
-    # PytorchTrainingParameters represent a dictionary with any key and value.
-    if isinstance(params, PytorchTrainingParameters):
-        return params.model_dump()
-
     state_kwargs = params["state_kwargs"]
     weight_kwargs = params["weight_optimization_kwargs"]
 

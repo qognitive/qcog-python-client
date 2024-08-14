@@ -2,7 +2,6 @@ import gzip
 import io
 import os
 import tarfile
-from dataclasses import dataclass
 
 import aiohttp
 
@@ -24,7 +23,6 @@ def compress_folder(folder_path: str) -> bytes:
     return gzip.compress(buffer.read())
 
 
-@dataclass
 class UploadCommand(BoundedCommand):
     upload_folder: str
     model_name: str
@@ -32,7 +30,7 @@ class UploadCommand(BoundedCommand):
 
 
 class UploadHandler(Handler[UploadCommand]):
-    command: Command = Command.upload
+    commands = (Command.upload,)
     attempts = 1
 
     async def handle(self, payload: UploadCommand) -> None:
@@ -41,8 +39,19 @@ class UploadHandler(Handler[UploadCommand]):
         gzip_folder = compress_folder(folder_path)
         # Retrieve the multipart request tool
         post_multipart = self.get_tool("post_multipart")
+        # Retrieve dataset_guid, training_parameters_guid
+        # from the context
+        dataset_guid = self.context.get("dataset_guid")
+        training_parameters_guid = self.context.get("training_parameters_guid")
+
+        if not dataset_guid:
+            raise ValueError("Dataset guid not found in the context.")
+
+        if not training_parameters_guid:
+            raise ValueError("Training parameters guid not found in the context.")
 
         data = aiohttp.FormData()
+
         data.add_field(
             "file",
             gzip_folder,
@@ -51,12 +60,11 @@ class UploadHandler(Handler[UploadCommand]):
         )
 
         response = await post_multipart(
-            "pytorch_model",
+            f"pytorch_model/?dataset_guid={dataset_guid}&training_parameters_guid={training_parameters_guid}",
             data,
         )
 
-        print("---- Response ----")
-        print(response)
+        print("Response:", response)
 
     async def revert(self) -> None:
         pass

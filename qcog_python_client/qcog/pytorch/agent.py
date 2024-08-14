@@ -2,8 +2,6 @@
 
 from typing import Any, Callable, Coroutine
 
-import aiohttp
-
 from qcog_python_client.qcog.pytorch.discover._discover import (
     DiscoverCommand,
     DiscoverHandler,
@@ -29,18 +27,6 @@ class PyTorchAgent:
             raise ValueError("Chain not initialized. Call the `init` method first.")
         return self._chain
 
-    def init(self) -> None:
-        """Initialize the PyTorch Agent.
-
-        This method needs to be called after registering the tools.
-        """
-        # Chain of Responsibility
-        self._chain = self._init(
-            DiscoverHandler(),
-            ValidateHandler(),
-            UploadHandler(),
-        )
-
     def _get_tool(self, tool_name: str) -> ToolFn:
         """Get a tool from the tools dictionary."""
         tool = self.tools.get(tool_name)
@@ -52,11 +38,17 @@ class PyTorchAgent:
 
         return tool
 
-    def _init(self, *chain: Handler) -> Handler:
+    def set_context(self, key: str, value: Any) -> None:
+        """Set a value on the chain context."""
+        self.chain.context[key] = value
+
+    def init(self, *chain: Handler) -> Handler:
         """Initialize the Responsibility Chain."""
         if len(chain) == 1:
             raise ValueError("Chain must have at least 2 handlers.")
         head = chain[0]
+
+        context: dict = {}
 
         for i in range(len(chain) - 1):
             current_handler = chain[i]
@@ -66,14 +58,20 @@ class PyTorchAgent:
         # Register the get_tool function
         for handler in chain:
             handler.get_tool = self._get_tool
+            handler.context = context
 
+        self._chain = head
         return head
 
     async def upload(self, model_path: str, model_name: str) -> Handler:
         """Upload the model to the server."""
         # Init Command will dispatch a Discover Command
         return await self.chain.dispatch(
-            payload=DiscoverCommand(model_name=model_name, model_path=model_path)
+            payload=DiscoverCommand(
+                model_name=model_name,
+                model_path=model_path,
+                dispatch_next=True,  # Will follow the whole chain
+            )
         )
 
     async def train(self, data: Any) -> dict:
@@ -95,14 +93,8 @@ class PyTorchAgent:
     @classmethod
     def create_agent(
         cls,
-        post_request: Callable[[str, dict], Coroutine[Any, Any, dict]],
-        get_request: Callable[[str], Coroutine[Any, Any, dict]],
-        post_multipart: Callable[[str, aiohttp.FormData], Coroutine[Any, Any, dict]],
     ) -> "PyTorchAgent":
         """Create a PyTorch Agent with a http client for making requests."""
         agent = cls()
-        agent.register_tool("post_request", post_request)
-        agent.register_tool("get_request", get_request)
-        agent.register_tool("post_multipart", post_multipart)
-        agent.init()
+        agent.init(DiscoverHandler(), ValidateHandler(), UploadHandler())
         return agent

@@ -6,7 +6,9 @@ from typing import Any
 
 import pandas as pd
 
-from qcog_python_client.qcog._baseclient import BaseQcogClient
+from qcog_python_client.qcog._baseclient import (
+    BaseQcogClient,
+)
 from qcog_python_client.qcog._data_uploader import DataClient
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog._interfaces import (
@@ -19,6 +21,7 @@ from qcog_python_client.schema.common import (
     Matrix,
     NotRequiredStateParams,
     NotRequiredWeightParams,
+    PytorchTrainingParameters,
 )
 from qcog_python_client.schema.generated_schema.models import TrainingStatus
 
@@ -269,6 +272,31 @@ class AsyncQcogClient(BaseQcogClient):
 
         """
         super().ensemble(*args, **kwargs)
+        return self
+
+    async def pytorch(
+        self, model_name: str, model_path: str, *, train_parameters: dict
+    ) -> AsyncQcogClient:
+        """Select PyTorch model.
+
+        Parameters
+        ----------
+        model_name : str
+            the name of the model
+        model_path : str
+            the path to the model
+        train_parameters : dict
+            the training parameters as specified in the `train`
+            function of the provided model
+
+        Returns
+        -------
+        AsyncQcogClient
+
+        """
+        await super()._pytorch(
+            model_name, model_path, PytorchTrainingParameters(**train_parameters)
+        )
         return self
 
     # ###########################

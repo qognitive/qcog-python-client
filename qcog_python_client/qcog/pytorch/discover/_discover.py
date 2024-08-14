@@ -4,13 +4,11 @@ import asyncio
 import base64
 import os
 from concurrent import futures
-from dataclasses import dataclass
 
 from qcog_python_client.qcog.pytorch.handler import BoundedCommand, Command, Handler
 from qcog_python_client.qcog.pytorch.validate._validate import ValidateCommand
 
 
-@dataclass
 class DiscoverCommand(BoundedCommand):
     model_name: str
     model_path: str
@@ -35,7 +33,7 @@ class DiscoverHandler(Handler):
 
     model_module_name = "model.py"  # The name of the model module
     retries = 0
-    command = Command.discover
+    commands = (Command.discover,)
     relevant_files: dict
 
     async def handle(self, payload: DiscoverCommand) -> ValidateCommand:

@@ -25,6 +25,7 @@ from qcog_python_client.schema.common import (
     Matrix,
     NotRequiredStateParams,
     NotRequiredWeightParams,
+    PytorchTrainingParameters,
 )
 from qcog_python_client.schema.generated_schema.models import (
     AppSchemasDataPayloadDataPayloadResponse,
@@ -34,12 +35,16 @@ from qcog_python_client.schema.generated_schema.models import (
     ModelEnsembleParameters,
     ModelGeneralParameters,
     ModelPauliParameters,
+    ModelPytorchParameters,
     TrainingStatus,
 )
 
 Operator: TypeAlias = str | int
 TrainingModel: TypeAlias = (
-    ModelPauliParameters | ModelEnsembleParameters | ModelGeneralParameters
+    ModelPauliParameters
+    | ModelEnsembleParameters
+    | ModelGeneralParameters
+    | ModelPytorchParameters
 )
 
 logger = qcoglogger.getChild(__name__)
@@ -121,6 +126,7 @@ class BaseQcogClient:
     @training_parameters.setter
     def training_parameters(self, value: dict) -> None:
         """Set and validate the training parameters."""
+        print("-----> Validating : ", value)
         self._training_parameters = (
             AppSchemasParametersTrainingParametersPayloadResponse.model_validate(
                 value
@@ -218,32 +224,41 @@ class BaseQcogClient:
         )
         return self
 
-    async def pytorch(
+    async def _pytorch(
         self,
         model_name: str,
         model_path: str,
-    ) -> Any:
+        train_parameters: PytorchTrainingParameters,
+    ) -> BaseQcogClient:
         """Select a Pythorch architecture defined by the user."""
+        # Instantiate the Pytorch client.
 
-        async def post_multipart(url: str, data: aiohttp.FormData) -> dict:
-            return await self.http_client.post(
-                url,
-                data,
-                content_type="data",
-            )
+        # Set the pytorch model parameters.
+        # In this case there are no parameters
+        # Because the parameters are defined
+        # by the user in the model itself.
+        self._model = ModelPytorchParameters(model_name=Model.pytorch.value)
 
+        # Upload the training parameters
+        await self._upload_training_parameters(train_parameters)
         # Create a PyTorch agent with the http client functions
-        agent = PyTorchAgent.create_agent(
-            post_request=self.http_client.post,
-            get_request=self.http_client.get,
-            post_multipart=post_multipart,
-        )
+        agent = PyTorchAgent.create_agent()
 
-        uploader = await agent.upload(model_path, model_name)
+        # Needed to upload the model
+        agent.register_tool("post_multipart", self._post_multipart)
 
-        print("---- uploader ----")
-        print(uploader)
+        # TODO: Add a validation for the parameters:
+        # We are already saving the types of the
+        # custom train parameters, in the `validate`
+        # handler. We could just validate the parameters
+        # and eventually delete them in case the
+        # validation fails.
 
+        agent.set_context("dataset_guid", self.dataset["guid"])
+        agent.set_context("training_parameters_guid", self.training_parameters["guid"])
+
+        result = await agent.upload(model_path, model_name)
+        print("-----> Result : ", result)
         return self
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
@@ -415,7 +430,9 @@ class BaseQcogClient:
     # Private Utility Methods #
     ############################
 
-    async def _upload_training_parameters(self, params: TrainingParameters) -> None:
+    async def _upload_training_parameters(
+        self, params: TrainingParameters | PytorchTrainingParameters
+    ) -> None:
         """Upload Training Parameters."""
         self.training_parameters = await self.http_client.post(
             "training_parameters",
@@ -424,4 +441,11 @@ class BaseQcogClient:
                 "parameters": {"model": self.model.model_dump()}
                 | jsonable_train_parameters(params),
             },
+        )
+
+    async def _post_multipart(self, url: str, data: aiohttp.FormData) -> dict:
+        return await self.http_client.post(
+            url,
+            data,
+            content_type="data",
         )

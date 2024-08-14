@@ -25,7 +25,7 @@ class TrainFnAnnotation:
 
 
 @dataclass
-class ValidatedModule:
+class ValidateModelModule:
     train_fn: dict[str, TrainFnAnnotation]
 
 
@@ -36,7 +36,7 @@ default_allowed_modules = {"torch", "pandas", "numpy", "sklearn"}
 def validate_model_module(
     file: FileToValidate,
     allowed_modules: set[str] | None = None,
-) -> ValidatedModule:
+) -> ValidateModelModule:
     """Validate the model module."""
     allowed_modules = allowed_modules or default_allowed_modules
     dir_path = os.path.dirname(file.path)
@@ -97,7 +97,7 @@ def validate_model_module(
     # only one function with the name `train`.
     train_fn = inspected[0][1]
 
-    return ValidatedModule(train_fn=inspect_train_fn(train_fn))
+    return ValidateModelModule(train_fn=inspect_train_fn(train_fn))
 
 
 def inspect_train_fn(fn: Callable) -> dict[str, TrainFnAnnotation]:

@@ -54,4 +54,8 @@ async def test_pytorch_workflow():
     client = await client.pytorch(
         model_name="test_model_00",
         model_path="tests/pytorch_model",
+        train_parameters={
+            "epochs": 5,
+            "batch_size": 10,
+        },
     )

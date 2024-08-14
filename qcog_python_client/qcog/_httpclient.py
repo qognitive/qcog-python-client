@@ -9,6 +9,8 @@ from enum import Enum
 from typing import Literal
 
 import aiohttp
+import urllib3
+import urllib3.util
 
 from qcog_python_client.qcog._interfaces import ABCRequestClient
 
@@ -103,6 +105,9 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             may use .json()
 
         """
+        # URLEncode the uri
+        uri = urllib3.util.parse_url(uri).url
+
         random.seed()
         sleep_for: int = random.randrange(1, 5)
         exception: aiohttp.client_exceptions.ClientResponseError
@@ -158,7 +163,7 @@ class RequestClient(_HTTPClient, ABCRequestClient):
 
         """
         return await self._request_retry(
-            f"{self.url}/{endpoint}/",
+            f"{self.url}/{endpoint}",
             HttpMethod.get,
         )
 
@@ -190,5 +195,5 @@ class RequestClient(_HTTPClient, ABCRequestClient):
 
         """
         return await self._request_retry(
-            f"{self.url}/{endpoint}/", HttpMethod.post, data, content_type=content_type
+            f"{self.url}/{endpoint}", HttpMethod.post, data, content_type=content_type
         )

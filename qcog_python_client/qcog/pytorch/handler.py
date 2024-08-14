@@ -15,13 +15,16 @@ from __future__ import annotations
 import asyncio
 import enum
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Coroutine, Generic, Protocol, TypeAlias, TypeVar
+from typing import Any, Callable, Coroutine, Generic, TypeAlias, TypeVar
+
+from pydantic import BaseModel
 
 
-class BoundedCommand(Protocol):
+class BoundedCommand(BaseModel):
     """Command type."""
 
     command: Command
+    dispatch_next: bool = False
 
 
 CommandPayloadType = TypeVar("CommandPayloadType", bound=BoundedCommand)
@@ -43,11 +46,11 @@ class Handler(ABC, Generic[CommandPayloadType]):
 
     head: Handler  # Reference to the head of the chain
     next: Handler | None = None
-    executed: bool = False
     attempts: int = 3
     retry_after: int = 3
-    command: Command
+    commands: tuple[Command]
     get_tool: Callable[[ToolName], ToolFn]
+    context: dict
 
     @abstractmethod
     async def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:
@@ -71,7 +74,7 @@ class Handler(ABC, Generic[CommandPayloadType]):
         # and the handler has already been executed
         # we want to revert the state of the handler
         # and pass the command to the next handler
-        if payload.command == Command.revert_all and self.executed:
+        if payload.command == Command.revert_all:
             await self.revert()
             if self.next:
                 return await self.next.dispatch(payload)
@@ -79,7 +82,7 @@ class Handler(ABC, Generic[CommandPayloadType]):
 
         # If the handler matches the command in the payload
         # Attempt the execution of the command
-        if self.command == payload.command:
+        if payload.command in self.commands:
             for i in range(self.attempts):
                 try:
                     return await execute_and_dispatch_next(self, payload)
@@ -100,7 +103,7 @@ class Handler(ABC, Generic[CommandPayloadType]):
         raise AttributeError(f"Command {payload.command} not found in the chain")
 
     def __repr__(self) -> str:  # noqa: D105
-        return f"{self.__class__.__name__}({self.command})"
+        return f"{self.__class__.__name__}({self.commands})"
 
 
 async def execute_and_dispatch_next(
@@ -111,9 +114,16 @@ async def execute_and_dispatch_next(
     If no next command is found, return the current handler.
     """
     next_command = await handler.handle(command)
-    handler.executed = True
 
-    if next_command and handler.next:
+    # If the returned payload is a command
+    # And the command is set to dispatch the next command
+    # And there is a next handler, then dispatch the next command
+    if next_command and command.dispatch_next and handler.next:
+        # If the command is set to `dispatch_next`,
+        # continue the chain and set the next command
+        # to be dispatched next
+        next_command.dispatch_next = True
         return await handler.next.dispatch(next_command)
 
+    # Otherwise, return the current handler
     return handler

@@ -6,6 +6,7 @@ import enum
 from typing import Any, Protocol, TypeAlias, TypedDict
 
 import pandas as pd
+from pydantic import BaseModel
 
 from .generated_schema.models import (
     AdamOptimizationParameters,
@@ -99,6 +100,12 @@ class TrainingParameters(TypedDict):
     num_passes: int
     weight_optimization_kwargs: NotRequiredWeightParams
     state_kwargs: NotRequiredStateParams
+
+
+class PytorchTrainingParameters(BaseModel):
+    """Base model for the model parameters."""
+
+    model_config = {"extra": "allow"}
 
 
 class AsyncTrainProtocol(Protocol):

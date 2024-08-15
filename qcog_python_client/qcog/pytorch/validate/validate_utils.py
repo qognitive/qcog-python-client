@@ -13,8 +13,7 @@ def get_stdlib_modules() -> set:
     stdlib_modules = set()
     for importer, modname, ispkg in pkgutil.iter_modules():
         # Exclude packages
-        if not ispkg:
-            stdlib_modules.add(modname)
+        stdlib_modules.add(modname)
 
     return stdlib_modules
 

@@ -30,7 +30,12 @@ class ValidateModelModule:
 
 
 # whitelist of allowed modules
-default_allowed_modules = {"torch", "pandas", "numpy", "sklearn"}
+default_allowed_modules = {
+    "torch",
+    "pandas",
+    "numpy",
+    "sklearn" "torchvision",
+}
 
 
 def validate_model_module(
@@ -50,7 +55,6 @@ def validate_model_module(
         # Inspect each python file and try to find third-party modules
         if item.endswith(".py"):
             third_party_modules = get_third_party_imports(os.path.join(dir_path, item))
-
             for module_name in third_party_modules:
                 # If the module_name name is the package, skip it
                 if module_name == file.pkg_name:

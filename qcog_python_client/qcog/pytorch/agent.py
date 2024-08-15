@@ -1,6 +1,6 @@
 """Class to handle all the PyTorch operations."""
 
-from typing import Any, Callable, Coroutine
+from typing import Any, Callable, Coroutine, cast
 
 from qcog_python_client.qcog.pytorch.discover._discover import (
     DiscoverCommand,
@@ -13,6 +13,7 @@ from qcog_python_client.qcog.pytorch.parameters._saveparameters import (
 )
 from qcog_python_client.qcog.pytorch.upload._upload import UploadHandler
 from qcog_python_client.qcog.pytorch.validate._validate import ValidateHandler
+from qcog_python_client.schema.common import PytorchTrainingParameters
 
 
 class PyTorchAgent:
@@ -67,29 +68,30 @@ class PyTorchAgent:
         self._chain = head
         return head
 
-    async def upload_model(self, model_path: str, model_name: str) -> None:
+    async def upload_model(self, model_path: str, model_name: str) -> dict:
         """Upload the model to the server."""
         # Init Command will dispatch a Discover Command
-        upload_handler = await self.chain.dispatch(
+        handler = await self.chain.dispatch(
             payload=DiscoverCommand(
                 model_name=model_name,
                 model_path=model_path,
                 dispatch_next=True,  # Will follow the whole chain
             )
         )
-        print(upload_handler)
+        upload_handler = cast(UploadHandler, handler)
         # We dont wanna expose the chain or the handlers outside of the PytorchAgent
-        return None
+        return upload_handler.created_model
 
     async def save_parameters(self, parameters: dict) -> dict:
         """Save the training parameters."""
-        save_params_handler: SaveParametersHandler = await self.chain.dispatch(
+        save_params_handler = await self.chain.dispatch(
             payload=SaveParametersCommand(
-                parameters=parameters,
+                parameters=PytorchTrainingParameters(**parameters),
             )
         )
 
-        return save_params_handler.parameters_response
+        handler = cast(SaveParametersHandler, save_params_handler)
+        return handler.parameters_response
 
     async def train(self, data: Any) -> dict:
         """Train the model."""

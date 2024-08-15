@@ -239,25 +239,25 @@ class BaseQcogClient:
         # by the user in the model itself.
         self._model = ModelPytorchParameters(model_name=Model.pytorch.value)
 
-        # Upload the training parameters
-        await self._upload_training_parameters(train_parameters)
         # Create a PyTorch agent with the http client functions
         agent = PyTorchAgent.create_agent()
 
-        # Needed to upload the model
+        # Needed to upload the model and the parameters
         agent.register_tool("post_multipart", self._post_multipart)
+        agent.register_tool("post_request", self.http_client.post)
 
-        # TODO: Add a validation for the parameters:
-        # We are already saving the types of the
-        # custom train parameters, in the `validate`
-        # handler. We could just validate the parameters
-        # and eventually delete them in case the
-        # validation fails.
+        # Upload the parameters
+        self.training_parameters = await agent.save_parameters(
+            train_parameters.model_dump()
+        )
 
+        # Set the context of training parameters and dataset guid
+        # To be used by the upload model handler
         agent.set_context("dataset_guid", self.dataset["guid"])
         agent.set_context("training_parameters_guid", self.training_parameters["guid"])
 
-        result = await agent.upload(model_path, model_name)
+        # Upload the model
+        result = await agent.upload_model(model_path, model_name)
         print("-----> Result : ", result)
         return self
 
@@ -431,7 +431,7 @@ class BaseQcogClient:
     ############################
 
     async def _upload_training_parameters(
-        self, params: TrainingParameters | PytorchTrainingParameters
+        self, params: TrainingParameters
     ) -> None:
         """Upload Training Parameters."""
         self.training_parameters = await self.http_client.post(
@@ -443,7 +443,12 @@ class BaseQcogClient:
             },
         )
 
-    async def _post_multipart(self, url: str, data: aiohttp.FormData) -> dict:
+    async def _post_multipart(
+        self,
+        url: str,
+        data: aiohttp.FormData,
+    ) -> dict:
+        # Add data headers to the form data
         return await self.http_client.post(
             url,
             data,

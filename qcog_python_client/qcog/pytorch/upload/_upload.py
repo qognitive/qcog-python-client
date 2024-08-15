@@ -1,4 +1,3 @@
-import gzip
 import io
 import os
 import tarfile
@@ -12,15 +11,29 @@ from qcog_python_client.qcog.pytorch.handler import (
 )
 
 
-def compress_folder(folder_path: str) -> bytes:
+def compress_folder(folder_path: str) -> io.BytesIO:
     """Compress a folder."""
+    # We define the arcname as the basename of the folder
+    # In this way we avoid the full path in the tar.gz file
+    arcname = os.path.basename(folder_path)
+
+    # What to exclude (__pycache__, .git, etc)
+    def filter(tarinfo: tarfile.TarInfo) -> tarfile.TarInfo | None:
+        if "__pycache__" in tarinfo.name:
+            return None
+        if ".git" in tarinfo.name:
+            return None
+        return tarinfo
+
     buffer = io.BytesIO()
+
     with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
-        for root, _, files in os.walk(folder_path):
-            for file in files:
-                tar.add(os.path.join(root, file))
+        tar.add(folder_path, arcname=arcname, filter=filter)
+        print("Compressed targzip with memebers: ", tar.getnames())
+
     buffer.seek(0)
-    return gzip.compress(buffer.read())
+
+    return buffer
 
 
 class UploadCommand(BoundedCommand):
@@ -36,7 +49,7 @@ class UploadHandler(Handler[UploadCommand]):
     async def handle(self, payload: UploadCommand) -> None:
         folder_path = payload.upload_folder
         # Compress the folder
-        gzip_folder = compress_folder(folder_path)
+        tar_gzip_folder = compress_folder(folder_path)
         # Retrieve the multipart request tool
         post_multipart = self.get_tool("post_multipart")
         # Retrieve dataset_guid, training_parameters_guid
@@ -53,18 +66,18 @@ class UploadHandler(Handler[UploadCommand]):
         data = aiohttp.FormData()
 
         data.add_field(
-            "file",
-            gzip_folder,
+            "model",
+            tar_gzip_folder,
             filename=f"model-{payload.model_name}.tar.gz",
             content_type="application/gzip",
         )
 
         response = await post_multipart(
-            f"pytorch_model/?dataset_guid={dataset_guid}&training_parameters_guid={training_parameters_guid}",
+            f"pytorch_model/?dataset_guid={dataset_guid}&training_parameters_guid={training_parameters_guid}&model_name={payload.model_name}",
             data,
         )
 
-        print("Response:", response)
+        self.created_model = response
 
     async def revert(self) -> None:
         pass

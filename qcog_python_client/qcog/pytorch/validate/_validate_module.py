@@ -34,7 +34,8 @@ default_allowed_modules = {
     "torch",
     "pandas",
     "numpy",
-    "sklearn" "torchvision",
+    "sklearn",
+    "torchvision",
 }
 
 

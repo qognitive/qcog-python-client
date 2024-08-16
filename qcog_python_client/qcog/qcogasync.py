@@ -202,10 +202,7 @@ class AsyncQcogClient(BaseQcogClient):
         """
         return await self._inference(data, parameters)
 
-    async def train_pytorch(
-        self,
-        training_parameters: dict
-    ) -> AsyncQcogClient:
+    async def train_pytorch(self, training_parameters: dict) -> AsyncQcogClient:
         """Train PyTorch model..
 
         TODO: docstring
@@ -288,7 +285,9 @@ class AsyncQcogClient(BaseQcogClient):
         return self
 
     async def pytorch(
-        self, model_name: str, model_path: str,
+        self,
+        model_name: str,
+        model_path: str,
     ) -> AsyncQcogClient:
         """Select PyTorch model.
 

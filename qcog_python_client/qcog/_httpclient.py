@@ -185,8 +185,8 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             if applicable) and will add to the dns prefix
         data: dict
             json-able data payload
-        content_type: Literal['json'] | Literal['octet-stream']
-            content type of the post request. For `octet-stream` content type,
+        content_type: Literal['json'] | Literal['data']
+            content type of the post request. For `data` content type,
             a FormData object is expected in the `data` parameter
 
         Returns

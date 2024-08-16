@@ -7,7 +7,7 @@ import torch.utils
 import torch.utils.data
 import torchvision
 import torchvision.transforms as transforms
-from pytorch_model._model import Net
+from _model import Net
 
 
 def train(
@@ -47,8 +47,10 @@ def train(
     print("Starting the model training!")
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
-        for _, data in enumerate(trainloader, 0):
+        for data in trainloader:
             # get the inputs; data is a list of [inputs, labels]
+            print("----Data----")
+            print(data)
             inputs, labels = data
 
             inputs = inputs.to(device)

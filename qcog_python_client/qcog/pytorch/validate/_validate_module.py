@@ -1,6 +1,7 @@
 import importlib
 import inspect
 import os
+import sys
 from dataclasses import dataclass
 from typing import Callable
 
@@ -81,6 +82,9 @@ def validate_model_module(
 
     if not spec:
         raise ValueError("Model module not found.")
+
+    # Set the path
+    sys.path.append(dir_path)
 
     module = importlib.util.module_from_spec(spec)
 

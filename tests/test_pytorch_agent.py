@@ -6,7 +6,6 @@ import pytest
 from qcog_python_client.qcog import AsyncQcogClient
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog.pytorch.agent import PyTorchAgent
-from qcog_python_client.schema.common import PytorchTrainingParameters
 from tests.datasets import get_wbc_data
 
 df_train, df_test, df_target = get_wbc_data()

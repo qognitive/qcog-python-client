@@ -1,4 +1,5 @@
 from typing import Callable
+
 from qcog_python_client.qcog.pytorch.handler import (
     BoundedCommand,
     Command,
@@ -18,7 +19,7 @@ class SaveParametersHandler(Handler[SaveParametersCommand]):
     async def handle(self, payload: SaveParametersCommand) -> None:
         # Check if a dynamic model to validate the parameters
         # has been set on the context
-        validate: Callable[[dict], None] = self.context.get("params_validator")
+        validate: Callable[[dict], None] | None = self.context.get("params_validator")
 
         if validate:
             validate(payload.parameters)

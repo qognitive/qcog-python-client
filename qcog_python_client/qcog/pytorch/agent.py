@@ -14,7 +14,6 @@ from qcog_python_client.qcog.pytorch.parameters._saveparameters import (
 from qcog_python_client.qcog.pytorch.train._train import TrainCommand, TrainHandler
 from qcog_python_client.qcog.pytorch.upload._upload import UploadHandler
 from qcog_python_client.qcog.pytorch.validate._validate import ValidateHandler
-from qcog_python_client.schema.common import PytorchTrainingParameters
 
 
 class PyTorchAgent:
@@ -72,6 +71,7 @@ class PyTorchAgent:
     async def upload_model(self, model_path: str, model_name: str) -> dict:
         """Upload the model to the server."""
         # Init Command will dispatch a Discover Command
+        print("DEBUG: Uploading model")
         handler = await self.chain.dispatch(
             payload=DiscoverCommand(
                 model_name=model_name,
@@ -80,10 +80,12 @@ class PyTorchAgent:
             )
         )
         upload_handler = cast(UploadHandler, handler)
+        print("DEBUG: Model uploaded: ", upload_handler.created_model)
         # We dont wanna expose the chain or the handlers outside of the PytorchAgent
         return upload_handler.created_model
 
-    async def train_model(self,
+    async def train_model(
+        self,
         model_guid: str,
         *,
         dataset_guid: str,
@@ -91,13 +93,16 @@ class PyTorchAgent:
     ) -> dict:
         """Train the model."""
         # Upload training command
-        save_parameters_handler: SaveParametersHandler = await self.chain.dispatch(
-            payload=SaveParametersCommand(
-                parameters=training_parameters
-            )
+        print("DEBUG: Training model - Save Parameters")
+        handler = await self.chain.dispatch(
+            payload=SaveParametersCommand(parameters=training_parameters)
         )
+        save_parameters_handler = cast(SaveParametersHandler, handler)
 
-        training_parameters_guid = save_parameters_handler.parameters_response['guid']
+        print("DEBUG: Training model - Train")
+        print("DEBUG: Training model - Model GUID: ", model_guid)
+
+        training_parameters_guid = save_parameters_handler.parameters_response["guid"]
 
         train_handler = await self.chain.dispatch(
             payload=TrainCommand(

@@ -39,7 +39,6 @@ from qcog_python_client.schema.generated_schema.models import (
     ModelPytorchParameters,
     TrainingStatus,
 )
-from tests.pytorch_model.model import train
 
 Operator: TypeAlias = str | int
 TrainingModel: TypeAlias = (
@@ -106,9 +105,11 @@ class BaseQcogClient:
         # same as the `trained_model`, but it's not an actual trained model,
         # It's just a pointer to the uploaded model with some parameters,
         # and a specific dataset.
-        self._pytorch_model = AppSchemasPytorchModelPytorchModelPayloadResponse.model_validate(  # noqa: E501
-            value
-        ).model_dump()
+        self._pytorch_model = (
+            AppSchemasPytorchModelPytorchModelPayloadResponse.model_validate(  # noqa: E501
+                value
+            ).model_dump()
+        )
 
     @property
     def model(self) -> TrainingModel:
@@ -370,8 +371,8 @@ class BaseQcogClient:
         )
 
     async def _train_pytorch(
-            self, training_parameters: PytorchTrainingParameters
-        ) -> BaseQcogClient:
+        self, training_parameters: PytorchTrainingParameters
+    ) -> BaseQcogClient:
         agent = PyTorchAgent.create_agent()
 
         # Needed to upload the model and the parameters

@@ -40,6 +40,7 @@ class Command(enum.Enum):
     validate = "validate"
     upload = "upload"
     revert_all = "revert_all"
+    train = "train"
 
 
 class Handler(ABC, Generic[CommandPayloadType]):

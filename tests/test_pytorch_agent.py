@@ -6,6 +6,7 @@ import pytest
 from qcog_python_client.qcog import AsyncQcogClient
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog.pytorch.agent import PyTorchAgent
+from qcog_python_client.schema.common import PytorchTrainingParameters
 from tests.datasets import get_wbc_data
 
 df_train, df_test, df_target = get_wbc_data()
@@ -50,12 +51,15 @@ async def test_pytorch_workflow():
         port=8000,
     )
 
-    client = await client.data(df_train)
     client = await client.pytorch(
         model_name="test-model-00",
         model_path="tests/pytorch_model",
-        train_parameters={
-            "epochs": 5,
-            "batch_size": 10,
-        },
+    )
+    client = await client.data(df_train)
+
+    await client.train_pytorch(
+        {
+            "batch_size": 32,
+            "epochs": 10,
+        }
     )

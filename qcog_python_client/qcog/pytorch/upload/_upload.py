@@ -43,8 +43,40 @@ class UploadCommand(BoundedCommand):
 
 
 class UploadHandler(Handler[UploadCommand]):
+    """Upload the model to the server.
+
+    It sets the created_model attribute on the handler.
+
+    The model has the following attributes:
+    training_parameters_guid: str
+        The parameters associated with that model
+
+    dataset_guid: str
+        The dataset associated with that model
+
+    qcog_version: str
+        The version of the model. In case of a pytorch model,
+        the version will be `pytorch-{model_name}`
+
+    project_guid: str
+        The project guid
+
+    experiment_name: str
+        The experiment name returned by the server.
+        The shape is `training-pytorch-{model_name}`
+
+    run_guid: str
+        The run guid returned by the server. It's associated with
+        the experiment guid if no train run has been executed yet.
+
+    status: str
+        Is set to `unknown` if no train run has been executed yet.
+
+    """
+
     commands = (Command.upload,)
     attempts = 1
+    data: aiohttp.FormData
 
     async def handle(self, payload: UploadCommand) -> None:
         folder_path = payload.upload_folder
@@ -52,20 +84,10 @@ class UploadHandler(Handler[UploadCommand]):
         tar_gzip_folder = compress_folder(folder_path)
         # Retrieve the multipart request tool
         post_multipart = self.get_tool("post_multipart")
-        # Retrieve dataset_guid, training_parameters_guid
-        # from the context
-        dataset_guid = self.context.get("dataset_guid")
-        training_parameters_guid = self.context.get("training_parameters_guid")
 
-        if not dataset_guid:
-            raise ValueError("Dataset guid not found in the context.")
+        self.data = aiohttp.FormData()
 
-        if not training_parameters_guid:
-            raise ValueError("Training parameters guid not found in the context.")
-
-        data = aiohttp.FormData()
-
-        data.add_field(
+        self.data.add_field(
             "model",
             tar_gzip_folder,
             filename=f"model-{payload.model_name}.tar.gz",
@@ -73,11 +95,11 @@ class UploadHandler(Handler[UploadCommand]):
         )
 
         response = await post_multipart(
-            f"pytorch_model/?dataset_guid={dataset_guid}&training_parameters_guid={training_parameters_guid}&model_name={payload.model_name}",
-            data,
+            f"pytorch_model/?model_name={payload.model_name}",
+            self.data,
         )
 
         self.created_model = response
 
     async def revert(self) -> None:
-        pass
+        delattr(self, "data")

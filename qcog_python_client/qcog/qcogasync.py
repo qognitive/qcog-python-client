@@ -202,6 +202,19 @@ class AsyncQcogClient(BaseQcogClient):
         """
         return await self._inference(data, parameters)
 
+    async def train_pytorch(
+        self,
+        training_parameters: dict
+    ) -> AsyncQcogClient:
+        """Train PyTorch model..
+
+        TODO: docstring
+        """
+        await super()._train_pytorch(
+            PytorchTrainingParameters.model_validate(training_parameters)
+        )
+        return self
+
     # ###########################
     # Public Models
     # ###########################
@@ -275,7 +288,7 @@ class AsyncQcogClient(BaseQcogClient):
         return self
 
     async def pytorch(
-        self, model_name: str, model_path: str, *, train_parameters: dict
+        self, model_name: str, model_path: str,
     ) -> AsyncQcogClient:
         """Select PyTorch model.
 
@@ -295,7 +308,8 @@ class AsyncQcogClient(BaseQcogClient):
 
         """
         await super()._pytorch(
-            model_name, model_path, PytorchTrainingParameters(**train_parameters)
+            model_name,
+            model_path,
         )
         return self
 

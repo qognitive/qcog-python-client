@@ -11,6 +11,7 @@ from qcog_python_client.qcog.pytorch.parameters._saveparameters import (
     SaveParametersCommand,
     SaveParametersHandler,
 )
+from qcog_python_client.qcog.pytorch.train._train import TrainCommand, TrainHandler
 from qcog_python_client.qcog.pytorch.upload._upload import UploadHandler
 from qcog_python_client.qcog.pytorch.validate._validate import ValidateHandler
 from qcog_python_client.schema.common import PytorchTrainingParameters
@@ -82,20 +83,32 @@ class PyTorchAgent:
         # We dont wanna expose the chain or the handlers outside of the PytorchAgent
         return upload_handler.created_model
 
-    async def save_parameters(self, parameters: dict) -> dict:
-        """Save the training parameters."""
-        save_params_handler = await self.chain.dispatch(
+    async def train_model(self,
+        model_guid: str,
+        *,
+        dataset_guid: str,
+        training_parameters: dict,
+    ) -> dict:
+        """Train the model."""
+        # Upload training command
+        save_parameters_handler: SaveParametersHandler = await self.chain.dispatch(
             payload=SaveParametersCommand(
-                parameters=PytorchTrainingParameters(**parameters),
+                parameters=training_parameters
             )
         )
 
-        handler = cast(SaveParametersHandler, save_params_handler)
-        return handler.parameters_response
+        training_parameters_guid = save_parameters_handler.parameters_response['guid']
 
-    async def train(self, data: Any) -> dict:
-        """Train the model."""
-        raise NotImplementedError()
+        train_handler = await self.chain.dispatch(
+            payload=TrainCommand(
+                model_guid=model_guid,
+                dataset_guid=dataset_guid,
+                training_parameters_guid=training_parameters_guid,
+            )
+        )
+
+        handler = cast(TrainHandler, train_handler)
+        return handler.trained_model
 
     async def inference(self, data: Any, model_name: str) -> Any:
         """Run inference."""
@@ -120,5 +133,6 @@ class PyTorchAgent:
             ValidateHandler(),
             UploadHandler(),
             SaveParametersHandler(),
+            TrainHandler(),
         )
         return agent

@@ -30,6 +30,7 @@ from qcog_python_client.schema.common import (
 from qcog_python_client.schema.generated_schema.models import (
     AppSchemasDataPayloadDataPayloadResponse,
     AppSchemasParametersTrainingParametersPayloadResponse,
+    AppSchemasPytorchModelPytorchModelPayloadResponse,
     AppSchemasTrainTrainedModelPayloadResponse,
     Model,
     ModelEnsembleParameters,
@@ -38,6 +39,7 @@ from qcog_python_client.schema.generated_schema.models import (
     ModelPytorchParameters,
     TrainingStatus,
 )
+from tests.pytorch_model.model import train
 
 Operator: TypeAlias = str | int
 TrainingModel: TypeAlias = (
@@ -84,6 +86,29 @@ class BaseQcogClient:
         self._trained_model: dict | None = None
         self._inference_result: dict | None = None
         self._loss: Matrix | None = None
+        self._pytorch_model: dict | None = None
+
+    @property
+    def pytorch_model(self) -> dict:
+        """Return the Pytorch model."""
+        if self._pytorch_model is None:
+            raise StateNotSetError(
+                "No Pytorch model has been found associated with this request.",
+                "You can use `pytorch` method to upload a new Pytorch model",
+            )
+        return self._pytorch_model
+
+    @pytorch_model.setter
+    def pytorch_model(self, value: dict) -> None:
+        """Set and validate the Pytorch model."""
+        # Pytorch model is the current model that has been set by the user
+        # using the `pytorch` method. The database model is currently the
+        # same as the `trained_model`, but it's not an actual trained model,
+        # It's just a pointer to the uploaded model with some parameters,
+        # and a specific dataset.
+        self._pytorch_model = AppSchemasPytorchModelPytorchModelPayloadResponse.model_validate(  # noqa: E501
+            value
+        ).model_dump()
 
     @property
     def model(self) -> TrainingModel:
@@ -228,7 +253,6 @@ class BaseQcogClient:
         self,
         model_name: str,
         model_path: str,
-        train_parameters: PytorchTrainingParameters,
     ) -> BaseQcogClient:
         """Select a Pythorch architecture defined by the user."""
         # Instantiate the Pytorch client.
@@ -244,21 +268,9 @@ class BaseQcogClient:
 
         # Needed to upload the model and the parameters
         agent.register_tool("post_multipart", self._post_multipart)
-        agent.register_tool("post_request", self.http_client.post)
-
-        # Upload the parameters
-        self.training_parameters = await agent.save_parameters(
-            train_parameters.model_dump()
-        )
-
-        # Set the context of training parameters and dataset guid
-        # To be used by the upload model handler
-        agent.set_context("dataset_guid", self.dataset["guid"])
-        agent.set_context("training_parameters_guid", self.training_parameters["guid"])
 
         # Upload the model
-        result = await agent.upload_model(model_path, model_name)
-        print("-----> Result : ", result)
+        self.pytorch_model = await agent.upload_model(model_path, model_name)
         return self
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
@@ -357,6 +369,20 @@ class BaseQcogClient:
             inference_result["response"]["data"],
         )
 
+    async def _train_pytorch(
+            self, training_parameters: PytorchTrainingParameters
+        ) -> BaseQcogClient:
+        agent = PyTorchAgent.create_agent()
+
+        # Needed to upload the model and the parameters
+        agent.register_tool("post_request", self.http_client.post)
+        self.trained_model = await agent.train_model(
+            self.pytorch_model["guid"],
+            dataset_guid=self.dataset["guid"],
+            training_parameters=training_parameters.model_dump(),
+        )
+        return self
+
     ############################
     # Public Utilities Methods #
     ############################
@@ -430,9 +456,7 @@ class BaseQcogClient:
     # Private Utility Methods #
     ############################
 
-    async def _upload_training_parameters(
-        self, params: TrainingParameters
-    ) -> None:
+    async def _upload_training_parameters(self, params: TrainingParameters) -> None:
         """Upload Training Parameters."""
         self.training_parameters = await self.http_client.post(
             "training_parameters",

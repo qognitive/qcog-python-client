@@ -16,7 +16,7 @@ async def test_pytorch_agent_discovery():
     """Test basic discovery of PyTorchAgent"""
 
     model_path = "tests/pytorch_model"
-    model_name = "test_model_00"
+    model_name = "test_model_01"
     # Register custom tools for the agent.
     # The following `tools` will be available
     # inside the handlers of the agent
@@ -51,7 +51,7 @@ async def test_pytorch_workflow():
     )
 
     client = await client.pytorch(
-        model_name="test-model-00",
+        model_name="test-model-03",
         model_path="tests/pytorch_model",
     )
     client = await client.data(df_train)

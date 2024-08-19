@@ -71,7 +71,7 @@ class PyTorchAgent:
     async def upload_model(self, model_path: str, model_name: str) -> dict:
         """Upload the model to the server."""
         # Init Command will dispatch a Discover Command
-        print("DEBUG: Uploading model")
+
         handler = await self.chain.dispatch(
             payload=DiscoverCommand(
                 model_name=model_name,
@@ -80,7 +80,7 @@ class PyTorchAgent:
             )
         )
         upload_handler = cast(UploadHandler, handler)
-        print("DEBUG: Model uploaded: ", upload_handler.created_model)
+
         # We dont wanna expose the chain or the handlers outside of the PytorchAgent
         return upload_handler.created_model
 
@@ -93,14 +93,11 @@ class PyTorchAgent:
     ) -> dict:
         """Train the model."""
         # Upload training command
-        print("DEBUG: Training model - Save Parameters")
+
         handler = await self.chain.dispatch(
             payload=SaveParametersCommand(parameters=training_parameters)
         )
         save_parameters_handler = cast(SaveParametersHandler, handler)
-
-        print("DEBUG: Training model - Train")
-        print("DEBUG: Training model - Model GUID: ", model_guid)
 
         training_parameters_guid = save_parameters_handler.parameters_response["guid"]
 

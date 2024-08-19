@@ -31,6 +31,7 @@ from qcog_python_client.schema.generated_schema.models import (
     AppSchemasDataPayloadDataPayloadResponse,
     AppSchemasParametersTrainingParametersPayloadResponse,
     AppSchemasPytorchModelPytorchModelPayloadResponse,
+    AppSchemasPytorchModelPytorchTrainedModelPayloadResponse,
     AppSchemasTrainTrainedModelPayloadResponse,
     Model,
     ModelEnsembleParameters,
@@ -371,17 +372,37 @@ class BaseQcogClient:
         )
 
     async def _train_pytorch(
-        self, training_parameters: PytorchTrainingParameters
+        self,
+        training_parameters: PytorchTrainingParameters,
     ) -> BaseQcogClient:
         agent = PyTorchAgent.create_agent()
 
         # Needed to upload the model and the parameters
         agent.register_tool("post_request", self.http_client.post)
-        self.trained_model = await agent.train_model(
+        trained_model = await agent.train_model(
             self.pytorch_model["guid"],
             dataset_guid=self.dataset["guid"],
             training_parameters=training_parameters.model_dump(),
         )
+
+        pytorch_trained_model = (
+            AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(
+                trained_model
+            )
+        )
+
+        generic_trained_model = AppSchemasTrainTrainedModelPayloadResponse(
+            qcog_version=self.pytorch_model["model_name"],
+            guid=pytorch_trained_model.guid,
+            dataset_guid=pytorch_trained_model.dataset_guid,
+            training_parameters_guid=pytorch_trained_model.training_parameters_guid,
+            status=TrainingStatus(pytorch_trained_model.status),
+            loss=None,
+            training_completion=0,
+            current_batch_completion=0,
+        )
+
+        self.trained_model = generic_trained_model.model_dump()
         return self
 
     ############################

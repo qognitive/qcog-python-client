@@ -1,96 +1,58 @@
 """Test PyTorch model."""
 
-import json
 
+import numpy as np
+import pandas as pd
 import torch
 import torch.utils
 import torch.utils.data
-import torchvision
-import torchvision.transforms as transforms
-from _model import Net
+from _model import Model
+from sklearn.calibration import LabelEncoder
+from torch.autograd import Variable
 
 
 def train(
-    trainset: torchvision.datasets.CIFAR10,
+    data: pd.DataFrame,
     *,
     epochs: int,
     batch_size: int,
 ) -> None:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
+    cols = data.columns
 
-    """Test Training function."""
-    trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=2
-    )
+    # Show the data
+    x_data = data[cols[2:-1]]
+    # Drop last column
+    x_data = x_data.drop(x_data.columns[-1], axis=1)
+    y_data = data[cols[-2]]  # Labels
+    le = LabelEncoder()
+    y_data = np.array(le.fit_transform(y_data))
 
-    testset = torchvision.datasets.CIFAR10(
-        root="./data", train=False, download=True, transform=transform
-    )
+    print("-- Y data Shape:  ", y_data.shape)
+    print("-- X data Shape:  ", x_data.values.shape)
 
-    testloader = torch.utils.data.DataLoader(
-        dataset=testset,
-        batch_size=batch_size,
-        shuffle=False,
-        drop_last=True,
-        num_workers=2,
-    )
+    model = Model(dim=x_data.values.shape[1])
+    model.to(device)
 
-    net = Net()
+    x_data = Variable(torch.from_numpy(x_data.values))
+    y_data = Variable(torch.from_numpy(y_data))
 
-    net.to(device)
-    print(f"Moved Resnet model to {device}")
+    criterion = torch.nn.BCELoss(reduction="sum")
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    print("Starting the model training!")
+    loss_list = []
+
     for epoch in range(epochs):  # loop over the dataset multiple times
-        running_loss = 0.0
-        for data in trainloader:
-            # get the inputs; data is a list of [inputs, labels]
-            print("----Data----")
-            print(data)
-            inputs, labels = data
+        y_pred = model(x_data.float())
+        loss = criterion(y_pred, y_data.view(-1, 1).float())
+        # print('Epoch', epoch, 'Loss:',e loss.item(), '- Pred:', y_pred.data[0])
+        loss_list.append(loss.item())
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-
-            _, loss = net(inputs, labels)
-
-            # print statistics
-            running_loss += loss.item()
-
-        print(
-            f"Epoch [{epoch + 1}/{epochs}], Loss: {running_loss / len(trainloader):.3f}"
-        )
-
-    print("Finished model training")
-
-    print("Evaluating the model performance")
-    net.eval()
-
-    # Test accuracy
-    correct = 0
-    total = 0
-    # since we're not training, we don't need to calculate the gradients for our outputs
-    with torch.no_grad():
-        for data in testloader:
-            inputs, labels = data
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            # calculate outputs by running images through the network
-            outputs = net(inputs)
-            # the class with the highest energy is what we choose as prediction
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-
-    print(
-        f"Accuracy of the retrained Resnet model on all 10000 test images: {100 * correct // total} %"  # noqa: E501
-    )
-
-    return {"model": net, "metrics": json.dumps({"accuracy": 100 * correct // total})}
+    return {"model": model, "metrics": {"loss": loss_list}}
 
 
 class TestMyClass:

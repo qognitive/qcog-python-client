@@ -208,7 +208,7 @@ class AsyncQcogClient(BaseQcogClient):
         TODO: docstring
         """
         await super()._train_pytorch(
-            PytorchTrainingParameters.model_validate(training_parameters)
+            PytorchTrainingParameters.model_validate(training_parameters),
         )
         return self
 

@@ -51,7 +51,7 @@ async def test_pytorch_workflow():
     )
 
     client = await client.pytorch(
-        model_name="test-model-03",
+        model_name="test-model-04",
         model_path="tests/pytorch_model",
     )
     client = await client.data(df_train)
@@ -62,3 +62,5 @@ async def test_pytorch_workflow():
             "epochs": 10,
         }
     )
+
+    await client.wait_for_training()

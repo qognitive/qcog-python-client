@@ -87,6 +87,7 @@ class BaseQcogClient:
         self._inference_result: dict | None = None
         self._loss: Matrix | None = None
         self._pytorch_model: dict | None = None
+        self._last_status: TrainingStatus | None = None
 
     @property
     def pytorch_model(self) -> dict:
@@ -197,6 +198,10 @@ class BaseQcogClient:
     def version(self, value: str) -> None:
         numeric_version(value)  # validate version format
         self._version = value
+
+    @property
+    def last_status(self) -> TrainingStatus:
+        return self._last_status
 
     ############################
     # Model Parameters
@@ -438,6 +443,15 @@ class BaseQcogClient:
         )
 
     async def _status(self) -> TrainingStatus:
+        if self.model.model_name == Model.pytorch.value:
+            return await self._pt_load_trained_model()
+
+        return await self._get_trained_model()
+
+    async def _pt_load_trained_model(self) -> dict:
+        raise NotImplementedError()
+
+    async def _get_trained_model(self) -> TrainingStatus:
         """Check the status of the training job."""
         # Load last status
         await self._load_trained_model()
@@ -462,6 +476,7 @@ class BaseQcogClient:
         if self._loss is None:
             await self._load_trained_model()
             self._loss = self.trained_model.get("loss", None)
+
         return self._loss
 
     async def _wait_for_training(self, poll_time: int = 60) -> None:

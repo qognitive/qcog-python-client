@@ -18,6 +18,7 @@ dependencies = [
   "pydantic",
   "typing_extensions",
   "pydantic-settings",
+  "anyio",
 ]
 dynamic = ["version"]
 

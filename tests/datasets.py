@@ -5,10 +5,21 @@ from sklearn import datasets as sk_datasets
 from sklearn.preprocessing import StandardScaler
 
 
-def get_wbc_data(test_fraction=0.2):
-    data = sk_datasets.load_breast_cancer()
+def get_wbc_data(test_fraction=0.2) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Get Wisconsin Breast Cancer dataset.
 
-    # Keep 20% of data for testing
+    Parameters
+    ----------
+    test_fraction : float, optional
+        Fraction of data to use for testing, by default 0.2
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        Train data, test data, test target
+    """
+
+    data = sk_datasets.load_breast_cancer()
 
     assert data is not None
 

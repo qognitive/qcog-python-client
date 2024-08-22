@@ -51,8 +51,30 @@ class Handler(ABC, Generic[CommandPayloadType]):
     attempts: int = 3
     retry_after: int = 3
     commands: tuple[Command]
-    get_tool: Callable[[ToolName], ToolFn]
-    context: dict
+
+    _context: dict | None
+    _tools: dict[ToolName, ToolFn] | None
+
+    @property
+    def context(self) -> dict:
+        """Context getter."""
+        if not self._context:
+            raise AttributeError("Context not set")
+        return self._context
+
+    @property
+    def tools(self) -> dict[ToolName, ToolFn]:
+        """Tools getter."""
+        if not self._tools:
+            raise AttributeError("Tools not set")
+        return self._tools
+
+    @tools.setter
+    def tools(self, tools: dict[ToolName, ToolFn]) -> None:
+        """Tools setter."""
+        if self._tools:
+            raise AttributeError("Tools already set")
+        self._tools = tools
 
     @abstractmethod
     async def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:
@@ -63,6 +85,20 @@ class Handler(ABC, Generic[CommandPayloadType]):
     async def revert(self) -> None:
         """Revert the changes."""
         ...
+
+    def get_tool(self, tool_name: ToolName) -> ToolFn:
+        """Get the tool."""
+        tool = self.tools.get(tool_name)
+        if not tool:
+            raise AttributeError(f"Tool {tool_name} not found in the context")
+        return tool
+
+    def get_context_value(self, key: str) -> Any:
+        """Get a key from the context."""
+        val = self.context.get(key)
+        if not val:
+            raise AttributeError(f"Key {key} not found in the context")
+        return val
 
     def set_next(self, next_component: Handler, head: Handler) -> Handler:
         """Set the next component."""
@@ -85,6 +121,8 @@ class Handler(ABC, Generic[CommandPayloadType]):
         # If the handler matches the command in the payload
         # Attempt the execution of the command
         if payload.command in self.commands:
+            exception: Exception
+
             for i in range(self.attempts):
                 try:
                     return await execute_and_dispatch_next(self, payload)
@@ -94,9 +132,11 @@ class Handler(ABC, Generic[CommandPayloadType]):
                     # 2 - wait for the specified time
                     # 3 - try again
                     print(f"Attempt {i}, error: {e}")
+                    exception = e
                     await self.revert()
                     await asyncio.sleep(self.retry_after)
-                    return await execute_and_dispatch_next(self, payload)
+            else:
+                raise exception
 
         # If there is a next handler, dispatch the payload to the next handler
         if self.next:

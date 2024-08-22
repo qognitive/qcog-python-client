@@ -1,1 +1,1 @@
-from ._upload import UploadCommand, UploadHandler
+from .uploadhandler import UploadCommand, UploadHandler

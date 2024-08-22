@@ -1,6 +1,5 @@
 """Test PyTorch model."""
 
-
 import numpy as np
 import pandas as pd
 import torch
@@ -16,7 +15,7 @@ def train(
     *,
     epochs: int,
     batch_size: int,
-) -> None:
+) -> dict:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     cols = data.columns
@@ -53,7 +52,3 @@ def train(
         optimizer.step()
 
     return {"model": model, "metrics": {"loss": loss_list}}
-
-
-class TestMyClass:
-    pass

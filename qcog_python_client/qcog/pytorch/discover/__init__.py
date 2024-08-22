@@ -1,1 +1,1 @@
-from ._discover import DiscoverCommand, DiscoverHandler
+from .discoverhandler import DiscoverCommand, DiscoverHandler

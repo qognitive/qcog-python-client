@@ -6,11 +6,13 @@ import pkgutil
 import sys
 from functools import lru_cache
 
+from qcog_python_client.log import qcoglogger as logger
+
 
 @lru_cache
-def get_stdlib_modules() -> set:
+def get_stdlib_modules() -> set[str]:
     """Get a set of all standard library modules."""
-    stdlib_modules = set()
+    stdlib_modules: set[str] = set()
     for importer, modname, ispkg in pkgutil.iter_modules():
         # Exclude packages
         stdlib_modules.add(modname)
@@ -18,12 +20,13 @@ def get_stdlib_modules() -> set:
     return stdlib_modules
 
 
-def get_third_party_imports(module_path: str) -> set:  # noqa
+def get_third_party_imports(module_path: str) -> set[str]:
     """Get all third-party packages imported in a Python module.
 
     Parameters
     ----------
-    module_path : The absolute path to the module file (e.g., /path/to/module.py).
+    module_path : str
+        The absolute path to the module file (e.g., /path/to/module.py).
 
     Returns
     -------
@@ -32,7 +35,7 @@ def get_third_party_imports(module_path: str) -> set:  # noqa
     """
     # Check if the file exists
     if not os.path.isfile(module_path):
-        print(f"Module file not found: {module_path}")
+        logger.warning(f"Module file not found: {module_path}")
         return set()
 
     # Read the module's source code
@@ -77,7 +80,4 @@ def is_package_module(module_path: str) -> bool:
     # Check if the file exists
 
     module_path = module_path if module_path.endswith(".py") else module_path + ".py"
-    if not os.path.isfile(module_path):
-        return False
-
-    return True
+    return os.path.isfile(module_path)

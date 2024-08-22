@@ -14,17 +14,13 @@ class ABCRequestClient(ABC):
         ...
 
     @overload
-    async def post(
-        self, url: str, data: dict, *, content_type: Literal["json"] = "json"
-    ) -> dict: ...
+    async def post(self, url: str, data: dict) -> dict: ...
 
     @overload
     async def post(
         self,
         url: str,
         data: aiohttp.FormData,
-        *,
-        content_type: Literal["data"] = "data",
     ) -> dict: ...
 
     @abstractmethod

@@ -1,7 +1,9 @@
+"""Validate the model module."""
+
 from typing import Any, Callable
 
 from qcog_python_client.qcog.pytorch.handler import BoundedCommand, Command, Handler
-from qcog_python_client.qcog.pytorch.upload._upload import UploadCommand
+from qcog_python_client.qcog.pytorch.upload.uploadhandler import UploadCommand
 from qcog_python_client.qcog.pytorch.validate._validate_module import (
     FileToValidate,
     validate_model_module,
@@ -9,6 +11,8 @@ from qcog_python_client.qcog.pytorch.validate._validate_module import (
 
 
 class ValidateCommand(BoundedCommand):
+    """Validate command."""
+
     model_name: str
     model_path: str
     relevant_files: dict
@@ -16,6 +20,8 @@ class ValidateCommand(BoundedCommand):
 
 
 class ValidateHandler(Handler):
+    """Validate the model module."""
+
     commands = (Command.validate,)
     attempts = 1
 
@@ -24,6 +30,7 @@ class ValidateHandler(Handler):
     }
 
     async def handle(self, payload: ValidateCommand) -> UploadCommand:
+        """Handle the validation."""
         validated: list = []
 
         for key, validate_fn in self.validate_map.items():
@@ -40,4 +47,5 @@ class ValidateHandler(Handler):
         )
 
     async def revert(self) -> None:
+        """Revert the changes."""
         pass

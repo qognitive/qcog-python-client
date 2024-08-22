@@ -203,9 +203,24 @@ class AsyncQcogClient(BaseQcogClient):
         return await self._inference(data, parameters)
 
     async def train_pytorch(self, training_parameters: dict) -> AsyncQcogClient:
-        """Train PyTorch model..
+        """Train PyTorch model.
 
-        TODO: docstring
+        Run a training session for a PyTorch model.
+        The training session should be run against a valid Pytorch model and dataset
+        previously selected.
+
+        Use `.data(...)` and `.pytorch(...)` to set the model and dataset.
+
+        Parameters
+        ----------
+        training_parameters : dict
+            the training parameters as specified in the `train`
+            function of the provided model
+
+        Returns
+        -------
+        AsyncQcogClient
+
         """
         await super()._train_pytorch(
             PytorchTrainingParameters.model_validate(training_parameters),
@@ -297,9 +312,6 @@ class AsyncQcogClient(BaseQcogClient):
             the name of the model
         model_path : str
             the path to the model
-        train_parameters : dict
-            the training parameters as specified in the `train`
-            function of the provided model
 
         Returns
         -------

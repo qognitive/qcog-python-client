@@ -1,5 +1,7 @@
 """Class to handle all the PyTorch operations."""
 
+from __future__ import annotations
+
 from typing import Any, cast
 
 from qcog_python_client.qcog.pytorch.discover.discoverhandler import (

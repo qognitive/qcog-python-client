@@ -114,6 +114,8 @@ class Handler(ABC, Generic[CommandPayloadType]):
         # If the handler matches the command in the payload
         # Attempt the execution of the command
         if payload.command in self.commands:
+            exception: Exception
+
             for i in range(self.attempts):
                 try:
                     return await execute_and_dispatch_next(self, payload)
@@ -123,9 +125,11 @@ class Handler(ABC, Generic[CommandPayloadType]):
                     # 2 - wait for the specified time
                     # 3 - try again
                     print(f"Attempt {i}, error: {e}")
+                    exception = e
                     await self.revert()
                     await asyncio.sleep(self.retry_after)
-                    return await execute_and_dispatch_next(self, payload)
+            else:
+                raise exception
 
         # If there is a next handler, dispatch the payload to the next handler
         if self.next:

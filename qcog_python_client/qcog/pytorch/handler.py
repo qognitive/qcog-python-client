@@ -72,8 +72,6 @@ class Handler(ABC, Generic[CommandPayloadType]):
     @tools.setter
     def tools(self, tools: dict[ToolName, ToolFn]) -> None:
         """Tools setter."""
-        if self._tools:
-            raise AttributeError("Tools already set")
         self._tools = tools
 
     @abstractmethod

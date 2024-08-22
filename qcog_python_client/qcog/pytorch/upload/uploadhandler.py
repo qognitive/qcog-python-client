@@ -25,7 +25,12 @@ def compress_folder(folder_path: str) -> io.BytesIO:
             return None
         if ".git" in tarinfo.name:
             return None
-        return tarinfo
+
+        return (
+            None
+            if any(name in tarinfo.name for name in {".git", "__pycache__"})
+            else tarinfo
+        )
 
     buffer = io.BytesIO()
 

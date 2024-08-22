@@ -498,5 +498,4 @@ class BaseQcogClient:
         return await self.http_client.post(
             url,
             data,
-            content_type="data",
         )

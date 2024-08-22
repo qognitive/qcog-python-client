@@ -1,1 +1,1 @@
-from ._validate import ValidateCommand, ValidateHandler
+from .validatehandler import ValidateCommand, ValidateHandler

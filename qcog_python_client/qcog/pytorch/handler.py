@@ -51,8 +51,23 @@ class Handler(ABC, Generic[CommandPayloadType]):
     attempts: int = 3
     retry_after: int = 3
     commands: tuple[Command]
-    get_tool: Callable[[ToolName], ToolFn]
-    context: dict
+
+    _context: dict | None
+    _tools: dict[ToolName, ToolFn] | None
+
+    @property
+    def context(self) -> dict:
+        """Context getter."""
+        if not self._context:
+            raise AttributeError("Context not set")
+        return self._context
+
+    @property
+    def tools(self) -> dict[ToolName, ToolFn]:
+        """Tools getter."""
+        if not self._tools:
+            raise AttributeError("Tools not set")
+        return self._tools
 
     @abstractmethod
     async def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:
@@ -63,6 +78,20 @@ class Handler(ABC, Generic[CommandPayloadType]):
     async def revert(self) -> None:
         """Revert the changes."""
         ...
+
+    def get_tool(self, tool_name: ToolName) -> ToolFn:
+        """Get the tool."""
+        tool = self.tools.get(tool_name)
+        if not tool:
+            raise AttributeError(f"Tool {tool_name} not found in the context")
+        return tool
+
+    def get_context_value(self, key: str) -> Any:
+        """Get a key from the context."""
+        val = self.context.get(key)
+        if not val:
+            raise AttributeError(f"Key {key} not found in the context")
+        return val
 
     def set_next(self, next_component: Handler, head: Handler) -> Handler:
         """Set the next component."""

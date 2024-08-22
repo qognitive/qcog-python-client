@@ -5,11 +5,15 @@ import base64
 import os
 from concurrent import futures
 
+from anyio import open_file
+
 from qcog_python_client.qcog.pytorch.handler import BoundedCommand, Command, Handler
-from qcog_python_client.qcog.pytorch.validate._validate import ValidateCommand
+from qcog_python_client.qcog.pytorch.validate.validatehandler import ValidateCommand
 
 
 class DiscoverCommand(BoundedCommand):
+    """Payload to dispatch a discover command."""
+
     model_name: str
     model_path: str
     command: Command = Command.discover
@@ -37,6 +41,18 @@ class DiscoverHandler(Handler):
     relevant_files: dict
 
     async def handle(self, payload: DiscoverCommand) -> ValidateCommand:
+        """Handle the discovery of a custom model.
+
+        Parameters
+        ----------
+        payload : DiscoverCommand
+            The payload to discover
+            model_name : str
+                The name of the model to be used for the current model
+            model_path : str
+                Where to find the folder containing the model
+
+        """
         self.model_name = payload.model_name
         # Get the absolute path of the model module
         self.model_path = os.path.abspath(payload.model_path)
@@ -50,22 +66,22 @@ class DiscoverHandler(Handler):
 
         # Initialize the relevant files dictionary
         self.relevant_files = {}
-        executor = futures.ThreadPoolExecutor(max_workers=1)
 
-        # NOTE: Eventually we can parallelize this operation.
         for item in content:
             if item == self.model_module_name:
                 item_path = os.path.join(self.model_path, item)
-                _, encoded_content = await read_async(executor, item_path)
-                self.relevant_files.update(
-                    {
-                        "model_module": {
-                            "path": item_path,
-                            "content": encoded_content,
-                            "pkg_name": pkg_name(self.model_path),
+
+                async with await open_file(item_path, "rb") as file:
+                    encoded_content = await file.read()
+                    self.relevant_files.update(
+                        {
+                            "model_module": {
+                                "path": item_path,
+                                "content": encoded_content,
+                                "pkg_name": pkg_name(self.model_path),
+                            }
                         }
-                    }
-                )
+                    )
 
         # Once the discovery has been completed,
         # Issue a validate command that will be executed next
@@ -76,6 +92,7 @@ class DiscoverHandler(Handler):
         )
 
     async def revert(self) -> None:
+        """Revert the changes."""
         # Unset the attributes
         delattr(self, "model_name")
         delattr(self, "model_path")
@@ -85,6 +102,7 @@ class DiscoverHandler(Handler):
 async def read_async(
     executor: futures.ThreadPoolExecutor, file_path: str
 ) -> tuple[str, str]:
+    """Read the file asynchronously."""
     loop = asyncio.get_running_loop()
     io_wrapper = await loop.run_in_executor(executor, open, file_path, "r")
     try:

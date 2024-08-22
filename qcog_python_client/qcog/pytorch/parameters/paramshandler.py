@@ -1,4 +1,4 @@
-from typing import Callable
+"""Handle the saving of the parameters."""
 
 from qcog_python_client.qcog.pytorch.handler import (
     BoundedCommand,
@@ -8,22 +8,29 @@ from qcog_python_client.qcog.pytorch.handler import (
 
 
 class SaveParametersCommand(BoundedCommand):
+    """Payload to dispatch a save parameters command."""
+
     command: Command = Command.save_parameters
     parameters: dict
 
 
 class SaveParametersHandler(Handler[SaveParametersCommand]):
+    """Save the parameters."""
+
     commands = (Command.save_parameters,)
     attempts = 1
 
     async def handle(self, payload: SaveParametersCommand) -> None:
-        # Check if a dynamic model to validate the parameters
-        # has been set on the context
-        validate: Callable[[dict], None] | None = self.context.get("params_validator")
+        """Handle the saving of the parameters.
 
-        if validate:
-            validate(payload.parameters)
+        Parameters
+        ----------
+        payload : SaveParametersCommand
+            The payload to save the parameters
+            parameters : dict
+                The parameters to be saved
 
+        """
         post_request = self.get_tool("post_request")
         self.parameters_response = await post_request(
             "training_parameters",
@@ -31,4 +38,5 @@ class SaveParametersHandler(Handler[SaveParametersCommand]):
         )
 
     async def revert(self) -> None:
+        """Revert the changes."""
         pass

@@ -1,3 +1,5 @@
+"""Handler for uploading the model to the server."""
+
 import io
 import os
 import tarfile
@@ -37,6 +39,8 @@ def compress_folder(folder_path: str) -> io.BytesIO:
 
 
 class UploadCommand(BoundedCommand):
+    """Payload to dispatch an upload command."""
+
     upload_folder: str
     model_name: str
     command: Command = Command.upload
@@ -79,6 +83,7 @@ class UploadHandler(Handler[UploadCommand]):
     data: aiohttp.FormData
 
     async def handle(self, payload: UploadCommand) -> None:
+        """Handle the upload."""
         folder_path = payload.upload_folder
         # Compress the folder
         tar_gzip_folder = compress_folder(folder_path)
@@ -102,4 +107,5 @@ class UploadHandler(Handler[UploadCommand]):
         self.created_model = response
 
     async def revert(self) -> None:
+        """Revert the changes."""
         delattr(self, "data")

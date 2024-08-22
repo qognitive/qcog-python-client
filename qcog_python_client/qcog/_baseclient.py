@@ -87,7 +87,9 @@ class BaseQcogClient:
         self._inference_result: dict | None = None
         self._loss: Matrix | None = None
         self._pytorch_model: dict | None = None
-        self._last_status: TrainingStatus | None = None
+        self.last_status: TrainingStatus | None = None
+        self.metrics: dict | None = None
+
 
     @property
     def pytorch_model(self) -> dict:
@@ -154,7 +156,6 @@ class BaseQcogClient:
     @training_parameters.setter
     def training_parameters(self, value: dict) -> None:
         """Set and validate the training parameters."""
-        print("-----> Validating : ", value)
         self._training_parameters = (
             AppSchemasParametersTrainingParametersPayloadResponse.model_validate(
                 value
@@ -175,9 +176,14 @@ class BaseQcogClient:
     @trained_model.setter
     def trained_model(self, value: dict) -> None:
         """Set and validate the trained model."""
-        self._trained_model = AppSchemasTrainTrainedModelPayloadResponse.model_validate(
-            value
-        ).model_dump()
+        if self.model.model_name == Model.pytorch.value:
+            self._trained_model = AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(
+                value
+            ).model_dump()
+        else:
+            self._trained_model = AppSchemasTrainTrainedModelPayloadResponse.model_validate(
+                value
+            ).model_dump()
 
     @property
     def inference_result(self) -> dict:
@@ -198,10 +204,6 @@ class BaseQcogClient:
     def version(self, value: str) -> None:
         numeric_version(value)  # validate version format
         self._version = value
-
-    @property
-    def last_status(self) -> TrainingStatus:
-        return self._last_status
 
     ############################
     # Model Parameters
@@ -396,18 +398,7 @@ class BaseQcogClient:
             )
         )
 
-        generic_trained_model = AppSchemasTrainTrainedModelPayloadResponse(
-            qcog_version=self.pytorch_model["model_name"],
-            guid=pytorch_trained_model.guid,
-            dataset_guid=pytorch_trained_model.dataset_guid,
-            training_parameters_guid=pytorch_trained_model.training_parameters_guid,
-            status=TrainingStatus(pytorch_trained_model.status),
-            loss=None,
-            training_completion=0,
-            current_batch_completion=0,
-        )
-
-        self.trained_model = generic_trained_model.model_dump()
+        self.trained_model = pytorch_trained_model.model_dump()
         return self
 
     ############################
@@ -426,6 +417,9 @@ class BaseQcogClient:
             `status` : TrainingStatus
 
         """
+        if self.model.model_name == Model.pytorch.value:
+            raise ValueError("Progress is not available for PyTorch models.")
+
         await self._load_trained_model()
         return {
             "guid": self.trained_model.get("guid"),
@@ -438,20 +432,30 @@ class BaseQcogClient:
 
     async def _load_trained_model(self) -> None:
         """Load the status of the current trained model."""
+        if self.model.model_name == Model.pytorch.value:
+            raise ValueError("Load trained model is not available for PyTorch models.")
+
         self.trained_model = await self.http_client.get(
             f"model/{self.trained_model['guid']}"
         )
 
     async def _status(self) -> TrainingStatus:
         if self.model.model_name == Model.pytorch.value:
-            return await self._pt_load_trained_model()
+            return await self._get_pt_trained_model_status()
+        return await self._get_trained_model_status()
 
-        return await self._get_trained_model()
+    async def _get_pt_trained_model_status(self) -> dict:
+        """Retrieve a PyTorch trained model status."""
+        pt_model_guid = self.trained_model["pytorch_model_guid"]
+        trained_model_guid = self.trained_model["guid"]
+        response = await self.http_client.get(
+            f"pytorch_model/{pt_model_guid}/trained_model/{trained_model_guid}"
+        )
+        self.metrics = response.get("metrics", None)
+        self.last_status = TrainingStatus(response["status"])
+        return self.last_status
 
-    async def _pt_load_trained_model(self) -> dict:
-        raise NotImplementedError()
-
-    async def _get_trained_model(self) -> TrainingStatus:
+    async def _get_trained_model_status(self) -> TrainingStatus:
         """Check the status of the training job."""
         # Load last status
         await self._load_trained_model()
@@ -472,6 +476,9 @@ class BaseQcogClient:
 
         Loss matrix is available only after training is completed.
         """
+        if self.model.model_name == Model.pytorch.value:
+            raise ValueError("Loss matrix is not available for PyTorch models.")
+
         # loss matrix is available only after training is completed
         if self._loss is None:
             await self._load_trained_model()

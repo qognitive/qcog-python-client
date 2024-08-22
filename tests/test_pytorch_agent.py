@@ -63,4 +63,5 @@ async def test_pytorch_workflow():
         }
     )
 
-    await client.wait_for_training()
+    await client.wait_for_training(poll_time=10)
+    print(client.metrics)

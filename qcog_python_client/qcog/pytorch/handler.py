@@ -69,6 +69,13 @@ class Handler(ABC, Generic[CommandPayloadType]):
             raise AttributeError("Tools not set")
         return self._tools
 
+    @tools.setter
+    def tools(self, tools: dict[ToolName, ToolFn]) -> None:
+        """Tools setter."""
+        if self._tools:
+            raise AttributeError("Tools already set")
+        self._tools = tools
+
     @abstractmethod
     async def handle(self, payload: CommandPayloadType) -> CommandPayloadType | None:
         """Handle the data."""

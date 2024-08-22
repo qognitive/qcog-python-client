@@ -221,7 +221,7 @@ class PyTorchAgent:
     @classmethod
     def create_agent(
         cls,
-    ) -> "PyTorchAgent":
+    ) -> PyTorchAgent:
         """Create a PyTorch Agent.
 
         Initialize the chain of responsibility with the handlers.

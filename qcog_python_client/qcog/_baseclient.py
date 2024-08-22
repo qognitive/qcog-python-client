@@ -133,7 +133,6 @@ class BaseQcogClient:
     @training_parameters.setter
     def training_parameters(self, value: dict) -> None:
         """Set and validate the training parameters."""
-        print("-----> Validating : ", value)
         self._training_parameters = (
             AppSchemasParametersTrainingParametersPayloadResponse.model_validate(
                 value

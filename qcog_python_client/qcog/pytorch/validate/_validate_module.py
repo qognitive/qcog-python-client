@@ -3,7 +3,6 @@ import inspect
 import os
 import sys
 from dataclasses import dataclass
-from typing import Callable
 
 from pydantic import BaseModel
 
@@ -71,9 +70,9 @@ def validate_model_module(
                     modules_found.add(module_name)
 
     # Check if the modules found are allowed
-    if modules_found - allowed_modules:
+    if not_allowed := modules_found - allowed_modules:
         raise ValueError(
-            f"Found modules not allowed: {modules_found - allowed_modules} or imported outside the package."  # noqa
+            f"Found modules not allowed: {not_allowed} or imported outside the package."
         )
 
     # Check that the model module contains a train function
@@ -105,18 +104,11 @@ def validate_model_module(
     # of the function and the second element is the function itself. We expect
     # only one function with the name `train`.
     train_fn = inspected[0][1]
+    train_fn_annotations: dict[str, TrainFnAnnotation] = {}
 
-    return ValidateModelModule(train_fn=inspect_train_fn(train_fn))
+    for ann in train_fn.__annotations__:
+        train_fn_annotations[ann] = TrainFnAnnotation(
+            arg_name=ann, arg_type=train_fn.__annotations__[ann]
+        )
 
-
-def inspect_train_fn(fn: Callable) -> dict[str, TrainFnAnnotation]:
-    """Inspect the train function.
-
-    Returns a dictionary with the annotations of the function.
-    """
-    retval: dict[str, TrainFnAnnotation] = {}
-
-    for ann in fn.__annotations__:
-        retval[ann] = TrainFnAnnotation(arg_name=ann, arg_type=fn.__annotations__[ann])
-
-    return retval
+    return ValidateModelModule(train_fn=train_fn_annotations)

@@ -52,26 +52,6 @@ TrainingModel: TypeAlias = (
 logger = qcoglogger.getChild(__name__)
 
 
-class StateNotSetError(Exception):
-    """Exception raised when a state is not set."""
-
-    def __init__(self, missing_state: str, suggestion: str | None = None) -> None:
-        """Initialize the exception.
-
-        Attributes
-        ----------
-        missing_state : str
-            The state that is missing.
-
-        suggestion : str | None
-            A suggestion for remediation.
-
-        """
-        self.missing_state = missing_state
-        self.suggestion = suggestion
-        super().__init__(f"Missing state: {missing_state}. {suggestion or ''}")
-
-
 class BaseQcogClient:
     """Base Qcog Client."""
 
@@ -92,7 +72,7 @@ class BaseQcogClient:
     def pytorch_model(self) -> dict:
         """Return the Pytorch model."""
         if self._pytorch_model is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No Pytorch model has been found associated with this request.",
                 "You can use `pytorch` method to upload a new Pytorch model",
             )
@@ -116,7 +96,7 @@ class BaseQcogClient:
     def model(self) -> TrainingModel:
         """Return the model."""
         if self._model is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "model", "Please set the model first using `pauli` or `ensemble` method"
             )
         return self._model
@@ -125,7 +105,7 @@ class BaseQcogClient:
     def dataset(self) -> dict:
         """Return the dataset."""
         if self._dataset is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No dataset has been found associated with this request.",
                 """You can use `data` method to upload a new dataset or
                 `preloaded_data` to load an existing one""",
@@ -143,7 +123,7 @@ class BaseQcogClient:
     def training_parameters(self) -> dict:
         """Return the training parameters."""
         if self._training_parameters is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No training parameters have been found associated with this request.",
                 """You can use `train` method to start a new training or
                 `preloaded_training_parameters` to load existing ones""",  # noqa: 501
@@ -164,7 +144,7 @@ class BaseQcogClient:
     def trained_model(self) -> dict:
         """Return the trained model."""
         if self._trained_model is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No trained model has been found associated with this request.",
                 """You can use `train` method to start a new training or
                 `preloaded_model` to load an existing one""",
@@ -182,7 +162,7 @@ class BaseQcogClient:
     def inference_result(self) -> dict:
         """Return the inference result."""
         if self._inference_result is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No inference result has been found associated with this request.",
                 "You can use `inference` method to run an inference",
             )

@@ -83,7 +83,7 @@ class PyTorchAgent:
             The chain of handlers to be initialized.
 
         """
-        if len(chain) < 1:
+        if len(chain) <= 1:
             raise ValueError("Chain must have at least 2 handlers.")
         head = chain[0]
 

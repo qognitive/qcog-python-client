@@ -83,7 +83,7 @@ class PyTorchAgent:
             The chain of handlers to be initialized.
 
         """
-        if len(chain) < 1:
+        if len(chain) <= 1:
             raise ValueError("Chain must have at least 2 handlers.")
         head = chain[0]
 
@@ -131,10 +131,9 @@ class PyTorchAgent:
             as a Callable[..., Awaitable[dict]].
 
         """
-        if self._chain is None:
+        if self.chain._tools is None:
             raise AttributeError("Chain not initialized. Call the `init` method first.")
-
-        self.chain.tools[tool_name] = fn
+        self.chain._tools[tool_name] = fn
 
     async def upload_model(self, model_path: str, model_name: str) -> dict:
         """Upload the model to the server.

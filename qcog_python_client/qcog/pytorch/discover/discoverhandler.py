@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-import base64
-from multiprocessing import process
 import os
-from concurrent import futures
 from typing import Awaitable, Callable, TypedDict, TypeAlias
+import os
 
 from anyio import open_file
 
@@ -180,16 +178,3 @@ class DiscoverHandler(Handler):
         delattr(self, "model_name")
         delattr(self, "model_path")
         delattr(self, "relevant_files")
-
-
-async def read_async(
-    executor: futures.ThreadPoolExecutor, file_path: str
-) -> tuple[str, str]:
-    """Read the file asynchronously."""
-    loop = asyncio.get_running_loop()
-    io_wrapper = await loop.run_in_executor(executor, open, file_path, "r")
-    try:
-        encoded = base64.b64encode(io_wrapper.read().encode()).decode()
-        return file_path, encoded
-    finally:
-        io_wrapper.close()

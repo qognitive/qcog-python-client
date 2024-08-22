@@ -70,7 +70,6 @@ class BaseQcogClient:
         self.last_status: TrainingStatus | None = None
         self.metrics: dict | None = None
 
-
     @property
     def pytorch_model(self) -> dict:
         """Return the Pytorch model."""
@@ -157,13 +156,17 @@ class BaseQcogClient:
     def trained_model(self, value: dict) -> None:
         """Set and validate the trained model."""
         if self.model.model_name == Model.pytorch.value:
-            self._trained_model = AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(
-                value
-            ).model_dump()
+            self._trained_model = (
+                AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(
+                    value
+                ).model_dump()
+            )
         else:
-            self._trained_model = AppSchemasTrainTrainedModelPayloadResponse.model_validate(
-                value
-            ).model_dump()
+            self._trained_model = (
+                AppSchemasTrainTrainedModelPayloadResponse.model_validate(
+                    value
+                ).model_dump()
+            )
 
     @property
     def inference_result(self) -> dict:
@@ -424,7 +427,7 @@ class BaseQcogClient:
             return await self._get_pt_trained_model_status()
         return await self._get_trained_model_status()
 
-    async def _get_pt_trained_model_status(self) -> dict:
+    async def _get_pt_trained_model_status(self) -> TrainingStatus:
         """Retrieve a PyTorch trained model status."""
         pt_model_guid = self.trained_model["pytorch_model_guid"]
         trained_model_guid = self.trained_model["guid"]

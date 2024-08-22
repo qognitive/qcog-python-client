@@ -8,6 +8,7 @@ import torch.utils.data
 from _model import Model
 from sklearn.calibration import LabelEncoder
 from torch.autograd import Variable
+from qcog_python_client import monitor
 
 
 def train(
@@ -17,6 +18,15 @@ def train(
     batch_size: int,
 ) -> dict:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    m_service = monitor.get("wandb")
+
+    m_service.init(
+        api_key="a0a7bcb597e5c67f9d24be0be5071fd33b04d1ed",
+        parameters={
+            "epochs": epochs,
+        },
+    )
 
     cols = data.columns
 
@@ -46,9 +56,12 @@ def train(
         y_pred = model(x_data.float())
         loss = criterion(y_pred, y_data.view(-1, 1).float())
         # print('Epoch', epoch, 'Loss:',e loss.item(), '- Pred:', y_pred.data[0])
+        m_service.log({"loss": loss.item(), "epoch": epoch})
         loss_list.append(loss.item())
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
+    m_service.close()
 
     return {"model": model, "metrics": {"loss": loss_list}}

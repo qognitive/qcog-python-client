@@ -1,9 +1,13 @@
 """Discover the module and the model."""
 
+from __future__ import annotations
+
 import asyncio
 import base64
+from multiprocessing import process
 import os
 from concurrent import futures
+from typing import Awaitable, Callable, TypedDict, TypeAlias
 
 from anyio import open_file
 
@@ -24,6 +28,72 @@ def pkg_name(package_path: str) -> str:
     return os.path.basename(package_path)
 
 
+class _RelevantFile(TypedDict):
+    path: str
+    content: str
+    pkg_name: str
+
+
+async def _maybe_model_module(
+    self: DiscoverHandler, file_path: str
+) -> _RelevantFile | None:
+    """Check if the file is the model module."""
+    if file_path == self.model_module_name:
+        item_path = os.path.join(self.model_path, file_path)
+
+        async with await open_file(item_path, "rb") as file:
+            encoded_content = await file.read()
+            return {
+                "path": item_path,
+                "content": encoded_content,
+                "pkg_name": pkg_name(self.model_path),
+            }
+    return None
+
+
+async def _maybe_monitor_importing_module(
+    self: DiscoverHandler, file_path: str
+) -> _RelevantFile | None:
+    """Check if the file is importing the monitor service."""
+    item_path = os.path.join(self.model_path, file_path)
+
+    async with await open_file(item_path, "r") as file:
+        content = await file.read()
+        if "from qcog_python_client import monitor" in content:
+            return {
+                "path": item_path,
+                "content": content,
+                "pkg_name": pkg_name(self.model_path),
+            }
+
+    return None
+
+
+RelevantFileId: TypeAlias = str
+FilePath: TypeAlias = str
+MaybeIsRelevantFile: TypeAlias = Callable[
+    [Handler, FilePath], Awaitable[_RelevantFile | None]
+]
+
+relevant_files_map: dict[RelevantFileId, MaybeIsRelevantFile] = {
+    "model_module": _maybe_model_module,
+    "monitor_service_import": _maybe_monitor_importing_module,
+}
+
+
+async def maybe_relevant_file(
+    self: DiscoverHandler,
+    file_path: str,
+) -> dict[RelevantFileId, _RelevantFile] | None:
+    """Check if the file is relevant."""
+    for relevant_file_id, maybe_relevant_file in relevant_files_map.items():
+        relevant_file = await maybe_relevant_file(self, file_path)
+        if relevant_file:
+            return {relevant_file_id: relevant_file}
+
+    return None
+
+
 class DiscoverHandler(Handler):
     """Discover the folder and the model.
 
@@ -36,6 +106,7 @@ class DiscoverHandler(Handler):
     """
 
     model_module_name = "model.py"  # The name of the model module
+    monitor_service_import = "from qcog_python_client import monitor"
     retries = 0
     commands = (Command.discover,)
     relevant_files: dict
@@ -67,24 +138,36 @@ class DiscoverHandler(Handler):
         # Initialize the relevant files dictionary
         self.relevant_files = {}
 
-        for item in content:
-            if item == self.model_module_name:
-                item_path = os.path.join(self.model_path, item)
+        async def process_file(file_path: str):
+            return await maybe_relevant_file(self, file_path)
 
-                async with await open_file(item_path, "rb") as file:
-                    encoded_content = await file.read()
-                    self.relevant_files.update(
-                        {
-                            "model_module": {
-                                "path": item_path,
-                                "content": encoded_content,
-                                "pkg_name": pkg_name(self.model_path),
-                            }
-                        }
-                    )
+        processed: list[dict[RelevantFileId, _RelevantFile]] = await asyncio.gather(
+            map(process_file, content)
+        )
+
+        self.relevant_files = {
+            fid: rel for file in processed for fid, rel in file.items()
+        }
+
+        # if file == self.model_module_name:
+        #     item_path = os.path.join(self.model_path, file)
+
+        #     async with await open_file(item_path, "rb") as file:
+        #         encoded_content = await file.read()
+        #         self.relevant_files.update(
+        #             {
+        #                 "model_module": {
+        #                     "path": item_path,
+        #                     "content": encoded_content,
+        #                     "pkg_name": pkg_name(self.model_path),
+        #                 }
+        #             }
+        #         )
 
         # Once the discovery has been completed,
         # Issue a validate command that will be executed next
+
+        print("Relevant files: ", self.relevant_files)
         return ValidateCommand(
             relevant_files=self.relevant_files,
             model_name=self.model_name,

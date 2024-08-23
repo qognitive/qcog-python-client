@@ -4,7 +4,7 @@ import os
 import sys
 from dataclasses import dataclass
 
-from qcog_python_client.qcog.pytorch.validate.shared import FileToValidate
+from qcog_python_client.qcog.pytorch.validate.shared import FileToValidate, ValidateCommand
 from qcog_python_client.qcog.pytorch.validate.validate_utils import (
     get_third_party_imports,
     is_package_module,
@@ -34,6 +34,7 @@ default_allowed_modules = {
 
 def validate_model_module(
     file: FileToValidate,
+    command: ValidateCommand,
     allowed_modules: set[str] | None = None,
 ) -> ValidateModelModule:
     """Validate the model module."""

@@ -2,25 +2,16 @@
 
 from typing import Any, Callable
 
-from qcog_python_client.qcog.pytorch.handler import BoundedCommand, Command, Handler
+from qcog_python_client.qcog.pytorch.handler import Command, Handler
 from qcog_python_client.qcog.pytorch.upload.uploadhandler import UploadCommand
 from qcog_python_client.qcog.pytorch.validate._setup_monitor_import import (
     setup_monitor_import,
 )
-from qcog_python_client.qcog.pytorch.validate._validate_module import (
+from qcog_python_client.qcog.pytorch.validate._validate_model_module import (
     FileToValidate,
     validate_model_module,
 )
-
-
-class ValidateCommand(BoundedCommand):
-    """Validate command."""
-
-    model_name: str
-    model_path: str
-    relevant_files: dict
-    directory: dict
-    command: Command = Command.validate
+from qcog_python_client.qcog.pytorch.validate.shared import ValidateCommand
 
 
 class ValidateHandler(Handler):
@@ -29,7 +20,7 @@ class ValidateHandler(Handler):
     commands = (Command.validate,)
     attempts = 1
 
-    validate_map: dict[str, Callable[[FileToValidate], Any]] = {
+    validate_map: dict[str, Callable[[FileToValidate, ValidateCommand], Any]] = {
         "model_module": validate_model_module,
         "monitor_service_import_module": setup_monitor_import,
     }
@@ -43,13 +34,11 @@ class ValidateHandler(Handler):
 
             if not file:
                 raise FileNotFoundError(
-                    f"File {key} not found in the relevant files. Keys: {
-                        payload.relevant_files.keys()
-                    }"
+                    f"File {key} not found in the relevant files. Keys: {payload.relevant_files.keys()}"  # noqa: E501
                 )
 
             parsed = FileToValidate.model_validate(file)
-            validated.append(validate_fn(parsed))
+            validated.append(validate_fn(parsed, payload))
 
         raise NotImplementedError("Not implemented yet")
 

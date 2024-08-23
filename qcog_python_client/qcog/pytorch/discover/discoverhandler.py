@@ -1,4 +1,9 @@
-"""Discover the module and the model."""
+"""Discover the module and the model.
+
+Finds the folder, convert the folder into a dictionary
+Create a `relevant_files` dictionary that contains the
+relevant files for the model. that will be validated later.
+"""
 
 from __future__ import annotations
 
@@ -54,7 +59,8 @@ async def _maybe_model_module(
     self: DiscoverHandler, file_path: FilePath, file_content: io.BytesIO
 ) -> _File | None:
     """Check if the file is the model module."""
-    if file_path == self.model_module_name:
+    module_name = os.path.basename(file_path)
+    if module_name == self.model_module_name:
         return {
             "path": file_path,
             "content": file_content,
@@ -71,7 +77,7 @@ async def _maybe_monitor_service_import_module(
     if os.path.isdir(file_path):
         return None
 
-    tree = ast.parse(file_content)
+    tree = ast.parse(file_content.read())
 
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
@@ -180,7 +186,7 @@ class DiscoverHandler(Handler):
         self.relevant_files = {}
 
         def process_file(
-            f: tuple[FilePath, FileContent]
+            f: tuple[FilePath, FileContent],
         ) -> Awaitable[dict[RelevantFileId, _File]]:
             return maybe_relevant_file(self, *f)
 
@@ -189,11 +195,14 @@ class DiscoverHandler(Handler):
         # to the filter function `process_file`
 
         dir_content = list(
-            map(lambda x: (x[0], x[1]["content"]), self.directory.items())
+            map(lambda x: (x[0], io.BytesIO(x[1]["content"])), self.directory.items())
         )
 
         # Process the files in parallel gathering the results
-        # from the coroutines returned by the `process_file` function
+        # from the coroutines returned by the `process_file`
+        # function. Some of the files might not be relevant.
+        # `lambda f: f is not None` will filter out those.
+
         processed: Iterable[dict[RelevantFileId, _File]] = filter(
             lambda f: f is not None,  # Filter out the files that are not relevant
             await asyncio.gather(
@@ -201,10 +210,7 @@ class DiscoverHandler(Handler):
             ),  # Process the files in parallel
         )
 
-        # Some of the files might not be relevant.
-        # `lambda f: f is not None` will filter out the
-        # files that are not relevant.
-
+        # Index the relevant files on the relevantFileId
         self.relevant_files = {
             fid: rel for file in processed for fid, rel in file.items()
         }

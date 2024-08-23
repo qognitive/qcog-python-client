@@ -6,6 +6,7 @@ import tarfile
 
 import aiohttp
 
+from qcog_python_client.log import qcoglogger as logger
 from qcog_python_client.qcog.pytorch.handler import (
     BoundedCommand,
     Command,
@@ -21,11 +22,6 @@ def compress_folder(folder_path: str) -> io.BytesIO:
 
     # What to exclude (__pycache__, .git, etc)
     def filter(tarinfo: tarfile.TarInfo) -> tarfile.TarInfo | None:
-        if "__pycache__" in tarinfo.name:
-            return None
-        if ".git" in tarinfo.name:
-            return None
-
         return (
             None
             if any(name in tarinfo.name for name in {".git", "__pycache__"})
@@ -36,7 +32,7 @@ def compress_folder(folder_path: str) -> io.BytesIO:
 
     with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
         tar.add(folder_path, arcname=arcname, filter=filter)
-        print("Compressed targzip with memebers: ", tar.getnames())
+        logger.info("Compressed targzip with memebers: ", tar.getnames())
 
     buffer.seek(0)
 

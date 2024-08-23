@@ -123,3 +123,6 @@ exclude = [
 "**/__init__.py" = ["F401", "D104"]
 # Remove D rules from tests
 "**/tests/**" = ["D"]
+
+[tool.pytest.ini_options]
+log_cli=true

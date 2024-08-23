@@ -4,18 +4,11 @@ import os
 import sys
 from dataclasses import dataclass
 
-from pydantic import BaseModel
-
+from qcog_python_client.qcog.pytorch.validate.shared import FileToValidate
 from qcog_python_client.qcog.pytorch.validate.validate_utils import (
     get_third_party_imports,
     is_package_module,
 )
-
-
-class FileToValidate(BaseModel):
-    path: str
-    content: str
-    pkg_name: str
 
 
 @dataclass

@@ -2,10 +2,20 @@
 
 from __future__ import annotations
 
+import ast
 import asyncio
+import io
 import os
-from typing import Awaitable, Callable, TypedDict, TypeAlias
-import os
+from typing import (
+    IO,
+    Any,
+    Awaitable,
+    Callable,
+    Coroutine,
+    Iterable,
+    TypeAlias,
+    TypedDict,
+)
 
 from anyio import open_file
 
@@ -21,75 +31,85 @@ class DiscoverCommand(BoundedCommand):
     command: Command = Command.discover
 
 
+class _File(TypedDict):
+    path: str
+    content: IO[bytes]
+    pkg_name: str
+
+
+RelevantFileId: TypeAlias = str
+FilePath: TypeAlias = str
+FileContent: TypeAlias = io.BytesIO
+MaybeIsRelevantFile: TypeAlias = Callable[
+    [Handler, FilePath, FileContent], Coroutine[Any, Any, _File | None]
+]
+
+
 def pkg_name(package_path: str) -> str:
     """From the package path, get the package name."""
     return os.path.basename(package_path)
 
 
-class _RelevantFile(TypedDict):
-    path: str
-    content: str
-    pkg_name: str
-
-
 async def _maybe_model_module(
-    self: DiscoverHandler, file_path: str
-) -> _RelevantFile | None:
+    self: DiscoverHandler, file_path: FilePath, file_content: io.BytesIO
+) -> _File | None:
     """Check if the file is the model module."""
     if file_path == self.model_module_name:
-        item_path = os.path.join(self.model_path, file_path)
-
-        async with await open_file(item_path, "rb") as file:
-            encoded_content = await file.read()
-            return {
-                "path": item_path,
-                "content": encoded_content,
-                "pkg_name": pkg_name(self.model_path),
-            }
+        return {
+            "path": file_path,
+            "content": file_content,
+            "pkg_name": pkg_name(self.model_path),
+        }
     return None
 
 
-async def _maybe_monitor_importing_module(
-    self: DiscoverHandler, file_path: str
-) -> _RelevantFile | None:
+async def _maybe_monitor_service_import_module(
+    self: DiscoverHandler, file_path: str, file_content: io.BytesIO
+) -> _File | None:
     """Check if the file is importing the monitor service."""
-    item_path = os.path.join(self.model_path, file_path)
+    # Make sure the item is not a folder. If so, exit
+    if os.path.isdir(file_path):
+        return None
 
-    async with await open_file(item_path, "r") as file:
-        content = await file.read()
-        if "from qcog_python_client import monitor" in content:
-            return {
-                "path": item_path,
-                "content": content,
-                "pkg_name": pkg_name(self.model_path),
-            }
+    tree = ast.parse(file_content)
 
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            # We assume that the only way that the monitor service
+            # will be imported is like
+            # from qcog_python_client import monitor or eventually
+            # from qcog_python_client import monitor as <alias>.
+            if node.module == "qcog_python_client" and any(
+                a.name == "monitor" for a in node.names
+            ):
+                return {
+                    "path": file_path,
+                    "content": file_content,
+                    "pkg_name": pkg_name(self.model_path),
+                }
     return None
 
-
-RelevantFileId: TypeAlias = str
-FilePath: TypeAlias = str
-MaybeIsRelevantFile: TypeAlias = Callable[
-    [Handler, FilePath], Awaitable[_RelevantFile | None]
-]
 
 relevant_files_map: dict[RelevantFileId, MaybeIsRelevantFile] = {
     "model_module": _maybe_model_module,
-    "monitor_service_import": _maybe_monitor_importing_module,
+    "monitor_service_import_module": _maybe_monitor_service_import_module,
 }
 
 
 async def maybe_relevant_file(
     self: DiscoverHandler,
-    file_path: str,
-) -> dict[RelevantFileId, _RelevantFile] | None:
+    file_path: FilePath,
+    file_content: io.BytesIO,
+) -> dict[RelevantFileId, _File]:
     """Check if the file is relevant."""
-    for relevant_file_id, maybe_relevant_file in relevant_files_map.items():
-        relevant_file = await maybe_relevant_file(self, file_path)
-        if relevant_file:
-            return {relevant_file_id: relevant_file}
+    retval: dict[RelevantFileId, _File] = {}
 
-    return None
+    for relevant_file_id, _maybe_relevant_file_fn in relevant_files_map.items():
+        relevant_file = await _maybe_relevant_file_fn(self, file_path, file_content)
+        if relevant_file:
+            retval.update({relevant_file_id: relevant_file})
+
+    return retval
 
 
 class DiscoverHandler(Handler):
@@ -133,41 +153,65 @@ class DiscoverHandler(Handler):
         # Check if the folder contains the model module
         content = os.listdir(self.model_path)
 
+        # Load all the folder in memory
+        self.directory: dict[FilePath, _File] = {}
+        pkg_name_ = pkg_name(self.model_path)
+
+        for item in content:
+            item_path = os.path.join(self.model_path, item)
+            # Avoid folders
+            if os.path.isdir(item_path):
+                continue
+
+            async with await open_file(item_path, "rb") as file:
+                encoded_content = await file.read()
+                self.directory[item] = {
+                    "path": item_path,
+                    "content": encoded_content,
+                    "pkg_name": pkg_name_,
+                }
+
+        # Figure it out which files are relevant.
+        # Relevant files have a specific id that
+        # is specified in the `relevant_files_map`
+        # dictionary as the key of that dictionary.
+
         # Initialize the relevant files dictionary
         self.relevant_files = {}
 
-        async def process_file(file_path: str):
-            return await maybe_relevant_file(self, file_path)
+        def process_file(
+            f: tuple[FilePath, FileContent]
+        ) -> Awaitable[dict[RelevantFileId, _File]]:
+            return maybe_relevant_file(self, *f)
 
-        processed: list[dict[RelevantFileId, _RelevantFile]] = await asyncio.gather(
-            map(process_file, content)
+        # Tranform the directory dictionary into a list
+        # of tuple (file_path, file_content) to be passed
+        # to the filter function `process_file`
+
+        dir_content = list(
+            map(lambda x: (x[0], x[1]["content"]), self.directory.items())
         )
+
+        # Process the files in parallel gathering the results
+        # from the coroutines returned by the `process_file` function
+        processed: Iterable[dict[RelevantFileId, _File]] = filter(
+            lambda f: f is not None,  # Filter out the files that are not relevant
+            await asyncio.gather(
+                *map(process_file, dir_content)
+            ),  # Process the files in parallel
+        )
+
+        # Some of the files might not be relevant.
+        # `lambda f: f is not None` will filter out the
+        # files that are not relevant.
 
         self.relevant_files = {
             fid: rel for file in processed for fid, rel in file.items()
         }
 
-        # if file == self.model_module_name:
-        #     item_path = os.path.join(self.model_path, file)
-
-        #     async with await open_file(item_path, "rb") as file:
-        #         encoded_content = await file.read()
-        #         self.relevant_files.update(
-        #             {
-        #                 "model_module": {
-        #                     "path": item_path,
-        #                     "content": encoded_content,
-        #                     "pkg_name": pkg_name(self.model_path),
-        #                 }
-        #             }
-        #         )
-
-        # Once the discovery has been completed,
-        # Issue a validate command that will be executed next
-
-        print("Relevant files: ", self.relevant_files)
         return ValidateCommand(
             relevant_files=self.relevant_files,
+            directory=self.directory,
             model_name=self.model_name,
             model_path=self.model_path,
         )

@@ -8,6 +8,7 @@ import torch.utils.data
 from _model import Model
 from sklearn.calibration import LabelEncoder
 from torch.autograd import Variable
+
 from qcog_python_client import monitor
 
 

@@ -6,7 +6,9 @@ from typing import Any
 
 import pandas as pd
 
-from qcog_python_client.qcog._baseclient import BaseQcogClient
+from qcog_python_client.qcog._baseclient import (
+    BaseQcogClient,
+)
 from qcog_python_client.qcog._data_uploader import DataClient
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog._interfaces import (
@@ -19,6 +21,7 @@ from qcog_python_client.schema.common import (
     Matrix,
     NotRequiredStateParams,
     NotRequiredWeightParams,
+    PytorchTrainingParameters,
 )
 from qcog_python_client.schema.generated_schema.models import TrainingStatus
 
@@ -199,6 +202,31 @@ class AsyncQcogClient(BaseQcogClient):
         """
         return await self._inference(data, parameters)
 
+    async def train_pytorch(self, training_parameters: dict) -> AsyncQcogClient:
+        """Train PyTorch model.
+
+        Run a training session for a PyTorch model.
+        The training session should be run against a valid Pytorch model and dataset
+        previously selected.
+
+        Use `.data(...)` and `.pytorch(...)` to set the model and dataset.
+
+        Parameters
+        ----------
+        training_parameters : dict
+            the training parameters as specified in the `train`
+            function of the provided model
+
+        Returns
+        -------
+        AsyncQcogClient
+
+        """
+        await super()._train_pytorch(
+            PytorchTrainingParameters.model_validate(training_parameters),
+        )
+        return self
+
     # ###########################
     # Public Models
     # ###########################
@@ -269,6 +297,31 @@ class AsyncQcogClient(BaseQcogClient):
 
         """
         super().ensemble(*args, **kwargs)
+        return self
+
+    async def pytorch(
+        self,
+        model_name: str,
+        model_path: str,
+    ) -> AsyncQcogClient:
+        """Select PyTorch model.
+
+        Parameters
+        ----------
+        model_name : str
+            the name of the model
+        model_path : str
+            the path to the model
+
+        Returns
+        -------
+        AsyncQcogClient
+
+        """
+        await super()._pytorch(
+            model_name,
+            model_path,
+        )
         return self
 
     # ###########################

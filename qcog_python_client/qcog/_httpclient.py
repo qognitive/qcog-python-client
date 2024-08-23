@@ -8,6 +8,8 @@ import random
 from enum import Enum
 
 import aiohttp
+import urllib3
+import urllib3.util
 
 from qcog_python_client.qcog._interfaces import ABCRequestClient
 
@@ -77,7 +79,7 @@ class RequestClient(_HTTPClient, ABCRequestClient):
         self,
         uri: str,
         method: HttpMethod,
-        data: dict | None = None,
+        data: dict | aiohttp.FormData | None = None,
     ) -> dict:
         """Execute the async get "aiohttp" by adding class-level settings.
 
@@ -85,7 +87,7 @@ class RequestClient(_HTTPClient, ABCRequestClient):
         ----------
         uri: str
             Full http url
-        data: dict
+        data: dict | aiohttp.FormData
             in case of post, the posted data, empty dict otherwise
         method: HttpMethod
             request type enum
@@ -97,20 +99,40 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             may use .json()
 
         """
+        # URLEncode the uri
+        uri = urllib3.util.parse_url(uri).url
+
         random.seed()
         sleep_for: int = random.randrange(1, 5)
-        exception: aiohttp.client_exceptions.ClientResponseError
+        exception: aiohttp.client_exceptions.ClientResponseError | ValueError
 
-        for retry in range(self.retries):
+        is_data = isinstance(data, aiohttp.FormData)
+        is_json = isinstance(data, dict)
+
+        for _ in range(self.retries):
             try:
                 async with aiohttp.ClientSession(
                     headers=self.headers, raise_for_status=True
                 ) as session:
-                    resp = await session.request(
-                        method.value,
-                        uri,
-                        json=data,
-                    )
+                    resp: aiohttp.ClientResponse
+
+                    if is_data:
+                        resp = await session.request(
+                            method.value,
+                            uri,
+                            data=data,
+                        )
+
+                    elif is_json:
+                        resp = await session.request(
+                            method.value,
+                            uri,
+                            json=data,
+                        )
+
+                    else:
+                        raise ValueError(f"Invalid Content Type found: {type(data)}")
+
                     retval: dict = await resp.json()
 
                     return retval
@@ -119,6 +141,9 @@ class RequestClient(_HTTPClient, ABCRequestClient):
                 await asyncio.sleep(sleep_for)
                 sleep_for = random.randrange(sleep_for, 2 * sleep_for)
                 exception = e
+            except ValueError as e:
+                exception = e
+                break
 
         raise exception
 
@@ -139,11 +164,15 @@ class RequestClient(_HTTPClient, ABCRequestClient):
 
         """
         return await self._request_retry(
-            f"{self.url}/{endpoint}/",
+            f"{self.url}/{endpoint}",
             HttpMethod.get,
         )
 
-    async def post(self, endpoint: str, data: dict) -> dict:
+    async def post(
+        self,
+        endpoint: str,
+        data: dict | aiohttp.FormData,
+    ) -> dict:
         """Execute a post request.
 
         Convenience wrapper around requests.post (called via _post method)
@@ -155,6 +184,9 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             if applicable) and will add to the dns prefix
         data: dict
             json-able data payload
+        content_type: Literal['json'] | Literal['data']
+            content type of the post request. For `data` content type,
+            a FormData object is expected in the `data` parameter
 
         Returns
         -------
@@ -162,7 +194,5 @@ class RequestClient(_HTTPClient, ABCRequestClient):
 
         """
         return await self._request_retry(
-            f"{self.url}/{endpoint}/",
-            HttpMethod.post,
-            data,
+            f"{self.url}/{endpoint}", HttpMethod.post, data
         )

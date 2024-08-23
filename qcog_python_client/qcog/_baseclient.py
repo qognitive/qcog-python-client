@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, TypeAlias
 
+import aiohttp
 import pandas as pd
 
 from qcog_python_client.log import qcoglogger
@@ -15,6 +16,7 @@ from qcog_python_client.qcog._jsonable_parameters import (
 )
 from qcog_python_client.qcog._status import SUCCESS_STATUS, WAITING_STATUS
 from qcog_python_client.qcog._version import DEFAULT_QCOG_VERSION, numeric_version
+from qcog_python_client.qcog.pytorch.agent import PyTorchAgent
 from qcog_python_client.schema import (
     InferenceParameters,
     TrainingParameters,
@@ -23,44 +25,31 @@ from qcog_python_client.schema.common import (
     Matrix,
     NotRequiredStateParams,
     NotRequiredWeightParams,
+    PytorchTrainingParameters,
 )
 from qcog_python_client.schema.generated_schema.models import (
     AppSchemasDataPayloadDataPayloadResponse,
     AppSchemasParametersTrainingParametersPayloadResponse,
+    AppSchemasPytorchModelPytorchModelPayloadResponse,
+    AppSchemasPytorchModelPytorchTrainedModelPayloadResponse,
     AppSchemasTrainTrainedModelPayloadResponse,
     Model,
     ModelEnsembleParameters,
     ModelGeneralParameters,
     ModelPauliParameters,
+    ModelPytorchParameters,
     TrainingStatus,
 )
 
 Operator: TypeAlias = str | int
 TrainingModel: TypeAlias = (
-    ModelPauliParameters | ModelEnsembleParameters | ModelGeneralParameters
+    ModelPauliParameters
+    | ModelEnsembleParameters
+    | ModelGeneralParameters
+    | ModelPytorchParameters
 )
 
 logger = qcoglogger.getChild(__name__)
-
-
-class StateNotSetError(Exception):
-    """Exception raised when a state is not set."""
-
-    def __init__(self, missing_state: str, suggestion: str | None = None) -> None:
-        """Initialize the exception.
-
-        Attributes
-        ----------
-        missing_state : str
-            The state that is missing.
-
-        suggestion : str | None
-            A suggestion for remediation.
-
-        """
-        self.missing_state = missing_state
-        self.suggestion = suggestion
-        super().__init__(f"Missing state: {missing_state}. {suggestion or ''}")
 
 
 class BaseQcogClient:
@@ -77,12 +66,37 @@ class BaseQcogClient:
         self._trained_model: dict | None = None
         self._inference_result: dict | None = None
         self._loss: Matrix | None = None
+        self._pytorch_model: dict | None = None
+
+    @property
+    def pytorch_model(self) -> dict:
+        """Return the Pytorch model."""
+        if self._pytorch_model is None:
+            raise AttributeError(
+                "No Pytorch model has been found associated with this request.",
+                "You can use `pytorch` method to upload a new Pytorch model",
+            )
+        return self._pytorch_model
+
+    @pytorch_model.setter
+    def pytorch_model(self, value: dict) -> None:
+        """Set and validate the Pytorch model."""
+        # Pytorch model is the current model that has been set by the user
+        # using the `pytorch` method. The database model is currently the
+        # same as the `trained_model`, but it's not an actual trained model,
+        # It's just a pointer to the uploaded model with some parameters,
+        # and a specific dataset.
+        self._pytorch_model = (
+            AppSchemasPytorchModelPytorchModelPayloadResponse.model_validate(  # noqa: E501
+                value
+            ).model_dump()
+        )
 
     @property
     def model(self) -> TrainingModel:
         """Return the model."""
         if self._model is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "model", "Please set the model first using `pauli` or `ensemble` method"
             )
         return self._model
@@ -91,7 +105,7 @@ class BaseQcogClient:
     def dataset(self) -> dict:
         """Return the dataset."""
         if self._dataset is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No dataset has been found associated with this request.",
                 """You can use `data` method to upload a new dataset or
                 `preloaded_data` to load an existing one""",
@@ -109,7 +123,7 @@ class BaseQcogClient:
     def training_parameters(self) -> dict:
         """Return the training parameters."""
         if self._training_parameters is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No training parameters have been found associated with this request.",
                 """You can use `train` method to start a new training or
                 `preloaded_training_parameters` to load existing ones""",  # noqa: 501
@@ -129,7 +143,7 @@ class BaseQcogClient:
     def trained_model(self) -> dict:
         """Return the trained model."""
         if self._trained_model is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No trained model has been found associated with this request.",
                 """You can use `train` method to start a new training or
                 `preloaded_model` to load an existing one""",
@@ -147,7 +161,7 @@ class BaseQcogClient:
     def inference_result(self) -> dict:
         """Return the inference result."""
         if self._inference_result is None:
-            raise StateNotSetError(
+            raise AttributeError(
                 "No inference result has been found associated with this request.",
                 "You can use `inference` method to run an inference",
             )
@@ -214,6 +228,30 @@ class BaseQcogClient:
             else [],
             model_name=Model.ensemble.value,
         )
+        return self
+
+    async def _pytorch(
+        self,
+        model_name: str,
+        model_path: str,
+    ) -> BaseQcogClient:
+        """Select a Pythorch architecture defined by the user."""
+        # Instantiate the Pytorch client.
+
+        # Set the pytorch model parameters.
+        # In this case there are no parameters
+        # Because the parameters are defined
+        # by the user in the model itself.
+        self._model = ModelPytorchParameters(model_name=Model.pytorch.value)
+
+        # Create a PyTorch agent with the http client functions
+        agent = PyTorchAgent.create_agent()
+
+        # Needed to upload the model and the parameters
+        agent.register_tool("post_multipart", self._post_multipart)
+
+        # Upload the model
+        self.pytorch_model = await agent.upload_model(model_path, model_name)
         return self
 
     async def _data(self, data: pd.DataFrame) -> BaseQcogClient:
@@ -312,6 +350,40 @@ class BaseQcogClient:
             inference_result["response"]["data"],
         )
 
+    async def _train_pytorch(
+        self,
+        training_parameters: PytorchTrainingParameters,
+    ) -> BaseQcogClient:
+        agent = PyTorchAgent.create_agent()
+
+        # Needed to upload the model and the parameters
+        agent.register_tool("post_request", self.http_client.post)
+        trained_model = await agent.train_model(
+            self.pytorch_model["guid"],
+            dataset_guid=self.dataset["guid"],
+            training_parameters=training_parameters.model_dump(),
+        )
+
+        pytorch_trained_model = (
+            AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(
+                trained_model
+            )
+        )
+
+        generic_trained_model = AppSchemasTrainTrainedModelPayloadResponse(
+            qcog_version=self.pytorch_model["model_name"],
+            guid=pytorch_trained_model.guid,
+            dataset_guid=pytorch_trained_model.dataset_guid,
+            training_parameters_guid=pytorch_trained_model.training_parameters_guid,
+            status=TrainingStatus(pytorch_trained_model.status),
+            loss=None,
+            training_completion=0,
+            current_batch_completion=0,
+        )
+
+        self.trained_model = generic_trained_model.model_dump()
+        return self
+
     ############################
     # Public Utilities Methods #
     ############################
@@ -394,4 +466,15 @@ class BaseQcogClient:
                 "parameters": {"model": self.model.model_dump()}
                 | jsonable_train_parameters(params),
             },
+        )
+
+    async def _post_multipart(
+        self,
+        url: str,
+        data: aiohttp.FormData,
+    ) -> dict:
+        # Add data headers to the form data
+        return await self.http_client.post(
+            url,
+            data,
         )

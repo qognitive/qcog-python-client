@@ -17,11 +17,9 @@ from qcog_python_client.schema.common import (
 )
 
 
-def jsonable_train_parameters(params: TrainingParameters) -> dict:
-    # Expected params for the API.
-    # This will eventually change when the
-    # schema is defined and updates
-
+def jsonable_train_parameters(
+    params: TrainingParameters,
+) -> dict:
     state_kwargs = params["state_kwargs"]
     weight_kwargs = params["weight_optimization_kwargs"]
 

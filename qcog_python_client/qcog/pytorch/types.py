@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import io
-from typing import TypeAlias
+from typing import Literal, TypeAlias
 
 from pydantic import BaseModel
 
@@ -42,7 +42,9 @@ class QFile(BaseModel):
 
 
 FilePath: TypeAlias = str
-RelevantFileId: TypeAlias = str
+
+RelevantFileId: TypeAlias = Literal["model_module", "monitor_service_import_module"]
 
 Directory: TypeAlias = dict[FilePath, QFile]
 RelevantFiles: TypeAlias = dict[RelevantFileId, QFile]
+

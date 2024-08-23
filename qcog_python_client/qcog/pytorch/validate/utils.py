@@ -1,9 +1,11 @@
 """Utility functions for validating the input data."""
 
 import ast
+import distutils
+import distutils.sysconfig
+import imp
 import io
 import os
-import pkgutil
 import sys
 from functools import lru_cache
 
@@ -18,12 +20,15 @@ def validate_directory(dir: dict) -> Directory:
 @lru_cache
 def get_stdlib_modules() -> set[str]:
     """Get a set of all standard library modules."""
-    stdlib_modules: set[str] = set()
-    for importer, modname, ispkg in pkgutil.iter_modules():
-        # Exclude packages
-        stdlib_modules.add(modname)
+    # stdlib_modules: set[str] = set()
+    # for importer, modname, ispkg in pkgutil.iter_modules():
+    #     if modname in sys.builtin_module_names:
+    #         stdlib_modules.add(modname)
 
-    return stdlib_modules
+    # # Get top level modules  https://docs.python.org/2/distutils/apiref.html#distutils.sysconfig.get_python_lib
+    # distutils.sysconfig.get_python_lib(standard_lib=True)
+    # return stdlib_modules
+    return set(sys.builtin_module_names)
 
 
 def get_third_party_imports(source_code: io.BytesIO) -> set[str]:
@@ -49,26 +54,34 @@ def get_third_party_imports(source_code: io.BytesIO) -> set[str]:
         # as the import statement can be of the form `import module`
         # or `from module import submodule`
         if isinstance(node, ast.Import):
-            for alias in node.names:
-                imports.add(alias.name)
+            for name in node.names:
+                imports.add(name.name)
         elif isinstance(node, ast.ImportFrom):
             if node.module:
                 imports.add(node.module)
 
-    # Get list of standard library modules
-    stdlib_modules = get_stdlib_modules()
-
     # Identify third-party packages
     third_party_packages = set()
-    for imp in imports:
+
+    # Get the path of the standard library.
+    # All the modules that are OS dependent are on this path
+    python_sys_lib = distutils.sysconfig.get_python_lib(standard_lib=True)
+
+    for imp_ in imports:
         # Split the package name to handle submodules
-        base_package = imp.split(".")[0]
+        base_package = imp_.split(".")[0]
+
+        _, path, desc = imp.find_module(base_package)
+
+        # If the path of the module matches the path of the standard library
+        # or the module is a built-in module, then it is not a third-party
+
         if (
-            base_package not in stdlib_modules
-            and base_package not in sys.builtin_module_names
+            base_package not in sys.builtin_module_names
+            and desc[2] != imp.C_BUILTIN
+            and python_sys_lib not in path
         ):
             third_party_packages.add(base_package)
-
     return third_party_packages
 
 

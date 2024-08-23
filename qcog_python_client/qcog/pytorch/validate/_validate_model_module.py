@@ -12,7 +12,7 @@ from qcog_python_client.qcog.pytorch.types import (
     QFile,
     ValidateCommand,
 )
-from qcog_python_client.qcog.pytorch.validate.validate_utils import (
+from qcog_python_client.qcog.pytorch.validate.utils import (
     get_third_party_imports,
     is_package_module,
 )

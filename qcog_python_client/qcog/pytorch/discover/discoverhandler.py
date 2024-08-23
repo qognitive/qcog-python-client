@@ -55,10 +55,16 @@ async def _maybe_monitor_service_import_module(
             # will be imported is like
             # from qcog_python_client import monitor or eventually
             # from qcog_python_client import monitor as <alias>.
-            if node.module == "qcog_python_client" and any(
-                a.name == "monitor" for a in node.names
-            ):
-                return file
+            if node.module == "qcog_python_client":
+                # We only support a single monitor import from qcog_python_client
+                # for now.
+                if len(node.names) > 1:
+                    raise ValueError(
+                        "You cannot import anything from qcog_python_client other than monitor."  # noqa: E501
+                    )
+
+                if node.names[0].name == "monitor":
+                    return file
     return None
 
 

@@ -1,17 +1,22 @@
 """Validate the model module."""
 
-from typing import Any, Callable
+from __future__ import annotations
+
+from typing import Callable
 
 from qcog_python_client.qcog.pytorch.handler import Command, Handler
+from qcog_python_client.qcog.pytorch.types import (
+    Directory,
+    QFile,
+    ValidateCommand,
+)
 from qcog_python_client.qcog.pytorch.upload.uploadhandler import UploadCommand
 from qcog_python_client.qcog.pytorch.validate._setup_monitor_import import (
     setup_monitor_import,
 )
 from qcog_python_client.qcog.pytorch.validate._validate_model_module import (
-    FileToValidate,
     validate_model_module,
 )
-from qcog_python_client.qcog.pytorch.validate.shared import ValidateCommand
 
 
 class ValidateHandler(Handler):
@@ -19,26 +24,31 @@ class ValidateHandler(Handler):
 
     commands = (Command.validate,)
     attempts = 1
+    directory: Directory
 
-    validate_map: dict[str, Callable[[FileToValidate, ValidateCommand], Any]] = {
+    validate_map: dict[
+        str, Callable[[ValidateHandler, QFile, Directory], Directory]
+    ] = {
         "model_module": validate_model_module,
         "monitor_service_import_module": setup_monitor_import,
     }
 
     async def handle(self, payload: ValidateCommand) -> UploadCommand:
         """Handle the validation."""
-        validated: list = []
+        self.directory = payload.directory
 
+        # `directory` will go through a series of validations
+        # based on the `validate_map` keys.
         for key, validate_fn in self.validate_map.items():
-            file = payload.relevant_files.get(key)
+            relevant_file = payload.relevant_files.get(key)
 
-            if not file:
+            if not relevant_file:
                 raise FileNotFoundError(
                     f"File {key} not found in the relevant files. Keys: {payload.relevant_files.keys()}"  # noqa: E501
                 )
 
-            parsed = FileToValidate.model_validate(file)
-            validated.append(validate_fn(parsed, payload))
+            parsed = QFile.model_validate(relevant_file)
+            self.directory = validate_fn(self, parsed, self.directory)
 
         raise NotImplementedError("Not implemented yet")
 

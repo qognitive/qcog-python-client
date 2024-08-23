@@ -129,7 +129,7 @@ class Handler(ABC, Generic[CommandPayloadType]):
                     # 1 - revert the state of the handler
                     # 2 - wait for the specified time
                     # 3 - try again
-                    print(f"Attempt {i}, error: {e}")
+                    print(f"Attempt {i}/{self.attempts}, error: {e}")
                     exception = e
                     await self.revert()
                     await asyncio.sleep(self.retry_after)

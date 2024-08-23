@@ -1,4 +1,4 @@
-"""Utility functions for validating the model package."""
+"""Utility functions for validating the input data."""
 
 import ast
 import io
@@ -6,6 +6,13 @@ import os
 import pkgutil
 import sys
 from functools import lru_cache
+
+from qcog_python_client.qcog.pytorch.types import Directory, QFile
+
+
+def validate_directory(dir: dict) -> Directory:
+    """Validate the directory."""
+    return {k: QFile(**v) for k, v in dir.items()}
 
 
 @lru_cache

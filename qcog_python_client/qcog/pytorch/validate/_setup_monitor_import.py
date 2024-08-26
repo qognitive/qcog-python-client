@@ -93,12 +93,6 @@ def setup_monitor_import(
     for node in ast.walk(ast_tree):
         if isinstance(node, ast.ImportFrom):
             if node.module == "qcog_python_client":
-                # For now there is only the package monitor
-                # to import, but in case in the future we
-                # have more packages that are importable
-                # from the python client into the training
-                # script, then we need to check that the
-                # names only contain the package monitor.
                 if len(node.names) > 1:
                     raise ValueError(
                         "Only one import is allowed from the qcog_python_client package."  # noqa: E501

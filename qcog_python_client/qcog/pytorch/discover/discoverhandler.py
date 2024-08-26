@@ -131,7 +131,12 @@ class DiscoverHandler(Handler):
         # Check if the folder contains the model module
         content = os.listdir(self.model_path)
 
-        # Load all the folder in memory
+        # --- Load training folder in memory ---
+        # The training folder is loaded in memory as a dictionary
+        # where the key is the path of the file and the value is
+        # a QFile object. The QFile object contains the filename,
+        # the path, the content of the file and the package name
+
         self.directory: Directory = {}
         pkg_name_ = pkg_name(self.model_path)
 
@@ -156,16 +161,18 @@ class DiscoverHandler(Handler):
                     }
                 )
 
-        # Figure it out which files are relevant.
+        # --- Discover the relevant files ---
         # Relevant files have a specific id that
         # is specified in the `relevant_files_map`
-        # dictionary as the key of that dictionary.
+        # And used to index the file. Relevant files
+        # are key files that are used to run
+        # the training session and are further
+        # valifatede in the chain.
 
-        # Initialize the relevant files dictionary
-        self.relevant_files = {}
+        self.relevant_files: RelevantFiles = {}
 
         # Process the files in parallel gathering the results
-        # from the coroutines returned by the `process_file`
+        # from the coroutines returned by the `maybe_relevant_file`
         # function. Some of the files might not be relevant.
         # `lambda f: f is not None` will filter out those.
 

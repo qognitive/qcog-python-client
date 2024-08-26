@@ -20,6 +20,7 @@ dependencies = [
   "pydantic-settings",
   "anyio",
 ]
+
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -41,6 +42,9 @@ examples = [
   "scikit-learn",
   "torch",
   "pillow",
+]
+wandb = [
+  "wandb",
 ]
 
 [tool.setuptools_scm]

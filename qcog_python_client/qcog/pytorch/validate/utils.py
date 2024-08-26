@@ -3,7 +3,7 @@
 import ast
 import distutils
 import distutils.sysconfig
-import imp
+import importlib
 import io
 import os
 import sys
@@ -62,14 +62,18 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         if is_package_module(os.path.join(package_path, base_package)):
             continue
 
-        _, path, desc = imp.find_module(base_package)
+        spec = importlib.util.find_spec(base_package)
 
+        if spec is None or spec.origin is None:
+            continue
+
+        path = spec.origin
         # If the path of the module matches the path of the standard library
         # or the module is a built-in module, then it is not a third-party
 
         if (
             base_package not in sys.builtin_module_names
-            and desc[2] != imp.C_BUILTIN
+            and spec.origin != "built-in"
             and python_sys_lib not in path
         ):
             third_party_packages.add(base_package)

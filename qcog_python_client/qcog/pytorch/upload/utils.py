@@ -1,3 +1,4 @@
+"""Utility functions for uploading files to the QCoG platform."""
 import io
 import os
 import tarfile
@@ -22,9 +23,6 @@ def compress_folder(directory: Directory, folder_path: str) -> io.BytesIO:
 
             # Add the file to the tar archive
             tar.addfile(tarfinfo, fileobj=io.BytesIO(qfile.content.getvalue()))
-
-        with open("test.tar.gz", "wb") as f:
-            f.write(buffer.getvalue())
 
     buffer.seek(0)
 

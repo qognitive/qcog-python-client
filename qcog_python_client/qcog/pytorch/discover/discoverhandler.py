@@ -191,5 +191,11 @@ class DiscoverHandler(Handler):
     async def revert(self) -> None:
         """Revert the changes."""
         # Unset the attributes
-        delattr(self, "model_name")
-        delattr(self, "model_path")
+        if hasattr(self, "model_name"):
+            delattr(self, "model_name")
+        if hasattr(self, "model_path"):
+            delattr(self, "model_path")
+        if hasattr(self, "directory"):
+            delattr(self, "directory")
+        if hasattr(self, "relevant_files"):
+            delattr(self, "relevant_files")

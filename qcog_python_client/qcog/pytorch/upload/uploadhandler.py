@@ -2,7 +2,6 @@
 
 import aiohttp
 
-from qcog_python_client.log import qcoglogger as logger
 from qcog_python_client.qcog.pytorch.handler import (
     Command,
     Handler,
@@ -62,10 +61,6 @@ class UploadHandler(Handler[UploadCommand]):
             filename=f"model-{payload.model_name}.tar.gz",
             content_type="application/gzip",
         )
-
-        assert self.data is not None
-        logger.info(f"Uploading model {payload.model_name} to the server")
-        logger.info(f"Type of data: {type(self.data)}")
 
         response = await post_multipart(
             f"pytorch_model/?model_name={payload.model_name}",

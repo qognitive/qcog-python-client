@@ -48,6 +48,7 @@ async def _maybe_monitor_service_import_module(
         return None
 
     tree = ast.parse(file.content.read())
+    file.content.seek(0)
 
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
@@ -144,11 +145,13 @@ class DiscoverHandler(Handler):
                 continue
 
             async with await open_file(item_path, "rb") as file:
+                io_file = io.BytesIO(await file.read())
+                io_file.seek(0)
                 self.directory[item_path] = QFile.model_validate(
                     {
                         "path": item_path,
                         "filename": item,
-                        "content": io.BytesIO(await file.read()),
+                        "content": io_file,
                         "pkg_name": pkg_name_,
                     }
                 )
@@ -190,4 +193,3 @@ class DiscoverHandler(Handler):
         # Unset the attributes
         delattr(self, "model_name")
         delattr(self, "model_path")
-        delattr(self, "relevant_files")

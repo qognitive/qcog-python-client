@@ -1,50 +1,14 @@
 """Handler for uploading the model to the server."""
 
-import io
-import os
-import tarfile
-
 import aiohttp
 
 from qcog_python_client.log import qcoglogger as logger
 from qcog_python_client.qcog.pytorch.handler import (
-    BoundedCommand,
     Command,
     Handler,
 )
-
-
-def compress_folder(folder_path: str) -> io.BytesIO:
-    """Compress a folder."""
-    # We define the arcname as the basename of the folder
-    # In this way we avoid the full path in the tar.gz file
-    arcname = os.path.basename(folder_path)
-
-    # What to exclude (__pycache__, .git, etc)
-    def filter(tarinfo: tarfile.TarInfo) -> tarfile.TarInfo | None:
-        return (
-            None
-            if any(name in tarinfo.name for name in {".git", "__pycache__"})
-            else tarinfo
-        )
-
-    buffer = io.BytesIO()
-
-    with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
-        tar.add(folder_path, arcname=arcname, filter=filter)
-        logger.info("Compressed targzip with memebers: ", tar.getnames())
-
-    buffer.seek(0)
-
-    return buffer
-
-
-class UploadCommand(BoundedCommand):
-    """Payload to dispatch an upload command."""
-
-    upload_folder: str
-    model_name: str
-    command: Command = Command.upload
+from qcog_python_client.qcog.pytorch.types import UploadCommand
+from qcog_python_client.qcog.pytorch.upload.utils import compress_folder
 
 
 class UploadHandler(Handler[UploadCommand]):
@@ -87,18 +51,21 @@ class UploadHandler(Handler[UploadCommand]):
         """Handle the upload."""
         folder_path = payload.upload_folder
         # Compress the folder
-        tar_gzip_folder = compress_folder(folder_path)
+        tar_gzip_folder = compress_folder(payload.directory, folder_path)
         # Retrieve the multipart request tool
         post_multipart = self.get_tool("post_multipart")
 
         self.data = aiohttp.FormData()
-
         self.data.add_field(
             "model",
             tar_gzip_folder,
             filename=f"model-{payload.model_name}.tar.gz",
             content_type="application/gzip",
         )
+
+        assert self.data is not None
+        logger.info(f"Uploading model {payload.model_name} to the server")
+        logger.info(f"Type of data: {type(self.data)}")
 
         response = await post_multipart(
             f"pytorch_model/?model_name={payload.model_name}",
@@ -109,4 +76,4 @@ class UploadHandler(Handler[UploadCommand]):
 
     async def revert(self) -> None:
         """Revert the changes."""
-        delattr(self, "data")
+        pass

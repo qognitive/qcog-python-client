@@ -7,7 +7,6 @@ import imp
 import io
 import os
 import sys
-from functools import lru_cache
 
 from qcog_python_client.qcog.pytorch.types import Directory, QFile
 
@@ -17,27 +16,15 @@ def validate_directory(dir: dict) -> Directory:
     return {k: QFile(**v) for k, v in dir.items()}
 
 
-@lru_cache
-def get_stdlib_modules() -> set[str]:
-    """Get a set of all standard library modules."""
-    # stdlib_modules: set[str] = set()
-    # for importer, modname, ispkg in pkgutil.iter_modules():
-    #     if modname in sys.builtin_module_names:
-    #         stdlib_modules.add(modname)
-
-    # # Get top level modules  https://docs.python.org/2/distutils/apiref.html#distutils.sysconfig.get_python_lib
-    # distutils.sysconfig.get_python_lib(standard_lib=True)
-    # return stdlib_modules
-    return set(sys.builtin_module_names)
-
-
-def get_third_party_imports(source_code: io.BytesIO) -> set[str]:
+def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[str]:
     """Get all third-party packages imported in a Python module.
 
     Parameters
     ----------
     source_code : io.BytesIO
         The source code of the module.
+    package_path : str
+        The path of the package to which the module belongs.
 
     Returns
     -------
@@ -70,6 +57,10 @@ def get_third_party_imports(source_code: io.BytesIO) -> set[str]:
     for imp_ in imports:
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
+
+        # Check if it's a package that belongs to the current package
+        if is_package_module(os.path.join(package_path, base_package)):
+            continue
 
         _, path, desc = imp.find_module(base_package)
 

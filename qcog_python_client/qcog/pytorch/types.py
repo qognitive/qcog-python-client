@@ -30,6 +30,15 @@ class ValidateCommand(BoundedCommand):
     command: Command = Command.validate
 
 
+class UploadCommand(BoundedCommand):
+    """Payload to dispatch an upload command."""
+
+    upload_folder: str
+    model_name: str
+    command: Command = Command.upload
+    directory: Directory
+
+
 class QFile(BaseModel):
     """File object."""
 
@@ -47,4 +56,3 @@ RelevantFileId: TypeAlias = Literal["model_module", "monitor_service_import_modu
 
 Directory: TypeAlias = dict[FilePath, QFile]
 RelevantFiles: TypeAlias = dict[RelevantFileId, QFile]
-

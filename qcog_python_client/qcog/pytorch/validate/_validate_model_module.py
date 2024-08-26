@@ -49,7 +49,7 @@ def validate_model_module(
     modules_found = set()
     for item_path, item in directory.items():
         if item_path.endswith(".py"):
-            third_party_modules = get_third_party_imports(item.content)
+            third_party_modules = get_third_party_imports(item.content, dir_path)
             for module_name in third_party_modules:
                 # If the module_name name is the package, skip it
                 if module_name == file.pkg_name:

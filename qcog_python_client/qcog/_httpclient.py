@@ -11,6 +11,7 @@ import aiohttp
 import urllib3
 import urllib3.util
 
+from qcog_python_client.log import qcoglogger as logger
 from qcog_python_client.qcog._interfaces import ABCRequestClient
 
 
@@ -109,6 +110,10 @@ class RequestClient(_HTTPClient, ABCRequestClient):
         is_data = isinstance(data, aiohttp.FormData)
         is_json = isinstance(data, dict)
 
+        logger.debug(f"Requesting {uri} with {method} method")
+        logger.debug(f"is_data: {is_data}")
+        logger.debug(f"is_json: {is_json}")
+
         for _ in range(self.retries):
             try:
                 async with aiohttp.ClientSession(
@@ -128,6 +133,12 @@ class RequestClient(_HTTPClient, ABCRequestClient):
                             method.value,
                             uri,
                             json=data,
+                        )
+
+                    elif data is None and method == HttpMethod.get:
+                        resp = await session.request(
+                            method.value,
+                            uri,
                         )
 
                     else:

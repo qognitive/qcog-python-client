@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import os
 from typing import Callable
 
+from qcog_python_client.log import qcoglogger as logger
 from qcog_python_client.qcog.pytorch.handler import Command, Handler
 from qcog_python_client.qcog.pytorch.types import (
     Directory,
     QFile,
+    RelevantFileId,
     ValidateCommand,
 )
 from qcog_python_client.qcog.pytorch.upload.uploadhandler import UploadCommand
@@ -27,7 +30,7 @@ class ValidateHandler(Handler):
     directory: Directory
 
     validate_map: dict[
-        str, Callable[[ValidateHandler, QFile, Directory], Directory]
+        RelevantFileId, Callable[[ValidateHandler, QFile, Directory], Directory]
     ] = {
         "model_module": validate_model_module,
         "monitor_service_import_module": setup_monitor_import,
@@ -50,12 +53,32 @@ class ValidateHandler(Handler):
             parsed = QFile.model_validate(relevant_file)
             self.directory = validate_fn(self, parsed, self.directory)
 
-        raise NotImplementedError("Not implemented yet")
+        verify_directory(self.directory)
 
         return UploadCommand(
-            upload_folder=payload.model_path, model_name=payload.model_name
+            upload_folder=payload.model_path,
+            model_name=payload.model_name,
+            directory=self.directory,
         )
 
     async def revert(self) -> None:
         """Revert the changes."""
         pass
+
+
+def verify_directory(d: Directory):
+    """Verify the directory."""
+    for file_path, file in d.items():
+        if file_path != file.path:
+            raise ValueError(f"File path mismatch: {file_path} != {file.path}")
+
+        if file.filename != os.path.basename(file_path):
+            raise ValueError(
+                f"File path is not a basename: {file_path} - {file.filename}"
+            )
+
+        # Make sure the file content is not empty
+        if not file.content.read():
+            logger.warning(f"File content is empty: {file_path}")
+
+        file.content.seek(0)

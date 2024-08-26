@@ -66,7 +66,7 @@ class ValidateHandler(Handler):
         pass
 
 
-def verify_directory(d: Directory):
+def verify_directory(d: Directory) -> None:
     """Verify the directory."""
     for file_path, file in d.items():
         if file_path != file.path:

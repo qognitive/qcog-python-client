@@ -5,7 +5,7 @@ from ._wandb import WandbMonitor
 Service: TypeAlias = Literal["wandb"]
 
 
-def get(service: Service) -> WandbMonitor:
+def get_monitor(service: Service) -> WandbMonitor:
     """Return the monitoring service."""
     if service == "wandb":
         return WandbMonitor()

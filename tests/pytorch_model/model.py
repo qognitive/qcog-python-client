@@ -20,10 +20,10 @@ def train(
 ) -> dict:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    m_service = monitor.get("wandb")
+    m_service = monitor.get_monitor("wandb")
 
     m_service.init(
-        api_key="a0a7bcb597e5c67f9d24be0be5071fd33b04d1ed",
+        api_key="",
         parameters={
             "epochs": epochs,
         },

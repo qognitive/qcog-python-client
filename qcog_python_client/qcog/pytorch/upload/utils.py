@@ -1,4 +1,5 @@
 """Utility functions for uploading files to the QCoG platform."""
+
 import io
 import os
 import tarfile

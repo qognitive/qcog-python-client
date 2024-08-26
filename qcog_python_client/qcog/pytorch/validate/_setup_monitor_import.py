@@ -75,7 +75,9 @@ def setup_monitor_import(
     # Generate the ast from the content
     ast_tree = ast.parse(file.content.getvalue())
 
-    # Now we need to find the import statement
+    # Now we need to find the import statement `from qcog_python_client import monitor`
+    # Remove it and add a new statement `import _monitor_ as monitor`
+
     for node in ast.walk(ast_tree):
         if isinstance(node, ast.ImportFrom):
             if node.module == "qcog_python_client":
@@ -97,14 +99,22 @@ def setup_monitor_import(
                         "The only package that can be imported is monitor."
                     )
 
-                # Now we need to update the import statement
-                # to point to the new package
-                node.module = MONITOR_PACKAGE_NAME
+                # Now we need to remove the import statement
+                # and add a new one
+                ast_tree.body.remove(node)
+
+                # Add the new import statement
+                new_import = ast.Import(
+                    names=[ast.alias(name=MONITOR_PACKAGE_NAME, asname="monitor")]
+                )
+
+                ast_tree.body.insert(0, new_import)
 
                 # Now re-write the content of the file
                 # starting from the modified AST tree
                 # Parse the AST tree to a string see: https://stackoverflow.com/questions/768634/parse-a-py-file-read-the-ast-modify-it-then-write-back-the-modified-source-c
                 file.content = io.BytesIO(ast.unparse(ast_tree).encode())
+                break
 
     # Now that the file has been updated, we need to update the corresponding
     # file in the directory

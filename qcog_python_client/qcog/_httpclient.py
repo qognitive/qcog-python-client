@@ -130,6 +130,12 @@ class RequestClient(_HTTPClient, ABCRequestClient):
                             json=data,
                         )
 
+                    elif data is None and method == HttpMethod.get:
+                        resp = await session.request(
+                            method.value,
+                            uri,
+                        )
+
                     else:
                         raise ValueError(f"Invalid Content Type found: {type(data)}")
 

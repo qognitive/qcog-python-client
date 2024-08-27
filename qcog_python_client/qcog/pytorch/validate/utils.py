@@ -74,14 +74,14 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         if spec.origin == 'built-in':
             continue
 
-        print("*** Import Path ", path)
-        # If the path of the module matches the path of the standard library
+        print("*** Import Path ", spec.origin)
+        # If the spec.origin of the module matches the path of the standard library
         # or the module is a built-in module, then it is not a third-party
 
         if (
             base_package not in sys.builtin_module_names
             and spec.origin != "built-in"
-            and python_sys_lib not in path
+            and python_sys_lib not in spec.origin
         ):
             third_party_packages.add(base_package)
     return third_party_packages

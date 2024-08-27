@@ -14,7 +14,7 @@ runs:
       role-to-assume: arn:aws:iam::885886606610:role/GithubFullS3
       aws-region: "us-east-2"
   - name: install dev dependencies
-    run: pip install .[dev] .[wandb]
+    run: pip install .[dev] .[dev-integration-tests]
     shell: bash
   - name: Integration Tests
     run: |

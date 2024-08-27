@@ -77,11 +77,12 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         is_builtin = (
             spec.origin == "built-in" or
             spec.origin == "frozen" or
+            str(spec.origin).startswith(python_sys_lib) or
             base_package in
             sys.builtin_module_names
         )
-
-        if str(spec.origin).startswith(python_sys_lib) and is_builtin:
+        if is_builtin:
+            print(" - Is builtin")
             continue
 
         third_party_packages.add(base_package)

@@ -8,6 +8,11 @@ runs:
     uses: actions/setup-python@v4
     with:
       python-version: '3.12.4'
+  - name: Configure AWS credentials
+    uses: aws-actions/configure-aws-credentials@v3
+    with:
+      role-to-assume: arn:aws:iam::885886606610:role/GithubFullS3
+      aws-region: "us-east-2"
   - name: install dev dependencies
     run: pip install .[dev] .[wandb]
     shell: bash

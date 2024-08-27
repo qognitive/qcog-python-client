@@ -53,6 +53,7 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
     # Get the path of the standard library.
     # All the modules that are OS dependent are on this path
     python_sys_lib = distutils.sysconfig.get_python_lib(standard_lib=True)
+    print("** python_sys_lib", python_sys_lib)
 
     for imp_ in imports:
         # Split the package name to handle submodules
@@ -68,6 +69,7 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
             continue
 
         path = spec.origin
+        print("*** Import Path ", path)
         # If the path of the module matches the path of the standard library
         # or the module is a built-in module, then it is not a third-party
 

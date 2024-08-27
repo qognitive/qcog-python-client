@@ -56,33 +56,14 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         standard_lib=True, plat_specific=True
     )
 
-    python_sys_lib_0 = distutils.sysconfig.get_python_lib(
-        standard_lib=True, plat_specific=False
-    )
-
-    python_sys_lib_1 = distutils.sysconfig.get_python_lib(
-        standard_lib=False, plat_specific=True
-    )
-
-    python_sys_lib_2 = distutils.sysconfig.get_python_lib(
-        standard_lib=False, plat_specific=False
-    )
-
-    print("---------------------------------------------------")
-    print("SYS LIB <standard_lib=True, plat_specific=True>:", python_sys_lib)
-    print("---------------------------------------------------")
-
     for imp_ in imports:
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
-        print(" #### PACKAGE: ", base_package)
         # Check if it's a package that belongs to the current package
         if is_package_module(os.path.join(package_path, base_package)):
             continue
 
         spec = importlib.util.find_spec(base_package)
-
-        print(" #### SPEC: ", spec)
 
         if spec is None or spec.origin is None:
             continue
@@ -94,6 +75,7 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         if (
             base_package not in sys.builtin_module_names
             and spec.origin != "built-in"
+            and spec.origin != "frozen"
             and os.path.commonpath([path, python_sys_lib]) != python_sys_lib
         ):
             third_party_packages.add(base_package)

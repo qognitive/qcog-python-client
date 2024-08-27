@@ -59,8 +59,12 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
     for imp_ in imports:
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
+        print("\n------> Base Package: ", base_package)
         # Check if it's a package that belongs to the current package
         if is_package_module(os.path.join(package_path, base_package)):
+            continue
+
+        if base_package in sys.builtin_module_names:
             continue
 
         spec = importlib.util.find_spec(base_package)
@@ -68,17 +72,24 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         if spec is None or spec.origin is None:
             continue
 
-        path = spec.origin
-        # If the path of the module matches the path of the standard library
-        # or the module is a built-in module, then it is not a third-party
+        if spec.origin == "frozen" or spec.origin == "built-in":
+            continue
 
-        if (
-            base_package not in sys.builtin_module_names
-            and spec.origin != "built-in"
-            and spec.origin != "frozen"
-            and os.path.commonpath([path, python_sys_lib]) != python_sys_lib
-        ):
-            third_party_packages.add(base_package)
+        # At this point we might have 2 cases:
+        # os specific modules or third-party modules
+        # os specific modules are in `python_sys_lib`
+        # third-party modules are usually in
+        # `<python_sys_lib>/site-packages` or `<python_sys_lib>/dist-packages`
+
+        common_path = os.path.commonpath([spec.origin, python_sys_lib])
+        print("\n------> Module Path: ", spec.origin)
+        print("------> Python Sys Lib: ", python_sys_lib)
+        print("------> Common path: ", common_path)
+
+        if common_path == python_sys_lib:
+            continue
+
+        third_party_packages.add(base_package)
     return third_party_packages
 
 
@@ -88,3 +99,7 @@ def is_package_module(module_path: str) -> bool:
 
     module_path = module_path if module_path.endswith(".py") else module_path + ".py"
     return os.path.isfile(module_path)
+
+
+def is_file_in_folder(file_path: str, folder_path: str) -> bool:
+    """Check if a file is in a folder."""

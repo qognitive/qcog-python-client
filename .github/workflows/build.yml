@@ -20,8 +20,13 @@ jobs:
     - name: Build schema
       uses: ./.github/actions/build-schema
 
-    - name: Setup python, Lint Code and test
+    - name: Setup python, Lint Code and unit tests
       uses: ./.github/actions/setup_lint_and_test
+
+    - name: Integration Tests
+      run: |
+        make test-integration
+      shell: bash
 
     - name: Build and install our repo
       uses: ./.github/actions/python-build

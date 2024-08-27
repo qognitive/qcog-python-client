@@ -1,3 +1,4 @@
+
 .PHONY: build
 build:  schema-build
 	python -m pip cache purge
@@ -27,4 +28,12 @@ schema-build:
 	python schema.py
 
 test-unit:
-	pytest -v tests/unit tests/unit
+	export PYTHONPATH=.
+	pytest -v --cov=qcog_python_client tests/unit
+
+test-integration:
+	export PYTHONPATH=. && \
+	export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} && \
+	export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} && \
+	export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} && \
+	pytest -v --cov=qcog_python_client tests/integration

@@ -190,7 +190,7 @@ class PyTorchAgent:
         Returns
         -------
         dict
-            The trained model
+            a dictionary containing the trained model and the training parameters
 
         """
         # Upload training command
@@ -211,7 +211,11 @@ class PyTorchAgent:
         )
 
         handler = cast(TrainHandler, train_handler)
-        return handler.trained_model
+
+        return {
+            "trained_model": handler.trained_model,
+            "training_parameters": save_parameters_handler.parameters_response,
+        }
 
     async def inference(self, data: Any, model_name: str) -> Any:
         """Run inference."""

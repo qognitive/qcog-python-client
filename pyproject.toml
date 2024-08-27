@@ -36,7 +36,8 @@ dev = [
   "sphinx_rtd_theme",
   "pydantic-settings",
   "datamodel-code-generator",
-  "pytest-asyncio"
+  "pytest-asyncio",
+  "pytest-cov"
 ]
 examples = [
   "scikit-learn",
@@ -130,3 +131,4 @@ exclude = [
 
 [tool.pytest.ini_options]
 log_cli=true
+

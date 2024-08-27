@@ -1,5 +1,5 @@
-name: "lint"
-description: "setup python 3.10 and execute flake8 linting"
+name: "Integration tests"
+description: "Performs a tests against mocked services"
 
 runs:
   using: "composite"
@@ -11,13 +11,7 @@ runs:
   - name: install dev dependencies
     run: pip install .[dev] .[wandb]
     shell: bash
-  - name: run linting
-    run: make lint-check
-    shell: bash
-  - name: Check docs building
-    run: make docs-build
-    shell: bash
-  - name: Test with pytest
+  - name: Integration Tests
     run: |
-      make test-unit
+      make test-integration
     shell: bash

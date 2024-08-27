@@ -52,7 +52,7 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
 
     # Get the path of the standard library.
     # All the modules that are OS dependent are on this path
-    python_sys_lib = distutils.sysconfig.get_python_lib(standard_lib=True)
+    python_sys_lib = distutils.sysconfig.get_python_lib(plat_specific=True, standard_lib=True)
     print("** python_sys_lib", python_sys_lib)
 
     for imp_ in imports:
@@ -75,6 +75,8 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         # Some packages are not installed in the standard library
         # and have special paths.
         spec = importlib.util.find_spec(base_package)
+
+        print("----> SPEC", spec)
 
         if spec is None or spec.origin is None:
             print(" - Spec is None")

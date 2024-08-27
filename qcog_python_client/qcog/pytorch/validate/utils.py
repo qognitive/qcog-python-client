@@ -79,7 +79,10 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         # os specific modules or third-party modules
         # os specific modules are in `python_sys_lib`
         # third-party modules are usually in
-        # `<python_sys_lib>/site-packages` or `<python_sys_lib>/dist-packages`
+        # `<python_sys_lib>/site-packages` or `<python_sys_lib>/dist-packages`.
+        # But depending on how python interpreter calls the script
+        # os specific modules could be located in a system
+        # specific path like `/usr/lib/python3.XX/`
 
         common_path = os.path.commonpath([spec.origin, python_sys_lib])
         print("\n------> Module Path: ", spec.origin)
@@ -99,7 +102,3 @@ def is_package_module(module_path: str) -> bool:
 
     module_path = module_path if module_path.endswith(".py") else module_path + ".py"
     return os.path.isfile(module_path)
-
-
-def is_file_in_folder(file_path: str, folder_path: str) -> bool:
-    """Check if a file is in a folder."""

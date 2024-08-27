@@ -70,9 +70,6 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
 
     print("---------------------------------------------------")
     print("SYS LIB <standard_lib=True, plat_specific=True>:", python_sys_lib)
-    print("SYS LIB <standard_lib=True, plat_specific=False>:", python_sys_lib_0)
-    print("SYS LIB <standard_lib=False, plat_specific=True>:", python_sys_lib_1)
-    print("SYS LIB <standard_lib=False, plat_specific=False>:", python_sys_lib_2)
     print("---------------------------------------------------")
 
     for imp_ in imports:
@@ -97,7 +94,7 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         if (
             base_package not in sys.builtin_module_names
             and spec.origin != "built-in"
-            and python_sys_lib not in path
+            and os.path.commonpath([path, python_sys_lib]) != python_sys_lib
         ):
             third_party_packages.add(base_package)
     return third_party_packages

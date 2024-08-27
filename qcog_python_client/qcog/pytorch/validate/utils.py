@@ -52,17 +52,40 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
 
     # Get the path of the standard library.
     # All the modules that are OS dependent are on this path
-    python_sys_lib = distutils.sysconfig.get_python_lib(standard_lib=True)
+    python_sys_lib = distutils.sysconfig.get_python_lib(
+        standard_lib=True, plat_specific=True
+    )
+
+    python_sys_lib_0 = distutils.sysconfig.get_python_lib(
+        standard_lib=True, plat_specific=False
+    )
+
+    python_sys_lib_1 = distutils.sysconfig.get_python_lib(
+        standard_lib=False, plat_specific=True
+    )
+
+    python_sys_lib_2 = distutils.sysconfig.get_python_lib(
+        standard_lib=False, plat_specific=False
+    )
+
+    print("---------------------------------------------------")
+    print("SYS LIB <standard_lib=True, plat_specific=True>:", python_sys_lib)
+    print("SYS LIB <standard_lib=True, plat_specific=False>:", python_sys_lib_0)
+    print("SYS LIB <standard_lib=False, plat_specific=True>:", python_sys_lib_1)
+    print("SYS LIB <standard_lib=False, plat_specific=False>:", python_sys_lib_2)
+    print("---------------------------------------------------")
 
     for imp_ in imports:
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
-
+        print(" #### PACKAGE: ", base_package)
         # Check if it's a package that belongs to the current package
         if is_package_module(os.path.join(package_path, base_package)):
             continue
 
         spec = importlib.util.find_spec(base_package)
+
+        print(" #### SPEC: ", spec)
 
         if spec is None or spec.origin is None:
             continue

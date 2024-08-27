@@ -62,10 +62,12 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         # Check if it's a package that belongs to the current package
         # So it's part of the customer project
         if is_package_module(os.path.join(package_path, base_package)):
+            print(" - Is package module")
             continue
 
         # Check if it's a built-in module
         if base_package in sys.builtin_module_names:
+            print(" - Is built-in module")
             continue
 
         # Some packages are not installed in the standard library
@@ -73,16 +75,21 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         spec = importlib.util.find_spec(base_package)
 
         if spec is None or spec.origin is None:
+            print(" - Spec is None")
             continue
 
         # Built in or frozen packages
         if spec.origin == 'built-in' or spec.origin == 'frozen':
+            print(" - Spec origin is ", spec.origin)
             continue
 
         # OS Specific packages
         if python_sys_lib in spec.origin:
+            print(" - Spec origin is ", spec.origin)
+            print(" - Python sys lib is ", python_sys_lib)
             continue
 
+        print(" - Third party!")
         # All the other should be third-party packages
         third_party_packages.add(base_package)
     return third_party_packages

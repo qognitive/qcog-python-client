@@ -11,7 +11,6 @@ permissions:
 jobs:
   bump-version-and-upload:
     runs-on: ubuntu-latest
-
     steps:
     - name: checkout code
       uses: actions/checkout@v4
@@ -19,14 +18,11 @@ jobs:
         fetch-depth: 0
     - name: Build schema
       uses: ./.github/actions/build-schema
-
     - name: Setup python, Lint Code and unit tests
       uses: ./.github/actions/setup_lint_and_test
-
     - name: Integration Tests
       run: |
         make test-integration
       shell: bash
-
     - name: Build and install our repo
       uses: ./.github/actions/python-build

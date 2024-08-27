@@ -37,7 +37,8 @@ dev = [
   "pydantic-settings",
   "datamodel-code-generator",
   "pytest-asyncio",
-  "pytest-cov"
+  "pytest-cov",
+  "testcontainers",
 ]
 examples = [
   "scikit-learn",

@@ -59,6 +59,8 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
 
+        print(" - Base package is ", base_package)
+
         # Check if it's a package that belongs to the current package
         # So it's part of the customer project
         if is_package_module(os.path.join(package_path, base_package)):
@@ -84,7 +86,7 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
             continue
 
         # OS Specific packages
-        if python_sys_lib in spec.origin:
+        if str(spec.origin).startswith(python_sys_lib):
             print(" - Spec origin is ", spec.origin)
             print(" - Python sys lib is ", python_sys_lib)
             continue

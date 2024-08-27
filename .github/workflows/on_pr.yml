@@ -6,16 +6,34 @@ on:
             - main
 
 jobs:
-    setup-and-test:
+    setup:
         runs-on: ubuntu-latest
         steps:
         - name: checkout code
           uses: actions/checkout@v4
           with:
             fetch-depth: 0
+        - name: Python Setup
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.12.4'
+    build-schema:
+        needs: setup
+        runs-on: ubuntu-latest
+        steps:
         - name: Build schema
           uses: ./.github/actions/build-schema
-        - name: Setup python, Lint Code and unit tests
+    lint:
+        needs: setup
+        runs-on: ubuntu-latest
+        steps:
+        - name: Setup python, Lint Code and test
           uses: ./.github/actions/setup_lint_and_test
+    integration-tests:
+        needs: setup
+        runs-on: ubuntu-latest
+        steps:
         - name: Integration Tests
-          uses: ./.github/actions/integration_tests
+          run: |
+            make test-integration
+          shell: bash

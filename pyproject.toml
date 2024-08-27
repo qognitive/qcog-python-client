@@ -39,6 +39,7 @@ dev = [
   "pytest-asyncio",
   "pytest-cov",
   "testcontainers",
+  "torch",
 ]
 examples = [
   "scikit-learn",

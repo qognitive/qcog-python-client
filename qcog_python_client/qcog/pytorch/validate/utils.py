@@ -52,40 +52,31 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
 
     # Get the path of the standard library.
     # All the modules that are OS dependent are on this path
-    python_sys_lib = distutils.sysconfig.get_python_lib(
-        plat_specific=True, standard_lib=True
-    )
-    print("** python_sys_lib", python_sys_lib)
+    python_sys_lib = distutils.sysconfig.get_python_lib(standard_lib=True)
 
     for imp_ in imports:
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
 
-        print(" - Base package is ", base_package)
-
         # Check if it's a package that belongs to the current package
-        # So it's part of the customer project
         if is_package_module(os.path.join(package_path, base_package)):
-            print(" - Is package module")
             continue
 
         spec = importlib.util.find_spec(base_package)
-        print(" - Spec is ", spec)
-        if spec is None:
+
+        if spec is None or spec.origin is None:
             continue
 
-        is_builtin = (
-            spec.origin == "built-in" or
-            spec.origin == "frozen" or
-            str(spec.origin).startswith(python_sys_lib) or
-            base_package in
-            sys.builtin_module_names
-        )
-        if is_builtin:
-            print(" - Is builtin")
-            continue
+        path = spec.origin
+        # If the path of the module matches the path of the standard library
+        # or the module is a built-in module, then it is not a third-party
 
-        third_party_packages.add(base_package)
+        if (
+            base_package not in sys.builtin_module_names
+            and spec.origin != "built-in"
+            and python_sys_lib not in path
+        ):
+            third_party_packages.add(base_package)
     return third_party_packages
 
 

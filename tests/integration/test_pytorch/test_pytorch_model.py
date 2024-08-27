@@ -95,4 +95,3 @@ async def test_exclusivity_of_methods(get_client):
                 "batch_size": 1,
             }
         )
-

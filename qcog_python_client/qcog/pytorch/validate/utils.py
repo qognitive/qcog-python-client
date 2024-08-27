@@ -59,6 +59,8 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
 
+        print("-----> Package ---> ", base_package)
+
         # Check if it's a package that belongs to the current package
         if is_package_module(os.path.join(package_path, base_package)):
             continue
@@ -68,7 +70,10 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         if spec is None or spec.origin is None:
             continue
 
-        path = spec.origin
+        # Built in package
+        if spec.origin == 'built-in':
+            continue
+
         print("*** Import Path ", path)
         # If the path of the module matches the path of the standard library
         # or the module is a built-in module, then it is not a third-party

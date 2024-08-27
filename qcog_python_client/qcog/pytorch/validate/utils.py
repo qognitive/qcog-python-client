@@ -59,19 +59,23 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
     for imp_ in imports:
         # Split the package name to handle submodules
         base_package = imp_.split(".")[0]
-        print("\n------> Base Package: ", base_package)
+
         # Check if it's a package that belongs to the current package
         if is_package_module(os.path.join(package_path, base_package)):
             continue
 
+        # Check if it's a built-in module
         if base_package in sys.builtin_module_names:
             continue
 
+        # Try to discern between a third-party package
+        # and a system package based on the spec.origin
         spec = importlib.util.find_spec(base_package)
 
         if spec is None or spec.origin is None:
             continue
 
+        # If the module is frozen or built-in it's a system module
         if spec.origin == "frozen" or spec.origin == "built-in":
             continue
 
@@ -83,18 +87,20 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
         # But depending on how python interpreter calls the script
         # os specific modules could be located in a system
         # specific path like `/usr/lib/python3.XX/`
-
-        common_path = os.path.commonpath([spec.origin, python_sys_lib])
-        print("\n------> Module Path: ", spec.origin)
-        print("------> Python Sys Lib: ", python_sys_lib)
-        print("------> Common path: ", common_path)
+        # ----------------------------------------------
+        # infolder infers the package name from the module path
+        # and checks is <python_sys_lib> + <package_name> is a substring
+        # of the module path. If it is then the module is in the folder
+        # and it's a third-party package.
+        # If it's not it means that there is another folder between the package
+        # and the system folder (`site-packages`?) and the module
+        # is a third-party package.
 
         if infolder(spec.origin, python_sys_lib):
             # Check if the module is directly inside the folder
             # or if it's a subpackage
             continue
 
-        print(f"------> Third Party Package: {base_package}")
         third_party_packages.add(base_package)
     return third_party_packages
 
@@ -124,7 +130,6 @@ def infolder(module_path: str, folder_path: str) -> bool:
     else:
         package_name = os.path.basename(module_path)
 
-    print("Package Name: ", package_name)
     # The module is in the folder if the `package_name` is right after
     # the `folder_path` in the `module_path`
     # so something like `<folder_path>/<package_name>` should be
@@ -132,4 +137,3 @@ def infolder(module_path: str, folder_path: str) -> bool:
     module_subpath_candidate = os.path.join(folder_path, package_name)
 
     return module_path.startswith(module_subpath_candidate)
-

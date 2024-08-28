@@ -13,9 +13,6 @@ def exclude(file_path: str) -> bool:
     rules = {
         "pycache": r".*__pycache__.*",
         "git": r".*\.git.*",
-        "venv_1": r".*\.venv.*",
-        "venv_2": r".*venv.*",
-        "venv_3": r".*\.env.*",
     }
 
     for pattern in rules.values():

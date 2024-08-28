@@ -3,6 +3,7 @@ import importlib
 import inspect
 import os
 import sys
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -31,7 +32,7 @@ class TrainFnAnnotation(BaseModel):
     """Train function annotation."""
 
     arg_name: str
-    arg_type: type
+    arg_type: Any
 
 
 def validate_model_module(

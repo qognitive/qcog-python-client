@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Literal, overload
+from typing import overload
 
 import aiohttp
 import pandas as pd
@@ -28,8 +28,6 @@ class ABCRequestClient(ABC):
         self,
         url: str,
         data: dict | aiohttp.FormData,
-        *,
-        content_type: Literal["json", "data"] = "json",
     ) -> dict:
         """Execute a post request."""
         ...

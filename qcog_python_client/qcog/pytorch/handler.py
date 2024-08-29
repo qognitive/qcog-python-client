@@ -19,6 +19,8 @@ from typing import Any, Callable, Coroutine, Generic, TypeAlias, TypeVar
 
 from pydantic import BaseModel
 
+from qcog_python_client.log import qcoglogger as logger
+
 
 class BoundedCommand(BaseModel):
     """Command type."""
@@ -129,7 +131,7 @@ class Handler(ABC, Generic[CommandPayloadType]):
                     # 1 - revert the state of the handler
                     # 2 - wait for the specified time
                     # 3 - try again
-                    print(f"Attempt {i}, error: {e}")
+                    logger.info(f"Attempt {i}/{self.attempts}, error: {e}")
                     exception = e
                     await self.revert()
                     await asyncio.sleep(self.retry_after)

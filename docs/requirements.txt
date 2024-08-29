@@ -8,3 +8,5 @@ typing_extensions
 pydantic
 pydantic_settings
 datamodel-code-generator
+anyio
+wandb

@@ -9,7 +9,7 @@ runs:
     with:
       python-version: '3.12.4'
   - name: install dev dependencies
-    run: pip install ".[dev]"
+    run: pip install .[dev,wandb]
     shell: bash
   - name: run linting
     run: make lint-check

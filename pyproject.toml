@@ -20,6 +20,7 @@ dependencies = [
   "pydantic-settings",
   "anyio",
 ]
+
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -41,6 +42,9 @@ examples = [
   "scikit-learn",
   "torch",
   "pillow",
+]
+wandb = [
+  "wandb>=0.17.7",
 ]
 
 [tool.setuptools_scm]
@@ -123,3 +127,6 @@ exclude = [
 "**/__init__.py" = ["F401", "D104"]
 # Remove D rules from tests
 "**/tests/**" = ["D"]
+
+[tool.pytest.ini_options]
+log_cli=true

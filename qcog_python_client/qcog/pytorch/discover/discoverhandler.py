@@ -1,24 +1,88 @@
-"""Discover the module and the model."""
+"""Discover the module and the model.
 
+Finds the folder, convert the folder into a dictionary
+Create a `relevant_files` dictionary that contains the
+relevant files for the model. that will be validated later.
+"""
+
+from __future__ import annotations
+
+import ast
+import asyncio
+import io
 import os
+from typing import (
+    Iterable,
+)
 
 from anyio import open_file
 
-from qcog_python_client.qcog.pytorch.handler import BoundedCommand, Command, Handler
-from qcog_python_client.qcog.pytorch.validate.validatehandler import ValidateCommand
+from qcog_python_client.qcog.pytorch import utils
+from qcog_python_client.qcog.pytorch.discover.types import IsRelevantFile
+from qcog_python_client.qcog.pytorch.discover.utils import pkg_name
+from qcog_python_client.qcog.pytorch.handler import Command, Handler
+from qcog_python_client.qcog.pytorch.types import (
+    Directory,
+    DiscoverCommand,
+    QFile,
+    RelevantFileId,
+    RelevantFiles,
+    ValidateCommand,
+)
 
 
-class DiscoverCommand(BoundedCommand):
-    """Payload to dispatch a discover command."""
-
-    model_name: str
-    model_path: str
-    command: Command = Command.discover
+async def _is_model_module(self: DiscoverHandler, file: QFile) -> bool:
+    """Check if the file is the model module."""
+    module_name = os.path.basename(file.path)
+    return module_name == self.model_module_name
 
 
-def pkg_name(package_path: str) -> str:
-    """From the package path, get the package name."""
-    return os.path.basename(package_path)
+async def _is_service_import_module(self: DiscoverHandler, file: QFile) -> bool:
+    """Check if the file is importing the monitor service."""
+    # Make sure the item is not a folder. If so, exit
+    if os.path.isdir(file.path):
+        return False
+
+    tree = ast.parse(file.content.read())
+    file.content.seek(0)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            # We assume that the only way that the monitor service
+            # will be imported is like
+            # from qcog_python_client import monitor or eventually
+            # from qcog_python_client import monitor as <alias>.
+            if node.module == "qcog_python_client":
+                # We only support a single monitor import from qcog_python_client
+                # for now.
+                if len(node.names) > 1:
+                    raise ValueError(
+                        "You cannot import anything from qcog_python_client other than monitor."  # noqa: E501
+                    )
+
+                return node.names[0].name == "monitor"
+
+    return False
+
+
+relevant_files_map: dict[RelevantFileId, IsRelevantFile] = {
+    "model_module": _is_model_module,  # type: ignore
+    "monitor_service_import_module": _is_service_import_module,  # type: ignore
+}
+
+
+async def maybe_relevant_file(
+    self: DiscoverHandler,
+    file: QFile,
+) -> dict[RelevantFileId, QFile]:
+    """Check if the file is relevant."""
+    retval: dict[RelevantFileId, QFile] = {}
+
+    for relevant_file_id, _maybe_relevant_file_fn in relevant_files_map.items():
+        if await _maybe_relevant_file_fn(self, file):
+            retval.update({relevant_file_id: file})
+
+    return retval
 
 
 class DiscoverHandler(Handler):
@@ -33,9 +97,10 @@ class DiscoverHandler(Handler):
     """
 
     model_module_name = "model.py"  # The name of the model module
+    monitor_service_import = "from qcog_python_client import monitor"
     retries = 0
     commands = (Command.discover,)
-    relevant_files: dict
+    relevant_files: RelevantFiles
 
     async def handle(self, payload: DiscoverCommand) -> ValidateCommand:
         """Handle the discovery of a custom model.
@@ -61,29 +126,65 @@ class DiscoverHandler(Handler):
         # Check if the folder contains the model module
         content = os.listdir(self.model_path)
 
-        # Initialize the relevant files dictionary
-        self.relevant_files = {}
+        # --- Load training folder in memory ---
+        # The training folder is loaded in memory as a dictionary
+        # where the key is the path of the file and the value is
+        # a QFile object. The QFile object contains the filename,
+        # the path, the content of the file and the package name
+
+        self.directory: Directory = {}
+        pkg_name_ = pkg_name(self.model_path)
 
         for item in content:
-            if item == self.model_module_name:
-                item_path = os.path.join(self.model_path, item)
+            item_path = os.path.join(self.model_path, item)
+            # filter by exclusion rules
+            if utils.exclude(item_path):
+                continue
+            # Avoid folders
+            if os.path.isdir(item_path):
+                continue
 
-                async with await open_file(item_path, "rb") as file:
-                    encoded_content = await file.read()
-                    self.relevant_files.update(
-                        {
-                            "model_module": {
-                                "path": item_path,
-                                "content": encoded_content,
-                                "pkg_name": pkg_name(self.model_path),
-                            }
-                        }
-                    )
+            async with await open_file(item_path, "rb") as file:
+                io_file = io.BytesIO(await file.read())
+                self.directory[item_path] = QFile.model_validate(
+                    {
+                        "path": item_path,
+                        "filename": item,
+                        "content": io_file,
+                        "pkg_name": pkg_name_,
+                    }
+                )
 
-        # Once the discovery has been completed,
-        # Issue a validate command that will be executed next
+        # --- Discover the relevant files ---
+        # Relevant files have a specific id that
+        # is specified in the `relevant_files_map`
+        # And used to index the file. Relevant files
+        # are key files that are used to run
+        # the training session and are further
+        # validate in the chain.
+
+        self.relevant_files: RelevantFiles = {}
+
+        # Process the files in parallel gathering the results
+        # from the coroutines returned by the `maybe_relevant_file`
+        # function. Some of the files might not be relevant.
+        # `lambda f: f is not None` will filter out those.
+
+        processed: Iterable[dict[RelevantFileId, QFile]] = filter(
+            lambda f: f is not None,  # Filter out the files that are not relevant
+            await asyncio.gather(
+                *map(lambda f: maybe_relevant_file(self, f), self.directory.values())
+            ),  # Process the files in parallel
+        )
+
+        # Index the relevant files on the relevantFileId
+        self.relevant_files = {
+            fid: rel for file in processed for fid, rel in file.items()
+        }
+
         return ValidateCommand(
             relevant_files=self.relevant_files,
+            directory=self.directory,
             model_name=self.model_name,
             model_path=self.model_path,
         )
@@ -91,6 +192,11 @@ class DiscoverHandler(Handler):
     async def revert(self) -> None:
         """Revert the changes."""
         # Unset the attributes
-        delattr(self, "model_name")
-        delattr(self, "model_path")
-        delattr(self, "relevant_files")
+        if hasattr(self, "model_name"):
+            delattr(self, "model_name")
+        if hasattr(self, "model_path"):
+            delattr(self, "model_path")
+        if hasattr(self, "directory"):
+            delattr(self, "directory")
+        if hasattr(self, "relevant_files"):
+            delattr(self, "relevant_files")

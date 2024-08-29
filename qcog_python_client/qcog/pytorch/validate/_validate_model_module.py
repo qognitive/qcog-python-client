@@ -1,33 +1,22 @@
+import copy
 import importlib
 import inspect
 import os
 import sys
-from dataclasses import dataclass
+from typing import Any
 
 from pydantic import BaseModel
 
-from qcog_python_client.qcog.pytorch.validate.validate_utils import (
+from qcog_python_client.qcog.pytorch.handler import Handler
+from qcog_python_client.qcog.pytorch.types import (
+    Directory,
+    QFile,
+    ValidateCommand,
+)
+from qcog_python_client.qcog.pytorch.validate.utils import (
     get_third_party_imports,
     is_package_module,
 )
-
-
-class FileToValidate(BaseModel):
-    path: str
-    content: str
-    pkg_name: str
-
-
-@dataclass
-class TrainFnAnnotation:
-    arg_name: str
-    arg_type: type
-
-
-@dataclass
-class ValidateModelModule:
-    train_fn: dict[str, TrainFnAnnotation]
-
 
 # whitelist of allowed modules
 default_allowed_modules = {
@@ -39,34 +28,36 @@ default_allowed_modules = {
 }
 
 
+class TrainFnAnnotation(BaseModel):
+    """Train function annotation."""
+
+    arg_name: str
+    arg_type: Any
+
+
 def validate_model_module(
-    file: FileToValidate,
+    self: Handler[ValidateCommand],
+    file: QFile,
+    directory: Directory,
     allowed_modules: set[str] | None = None,
-) -> ValidateModelModule:
+) -> Directory:
     """Validate the model module."""
+    directory = copy.deepcopy(directory)
     allowed_modules = allowed_modules or default_allowed_modules
     dir_path = os.path.dirname(file.path)
-    content = os.listdir(dir_path)
 
     # Very naive way to inspect all the package.
     # Assumes one level deep and doesn't recurse.
     modules_found = set()
-
-    for item in content:
-        # Inspect each python file and try to find third-party modules
-        if item.endswith(".py"):
-            third_party_modules = get_third_party_imports(os.path.join(dir_path, item))
+    for item_path, item in directory.items():
+        if item_path.endswith(".py"):
+            third_party_modules = get_third_party_imports(item.content, dir_path)
             for module_name in third_party_modules:
                 # If the module_name name is the package, skip it
                 if module_name == file.pkg_name:
                     continue
-
-                # For each module check if it's part of the current package
-                # If not, raise an error
-                module_path = os.path.join(dir_path, module_name)
-
                 # If the module is contained is not in the package
-                if not is_package_module(module_path):
+                if not is_package_module(item_path):
                     modules_found.add(module_name)
 
     # Check if the modules found are allowed
@@ -111,4 +102,7 @@ def validate_model_module(
             arg_name=ann, arg_type=train_fn.__annotations__[ann]
         )
 
-    return ValidateModelModule(train_fn=train_fn_annotations)
+    # Set the train function annotations on the handler
+    self.train_fn_annotations = train_fn_annotations  # type: ignore
+    # Directory has been validated
+    return directory

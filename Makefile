@@ -40,3 +40,5 @@ test-integration:
 	export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} && \
 	aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com && \
 	pytest -v --cov=qcog_python_client tests/integration
+	pytest -v tests/unit
+

@@ -8,12 +8,12 @@ import io
 import os
 import sys
 
-from qcog_python_client.qcog.pytorch.types import Directory, QFile
+# def validate_directory(dir: dict) -> Directory:
+#     """Validate the directory.
 
-
-def validate_directory(dir: dict) -> Directory:
-    """Validate the directory."""
-    return {k: QFile(**v) for k, v in dir.items()}
+#     It takes the raw dictionary and validate
+#     """
+#     return {k: QFile(**v) for k, v in dir.items()}
 
 
 def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[str]:
@@ -107,8 +107,6 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
 
 def is_package_module(module_path: str) -> bool:
     """Check if a Python module exists in the specified path."""
-    # Check if the file exists
-
     module_path = module_path if module_path.endswith(".py") else module_path + ".py"
     return os.path.isfile(module_path)
 

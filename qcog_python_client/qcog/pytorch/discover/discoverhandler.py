@@ -18,7 +18,7 @@ from typing import (
 from anyio import open_file
 
 from qcog_python_client.qcog.pytorch import utils
-from qcog_python_client.qcog.pytorch.discover.types import MaybeIsRelevantFile
+from qcog_python_client.qcog.pytorch.discover.types import IsRelevantFile
 from qcog_python_client.qcog.pytorch.discover.utils import pkg_name
 from qcog_python_client.qcog.pytorch.handler import Command, Handler
 from qcog_python_client.qcog.pytorch.types import (
@@ -31,21 +31,17 @@ from qcog_python_client.qcog.pytorch.types import (
 )
 
 
-async def _maybe_model_module(self: DiscoverHandler, file: QFile) -> QFile | None:
+async def _is_model_module(self: DiscoverHandler, file: QFile) -> bool:
     """Check if the file is the model module."""
     module_name = os.path.basename(file.path)
-    if module_name == self.model_module_name:
-        return file
-    return None
+    return module_name == self.model_module_name
 
 
-async def _maybe_monitor_service_import_module(
-    self: DiscoverHandler, file: QFile
-) -> QFile | None:
+async def _is_service_import_module(self: DiscoverHandler, file: QFile) -> bool:
     """Check if the file is importing the monitor service."""
     # Make sure the item is not a folder. If so, exit
     if os.path.isdir(file.path):
-        return None
+        return False
 
     tree = ast.parse(file.content.read())
     file.content.seek(0)
@@ -64,14 +60,14 @@ async def _maybe_monitor_service_import_module(
                         "You cannot import anything from qcog_python_client other than monitor."  # noqa: E501
                     )
 
-                if node.names[0].name == "monitor":
-                    return file
-    return None
+                return node.names[0].name == "monitor"
+
+    return False
 
 
-relevant_files_map: dict[RelevantFileId, MaybeIsRelevantFile] = {
-    "model_module": _maybe_model_module,  # type: ignore
-    "monitor_service_import_module": _maybe_monitor_service_import_module,  # type: ignore
+relevant_files_map: dict[RelevantFileId, IsRelevantFile] = {
+    "model_module": _is_model_module,  # type: ignore
+    "monitor_service_import_module": _is_service_import_module,  # type: ignore
 }
 
 
@@ -83,9 +79,8 @@ async def maybe_relevant_file(
     retval: dict[RelevantFileId, QFile] = {}
 
     for relevant_file_id, _maybe_relevant_file_fn in relevant_files_map.items():
-        relevant_file = await _maybe_relevant_file_fn(self, file)
-        if relevant_file:
-            retval.update({relevant_file_id: relevant_file})
+        if await _maybe_relevant_file_fn(self, file):
+            retval.update({relevant_file_id: file})
 
     return retval
 
@@ -151,7 +146,6 @@ class DiscoverHandler(Handler):
 
             async with await open_file(item_path, "rb") as file:
                 io_file = io.BytesIO(await file.read())
-                io_file.seek(0)
                 self.directory[item_path] = QFile.model_validate(
                     {
                         "path": item_path,
@@ -167,7 +161,7 @@ class DiscoverHandler(Handler):
         # And used to index the file. Relevant files
         # are key files that are used to run
         # the training session and are further
-        # valifatede in the chain.
+        # validate in the chain.
 
         self.relevant_files: RelevantFiles = {}
 

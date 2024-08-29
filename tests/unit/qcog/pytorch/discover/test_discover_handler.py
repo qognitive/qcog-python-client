@@ -6,8 +6,8 @@ import pytest
 
 from qcog_python_client.qcog.pytorch.discover import DiscoverCommand, DiscoverHandler
 from qcog_python_client.qcog.pytorch.discover.discoverhandler import (
-    _maybe_model_module,
-    _maybe_monitor_service_import_module,
+    _is_model_module,
+    _is_service_import_module
 )
 from qcog_python_client.qcog.pytorch.types import QFile
 from qcog_python_client.qcog.pytorch.validate.validatehandler import ValidateCommand
@@ -66,8 +66,8 @@ async def test_maybe_model_module_positive(mock_model_dir, discover_handler):
         pkg_name=None,
     )
     discover_handler.model_path = mock_model_dir
-    result = await _maybe_model_module(discover_handler, f)
-    assert result is f
+    result = await _is_model_module(discover_handler, f)
+    assert result is True
 
 
 @pytest.mark.asyncio
@@ -84,9 +84,8 @@ async def test_maybe_model_module_negative(mock_model_dir, discover_handler):
     )
 
     discover_handler.model_path = mock_model_dir
-    result = await _maybe_model_module(discover_handler, f)
-    assert result is None
-
+    result = await _is_model_module(discover_handler, f)
+    assert result is False
 
 @pytest.mark.asyncio
 async def test_maybe_monitor_service_import_module(mock_model_dir, discover_handler):
@@ -102,8 +101,7 @@ async def test_maybe_monitor_service_import_module(mock_model_dir, discover_hand
     )
 
     discover_handler.model_path = mock_model_dir
-    result = await _maybe_monitor_service_import_module(discover_handler, f)
-    assert result is f
+    assert await _is_service_import_module(discover_handler, f)
 
 
 @pytest.mark.asyncio
@@ -126,7 +124,7 @@ async def test_maybe_monitor_service_import_module_wrong_import(
 
     discover_handler.model_path = mock_model_dir
     with pytest.raises(ValueError) as exc_info:
-        await _maybe_monitor_service_import_module(discover_handler, f)
+        await _is_service_import_module(discover_handler, f)
     assert (
         "You cannot import anything from qcog_python_client other than monitor."
         in str(exc_info.value)
@@ -152,10 +150,7 @@ async def test_maybe_monitor_service_import_module_with_alias(
     )
 
     discover_handler.model_path = mock_model_dir
-    result = await _maybe_monitor_service_import_module(discover_handler, f)
-
-    assert result is f
-
+    assert await _is_service_import_module(discover_handler, f)
 
 @pytest.mark.asyncio
 async def test_revert(discover_handler):

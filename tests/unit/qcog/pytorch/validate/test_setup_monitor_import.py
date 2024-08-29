@@ -100,7 +100,7 @@ def test_setup_monitor_import_directory_update(
         mock_handler,
         mock_relevant_file,
         mock_training_package,
-        monitor_package_folder_path_getter=lambda: monitor_package_folder_path,
+        monitor_package_folder_path=monitor_package_folder_path,
         folder_content_getter=lambda folder_path: mock_monitor_package,
     )
 
@@ -167,8 +167,8 @@ def dummy_function():
             mock_handler,
             file,
             mock_training_package,
-            monitor_package_folder_path_getter=lambda: monitor_package_folder_path,
-            folder_content_getter=lambda folder_path: mock_monitor_package,
+            monitor_package_folder_path=monitor_package_folder_path,
+            folder_content_getter=lambda folder_path: mock_monitor_package
         )
 
     exc_info == "Only one import is allowed from the qcog_python_client package."

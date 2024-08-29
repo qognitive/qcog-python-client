@@ -53,6 +53,7 @@ def setup_monitor_import(
         The updated directory.
 
     """
+    directory = copy.deepcopy(directory)
     # We need to add the monitoring package from the qcog_package into
     # the training directory and update the import on the file in order
     # to point to the new location.
@@ -136,6 +137,6 @@ def setup_monitor_import(
 
             directory[file.path] = file
 
-            return copy.deepcopy(directory)
+            return directory
 
     raise ValueError("No monitor import found in the file.")

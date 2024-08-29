@@ -41,6 +41,7 @@ def validate_model_module(
     allowed_modules: set[str] | None = None,
 ) -> Directory:
     """Validate the model module."""
+    directory = copy.deepcopy(directory)
     allowed_modules = allowed_modules or default_allowed_modules
     dir_path = os.path.dirname(file.path)
 
@@ -103,4 +104,4 @@ def validate_model_module(
     # Set the train function annotations on the handler
     self.train_fn_annotations = train_fn_annotations  # type: ignore
     # Directory has been validated
-    return copy.deepcopy(directory)
+    return directory

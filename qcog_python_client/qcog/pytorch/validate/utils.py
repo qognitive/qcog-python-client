@@ -82,7 +82,5 @@ def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[s
 
 def is_package_module(module_path: str) -> bool:
     """Check if a Python module exists in the specified path."""
-    # Check if the file exists
-
     module_path = module_path if module_path.endswith(".py") else module_path + ".py"
     return os.path.isfile(module_path)

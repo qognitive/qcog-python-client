@@ -101,7 +101,6 @@ def validate_model_module(
         )
 
     # Set the train function annotations on the handler
-    setattr(self, "train_fn_annotations", train_fn_annotations)
-
+    self.train_fn_annotations = train_fn_annotations  # type: ignore
     # Directory has been validated
     return copy.deepcopy(directory)

@@ -401,7 +401,8 @@ class BaseQcogClient:
 
         """
         if self.model.model_name == Model.pytorch.value:
-            raise ValueError("Progress is not available for PyTorch models.")
+            logger.warning("Progress is not available for PyTorch models.")
+            return {}
 
         await self._load_trained_model()
         return {

@@ -15,34 +15,50 @@ from qcog_python_client.qcog.pytorch.types import (
 )
 
 MONITOR_PACKAGE_NAME = "_monitor_"
-
-
-def get_monitor_package_folder_path() -> str:
-    """Return the path to the monitor package folder as an absolute path."""
-    return str(Path(os.path.abspath(monitor.__file__)).parent)
+MONITOR_PACKAGE_FOLDER_PATH = str(Path(os.path.abspath(monitor.__file__)).parent)
 
 
 def setup_monitor_import(
     self: Handler[ValidateCommand],
     file: QFile,
     directory: Directory,
-    monitor_package_folder_path_getter: Callable[
-        [], str
-    ] = get_monitor_package_folder_path,
+    monitor_package_folder_path=MONITOR_PACKAGE_FOLDER_PATH,
     folder_content_getter: Callable[
         [str], Directory
     ] = lambda folder_path: utils.get_folder_structure(
         folder_path, filter=utils.exclude
     ),
 ) -> Directory:
+    """Monitor import setup.
+
+    Parameters
+    ----------
+    self: Handler[ValidateCommand]
+        The handler calling this function
+    file : QFile
+        The file to validate.
+
+    directory : Directory
+        The directory to validate.
+
+    monitor_package_folder_path : str
+        The path to the monitor package folder.
+
+    folder_content_getter : Callable[[str], Directory]
+        The function to get the content of the folder.
+
+    Returns
+    -------
+    Directory
+        The updated directory.
+
+    """
     # We need to add the monitoring package from the qcog_package into
     # the training directory and update the import on the file in order
     # to point to the new location.
 
-    # Get the monitor package absolute location
-    monitor_package_folder_path = monitor_package_folder_path_getter()
-
-    # From the location, create a dictionary with the content of the
+    # From the monitor_package_folder_path location,
+    # create a dictionary with the content of the
     # monitor package. The dictionary will have the path of the file
     # as the key and the file as the value.
     monitor_package_content = folder_content_getter(monitor_package_folder_path)
@@ -91,39 +107,35 @@ def setup_monitor_import(
     # Remove it and add a new statement `import _monitor_ as monitor`
 
     for node in ast.walk(ast_tree):
-        if isinstance(node, ast.ImportFrom):
-            if node.module == "qcog_python_client":
-                if len(node.names) > 1:
-                    raise ValueError(
-                        "Only one import is allowed from the qcog_python_client package."  # noqa: E501
-                    )
-
-                package_name = node.names[0].name
-
-                if package_name != "monitor":
-                    raise ValueError(
-                        "The only package that can be imported is monitor."
-                    )
-
-                # Now we need to remove the import statement
-                # and add a new one
-                ast_tree.body.remove(node)
-
-                # Add the new import statement
-                new_import = ast.Import(
-                    names=[ast.alias(name=MONITOR_PACKAGE_NAME, asname="monitor")]
+        if isinstance(node, ast.ImportFrom) and node.module == "qcog_python_client":
+            if len(node.names) > 1:
+                raise ValueError(
+                    "Only one import is allowed from the qcog_python_client package."  # noqa: E501
                 )
 
-                ast_tree.body.insert(0, new_import)
+            package_name = node.names[0].name
 
-                # Now re-write the content of the file
-                # starting from the modified AST tree
-                # Parse the AST tree to a string see: https://stackoverflow.com/questions/768634/parse-a-py-file-read-the-ast-modify-it-then-write-back-the-modified-source-c
-                file.content = io.BytesIO(ast.unparse(ast_tree).encode())
-                break
+            if package_name != "monitor":
+                raise ValueError("The only package that can be imported is monitor.")
 
-    # Now that the file has been updated, we need to update the corresponding
-    # file in the directory
-    directory[file.path] = file
+            # Now we need to remove the import statement
+            # and add a new one
+            ast_tree.body.remove(node)
 
-    return copy.deepcopy(directory)
+            # Add the new import statement
+            new_import = ast.Import(
+                names=[ast.alias(name=MONITOR_PACKAGE_NAME, asname="monitor")]
+            )
+
+            ast_tree.body.insert(0, new_import)
+
+            # Now re-write the content of the file
+            # starting from the modified AST tree
+            # Parse the AST tree to a string see: https://stackoverflow.com/questions/768634/parse-a-py-file-read-the-ast-modify-it-then-write-back-the-modified-source-c
+            file.content = io.BytesIO(ast.unparse(ast_tree).encode())
+
+            directory[file.path] = file
+
+            return copy.deepcopy(directory)
+
+    raise ValueError("No monitor import found in the file.")

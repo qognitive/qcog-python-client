@@ -8,12 +8,12 @@ import io
 import os
 import sys
 
-from qcog_python_client.qcog.pytorch.types import Directory, QFile
+# def validate_directory(dir: dict) -> Directory:
+#     """Validate the directory.
 
-
-def validate_directory(dir: dict) -> Directory:
-    """Validate the directory."""
-    return {k: QFile(**v) for k, v in dir.items()}
+#     It takes the raw dictionary and validate
+#     """
+#     return {k: QFile(**v) for k, v in dir.items()}
 
 
 def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[str]:

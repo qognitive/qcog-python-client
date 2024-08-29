@@ -27,4 +27,4 @@ schema-build:
 	python schema.py
 
 test-unit:
-	pytest -v tests/unit tests/unit
+	pytest -v tests/unit

@@ -7,18 +7,27 @@ from typing import Callable
 
 from qcog_python_client.qcog.pytorch.types import FilePath, QFile
 
+default_rules = {
+    re.compile(r".*__pycache__.*"),
+    re.compile(r".*\.git.*"),
+}
 
-def exclude(file_path: str) -> bool:
-    """Check against a list of regexes rules to exclude the file."""
-    rules = {
-        "pycache": r".*__pycache__.*",
-        "git": r".*\.git.*",
-        "venv_1": r".*\.venv.*",
-        "venv_2": r".*venv.*",
-        "venv_3": r".*\.env.*",
-    }
 
-    for pattern in rules.values():
+def exclude(file_path: str, rules: set[re.Pattern[str]] | None = None) -> bool:
+    """Check against a set of regexes rules.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to the file.
+
+    rules : set[re.Pattern[str]] | None
+        The set of regex rules to check against. Defaults to `default_rules`.
+        if None is passed.
+
+    """
+    rules = rules or default_rules
+    for pattern in rules:
         if re.match(pattern, file_path):
             return True
 
@@ -28,7 +37,23 @@ def exclude(file_path: str) -> bool:
 def get_folder_structure(
     file_path: str, *, filter: Callable[[FilePath], bool] | None = None
 ) -> dict[FilePath, QFile]:
-    """Return the folder structure as a dictionary."""
+    """Return the folder structure as a dictionary.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to the folder.
+
+    filter : Callable[[FilePath], bool] | None
+        The filter function to apply to the folder structure.
+        to exclude some paths
+
+    Returns
+    -------
+    dict[FilePath, QFile]
+        The folder structure as a dictionary.
+
+    """
     folder_items = os.listdir(file_path)
 
     retval: dict[FilePath, QFile] = {}

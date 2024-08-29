@@ -22,7 +22,7 @@ dependencies = [
   "anyio",
 ]
 
-# dynamic = ["version"]
+dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
@@ -52,7 +52,6 @@ examples = [
   "torch",
   "pillow",
 ]
-
 wandb = [
   "wandb>=0.17.7",
 ]
@@ -140,4 +139,3 @@ exclude = [
 
 [tool.pytest.ini_options]
 log_cli=true
-

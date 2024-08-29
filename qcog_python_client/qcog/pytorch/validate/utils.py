@@ -8,13 +8,6 @@ import io
 import os
 import sys
 
-# def validate_directory(dir: dict) -> Directory:
-#     """Validate the directory.
-
-#     It takes the raw dictionary and validate
-#     """
-#     return {k: QFile(**v) for k, v in dir.items()}
-
 
 def get_third_party_imports(source_code: io.BytesIO, package_path: str) -> set[str]:
     """Get all third-party packages imported in a Python module.

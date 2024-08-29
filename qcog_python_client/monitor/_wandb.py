@@ -3,6 +3,7 @@
 import os
 
 import wandb
+import wandb.sdk as wandbsdk
 
 from .interface import Monitor
 
@@ -44,12 +45,13 @@ class WandbMonitor(Monitor):
             raise ValueError(
                 "Wandb API key is required. Please provide a key, ether as an argument or as an environment variable -> WANDB_API_KEY"  # noqa
             )
-        wandb.login(
+
+        wandbsdk.login(
             anonymous="never",
             key=key,
         )
 
-        wandb.init(
+        wandbsdk.init(
             project=project,
             config=parameters,
             tags=labels,
@@ -68,4 +70,4 @@ class WandbMonitor(Monitor):
 
     def close(self) -> None:
         """Close the Wandb monitor."""
-        wandb.finish()
+        wandbsdk.finish()

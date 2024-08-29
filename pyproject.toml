@@ -44,7 +44,7 @@ examples = [
   "pillow",
 ]
 wandb = [
-  "wandb",
+  "wandb=>0.17.7",
 ]
 
 [tool.setuptools_scm]

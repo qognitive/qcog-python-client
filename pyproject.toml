@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qcog_python_client"
-version = "0.3.1-beta"
+
 readme = "README.md"
 description = "qcog python client"
 dependencies = [

@@ -22,7 +22,7 @@ def setup_monitor_import(
     self: Handler[ValidateCommand],
     file: QFile,
     directory: Directory,
-    monitor_package_folder_path=MONITOR_PACKAGE_FOLDER_PATH,
+    monitor_package_folder_path: str = MONITOR_PACKAGE_FOLDER_PATH,
     folder_content_getter: Callable[
         [str], Directory
     ] = lambda folder_path: utils.get_folder_structure(

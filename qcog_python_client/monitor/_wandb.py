@@ -18,6 +18,7 @@ class WandbMonitor(Monitor):
         project: str = WANDB_DEFAULT_PROJECT,
         parameters: dict | None = None,
         labels: list[str] | None = None,
+        trace_name: str | None = None,
     ) -> None:
         """Initialize the Wandb Monitor.
 
@@ -52,6 +53,7 @@ class WandbMonitor(Monitor):
             project=project,
             config=parameters,
             tags=labels,
+            name=trace_name,
         )
 
     def log(self, data: dict) -> None:  # noqa: D417   # Complains about parameters description not being present

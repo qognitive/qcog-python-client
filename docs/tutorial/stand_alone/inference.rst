@@ -74,6 +74,6 @@ That's it!  You have all the pieces to get started with the QCML library. You ca
 
 Try some more complicated examples and see how the model performs, or dive right into your own data.
 
-* :doc:`/examples/wisconsin`
-* :doc:`/examples/coil20`
-* :doc:`/examples/timeseries`
+* :doc:`/examples/stand_alone/wisconsin`
+* :doc:`/examples/stand_alone/coil20`
+* :doc:`/examples/stand_alone/timeseries`

@@ -2,43 +2,36 @@ Qognitive Python Client
 =======================
 
 .. toctree::
-   :maxdepth: 2
    :hidden:
    :caption: Getting started
 
    /tutorial/install
    /tutorial/datasets
    /tutorial/models
-   /tutorial/training
-   /tutorial/inference
 
 .. toctree::
-   :maxdepth: 2
    :hidden:
    :caption: Examples
 
-   /examples/wisconsin
-   /examples/coil20
-   /examples/timeseries
+   /examples/stand_alone/index
+   /examples/pytorch/index
 
 .. toctree::
-   :maxdepth: 2
    :hidden:
    :caption: Models
 
-   /models/pauli
-   /models/ensemble
+   /models/stand_alone/pauli
+   /models/stand_alone/ensemble
+   /models/pytorch/qcml_layer
 
 .. toctree::
-   :maxdepth: 2
    :hidden:
-   :caption: Parameters
+   :caption: QCML Stand Alone Parameters
 
    /parameters/optimization
    /parameters/state
 
 .. toctree::
-   :maxdepth: 2
    :hidden:
    :caption: API Reference
 

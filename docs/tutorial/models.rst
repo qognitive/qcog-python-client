@@ -1,24 +1,15 @@
 Model Selection
 ===============
 
-Here we will choose one of our QCML models and parameterize it for training.  There are several QCML models that you can choose from and we are continuing to develop new models as well as improve existing ones.  You can see which models are currently available on the sidebar.
+Here we will choose one of our QCML models and parameterize it for training. There are several QCML models that you can choose from and we are continuing to develop new models as well as improve existing ones. You can see which models are currently available on the sidebar.
+about:blank#blocked
+There are two categories of models. The first is a stand alone QCML model, which has at its core a single cost function that involves the quantum state. The second is a QCML PyTorch layer which has been built so that you can integrate it with classical ML deep learning layers, and so develop a hybrid quantum-classical model whose architecture fits your needs. The cost function is defined by you which is a classical cost function where QCML will be a part of the network.
 
-We're going to use the Pauli model for this example.
+Setting up each is a little different, so we'll cover them separately.
 
-Setting the Model Parameters
-----------------------------
+.. toctree::
+   :caption: QCML Models
 
-We configure our model by a call on our ``qcml`` object, which returns the object with the model configuration. This is the same procedure for both sync and async clients.
+   /tutorial/stand_alone/index
+   /tutorial/pytorch/index
 
-.. code-block:: python
-
-    qcml = qcml.pauli(
-        operators=["X", "Y", "Z"],
-        qbits=2,
-        pauli_weight=2
-    )
-
-You can read more about the pauli model, the parameterization, and the available options on the :doc:`/models/pauli` page.
-
-.. note::
-    The operators list does have to match the dataset that you are going to be running on. This might seem redundant but it happens in lots of other machine learning models where you have to match the dimensionality of your input to the dimensions of the model - or at least do some preprocessing to get the data into the proper scale.

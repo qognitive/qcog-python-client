@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import Callable
+from typing import Callable, TypeAlias
 
 from qcog_python_client.log import qcoglogger as logger
 from qcog_python_client.qcog.pytorch.handler import Command, Handler
@@ -21,6 +21,8 @@ from qcog_python_client.qcog.pytorch.validate._validate_model_module import (
     validate_model_module,
 )
 
+Required: TypeAlias = bool
+
 
 class ValidateHandler(Handler):
     """Validate the model module."""
@@ -30,10 +32,11 @@ class ValidateHandler(Handler):
     directory: Directory
 
     validate_map: dict[
-        RelevantFileId, Callable[[ValidateHandler, QFile, Directory], Directory]
+        RelevantFileId,
+        tuple[Required, Callable[[ValidateHandler, QFile, Directory], Directory]],
     ] = {
-        "model_module": validate_model_module,
-        "monitor_service_import_module": setup_monitor_import,
+        "model_module": (True, validate_model_module),
+        "monitor_service_import_module": (False, setup_monitor_import),
     }
 
     async def handle(self, payload: ValidateCommand) -> UploadCommand:
@@ -42,13 +45,18 @@ class ValidateHandler(Handler):
 
         # `directory` will go through a series of validations
         # based on the `validate_map` keys.
-        for key, validate_fn in self.validate_map.items():
+        for key, (required, validate_fn) in self.validate_map.items():
+            print("key", key)
+            print("required", required)
             relevant_file = payload.relevant_files.get(key)
-
-            if not relevant_file:
+            print("Relevant file", relevant_file)
+            if not relevant_file and required:
                 raise FileNotFoundError(
                     f"File {key} not found in the relevant files. Keys: {payload.relevant_files.keys()}"  # noqa: E501
                 )
+
+            if not relevant_file:
+                continue
 
             parsed = QFile.model_validate(relevant_file)
             self.directory = validate_fn(self, parsed, self.directory)

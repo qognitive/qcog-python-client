@@ -12,6 +12,7 @@ default_rules = {
     re.compile(r".*\.git.*"),
 }
 
+
 def exclude(file_path: str, rules: set[re.Pattern[str]] | None = None) -> bool:
     """Check against a set of regexes rules.
 

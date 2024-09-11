@@ -168,7 +168,7 @@ def dummy_function():
             file,
             mock_training_package,
             monitor_package_folder_path=monitor_package_folder_path,
-            folder_content_getter=lambda folder_path: mock_monitor_package
+            folder_content_getter=lambda folder_path: mock_monitor_package,
         )
 
     exc_info == "Only one import is allowed from the qcog_python_client package."

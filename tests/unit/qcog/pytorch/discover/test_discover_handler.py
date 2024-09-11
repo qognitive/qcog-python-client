@@ -7,7 +7,7 @@ import pytest
 from qcog_python_client.qcog.pytorch.discover import DiscoverCommand, DiscoverHandler
 from qcog_python_client.qcog.pytorch.discover.discoverhandler import (
     _is_model_module,
-    _is_service_import_module
+    _is_service_import_module,
 )
 from qcog_python_client.qcog.pytorch.types import QFile
 from qcog_python_client.qcog.pytorch.validate.validatehandler import ValidateCommand
@@ -87,6 +87,7 @@ async def test_maybe_model_module_negative(mock_model_dir, discover_handler):
     result = await _is_model_module(discover_handler, f)
     assert result is False
 
+
 @pytest.mark.asyncio
 async def test_maybe_monitor_service_import_module(mock_model_dir, discover_handler):
     monitor_file_path = os.path.join(mock_model_dir, "monitor.py")
@@ -151,6 +152,7 @@ async def test_maybe_monitor_service_import_module_with_alias(
 
     discover_handler.model_path = mock_model_dir
     assert await _is_service_import_module(discover_handler, f)
+
 
 @pytest.mark.asyncio
 async def test_revert(discover_handler):

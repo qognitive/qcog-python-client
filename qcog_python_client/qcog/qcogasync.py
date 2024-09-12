@@ -151,6 +151,22 @@ class AsyncQcogClient(BaseQcogClient):
         await self._preloaded_model(guid)
         return self
 
+    async def preloaded_pt_model(self, model_name: str) -> AsyncQcogClient:
+        """Retrieve a preexisting PyTorch model.
+
+        Parameters
+        ----------
+        model_name : str
+            model name
+
+        Returns
+        -------
+        QcogClient
+
+        """
+        await self._preloaded_pt_model(model_name)
+        return self
+
     async def train(
         self,
         batch_size: int,

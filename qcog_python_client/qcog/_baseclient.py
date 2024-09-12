@@ -304,6 +304,11 @@ class BaseQcogClient:
         self.trained_model = await self.http_client.get(f"model/{guid}")
         return self
 
+    async def _preloaded_pt_model(self, model_name: str) -> BaseQcogClient:
+        self.pytorch_model = await self.http_client.get(f"pytorch_model/{model_name}")
+        self._model = ModelPytorchParameters(model_name=Model.pytorch.value)
+        return self
+
     async def _train(
         self,
         batch_size: int,

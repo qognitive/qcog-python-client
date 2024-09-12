@@ -312,6 +312,11 @@ class BaseQcogClient:
         get_states_extra: NotRequiredStateParams,
     ) -> BaseQcogClient:
         """Start a training job."""
+        if self.model.model_name == Model.pytorch.value:
+            raise ValueError(
+                "Training is not available for PyTorch models. Use `train_pytorch` method."  # noqa: E501
+            )
+
         params: TrainingParameters = TrainingParameters(
             batch_size=batch_size,
             num_passes=num_passes,
@@ -369,15 +374,18 @@ class BaseQcogClient:
 
         # Needed to upload the model and the parameters
         agent.register_tool("post_request", self.http_client.post)
-        trained_model = await agent.train_model(
+
+        train_response = await agent.train_model(
             self.pytorch_model["guid"],
             dataset_guid=self.dataset["guid"],
             training_parameters=training_parameters.model_dump(),
         )
 
+        self.training_parameters = train_response["training_parameters"]
+
         pytorch_trained_model = (
             AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(
-                trained_model
+                train_response["trained_model"]
             )
         )
 

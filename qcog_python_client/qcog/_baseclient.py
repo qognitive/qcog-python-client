@@ -362,9 +362,17 @@ class BaseQcogClient:
     async def _inference(
         self,
         data: pd.DataFrame,
-        parameters: InferenceParameters,
-    ) -> pd.DataFrame:
+        parameters: InferenceParameters | None = None,
+    ) -> pd.DataFrame | list:
         """From a trained model query an inference."""
+        if self.model.model_name == Model.pytorch.value:
+            return await self._pt_inference(data)
+
+        if parameters is None:
+            raise ValueError(
+                "Inference parameters are required for Pauli and Ensemble models."
+            )
+
         inference_result = await self.http_client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
@@ -376,6 +384,25 @@ class BaseQcogClient:
         return base642dataframe(
             inference_result["response"]["data"],
         )
+
+    async def _pt_inference(
+        self,
+        data: pd.DataFrame,
+    ) -> list:
+        model_guid = self.pytorch_model["guid"]
+        trained_model_guid = self.trained_model["guid"]
+
+        inference_result = await self.http_client.post(
+            f"pytorch_model/{model_guid}/trained_model/{trained_model_guid}/inference",
+            {
+                "data": encode_base64(data),
+            },
+        )
+
+        print(">> Inference result: ", inference_result)
+        return inference_result
+
+        # Return data based on the shape of the response
 
     async def _train_pytorch(
         self,

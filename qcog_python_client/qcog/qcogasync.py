@@ -136,7 +136,10 @@ class AsyncQcogClient(BaseQcogClient):
         return self
 
     async def preloaded_model(self, guid: str) -> AsyncQcogClient:
-        """Retrieve a preexisting model.
+        """Retrieve a preexisting trained model.
+
+        If you are working on a Pytorch model, you need to preload the
+        pytorch model first using `preloaded_pt_model`.
 
         Parameters
         ----------
@@ -149,6 +152,22 @@ class AsyncQcogClient(BaseQcogClient):
 
         """
         await self._preloaded_model(guid)
+        return self
+
+    async def preloaded_pt_model(self, model_name: str) -> AsyncQcogClient:
+        """Retrieve a preexisting PyTorch model.
+
+        Parameters
+        ----------
+        model_name : str
+            model name
+
+        Returns
+        -------
+        QcogClient
+
+        """
+        await self._preloaded_pt_model(model_name)
         return self
 
     async def train(

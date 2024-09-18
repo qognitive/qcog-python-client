@@ -301,7 +301,18 @@ class BaseQcogClient:
 
     async def _preloaded_model(self, guid: str) -> BaseQcogClient:
         """Retrieve preexisting model payload."""
-        self.trained_model = await self.http_client.get(f"model/{guid}")
+        if self.model.model_name == Model.pytorch.value:
+            pytorch_model_guid = self.pytorch_model["guid"]
+            self.trained_model = await self.http_client.get(
+                f"pytorch_model/{pytorch_model_guid}/trained_model/{guid}"
+            )
+        else:
+            self.trained_model = await self.http_client.get(f"model/{guid}")
+        return self
+
+    async def _preloaded_pt_model(self, model_name: str) -> BaseQcogClient:
+        self.pytorch_model = await self.http_client.get(f"pytorch_model/{model_name}")
+        self._model = ModelPytorchParameters(model_name=Model.pytorch.value)
         return self
 
     async def _train(

@@ -10,7 +10,12 @@ class ABCRequestClient(ABC):
 
     @abstractmethod
     async def get(self, url: str) -> dict:
-        """Execute a get request."""
+        """Execute a get request. Returns a single object."""
+        ...
+
+    @abstractmethod
+    async def get_many(self, url: str) -> list[dict]:
+        """Execute a get request. Returns a list of objects."""
         ...
 
     @overload

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, overload
 
 import pandas as pd
 
@@ -135,23 +135,57 @@ class AsyncQcogClient(BaseQcogClient):
         await self._preloaded_training_parameters(guid)
         return self
 
-    async def preloaded_model(self, guid: str) -> AsyncQcogClient:
-        """Retrieve a preexisting trained model.
+    @overload
+    async def preloaded_model(self, guid: str) -> AsyncQcogClient: ...
 
-        If you are working on a Pytorch model, you need to preload the
-        pytorch model first using `preloaded_pt_model`.
+    @overload
+    async def preloaded_model(
+        self,
+        guid: str,
+        *,
+        pytorch_model_name: str | None = None,
+    ) -> AsyncQcogClient: ...
+
+    @overload
+    async def preloaded_model(
+        self, *, pytorch_model_name: str | None = None, force_reload: bool = False
+    ) -> AsyncQcogClient: ...
+
+    async def preloaded_model(
+        self,
+        guid: str | None = None,
+        *,
+        pytorch_model_name: str | None = None,
+        force_reload: bool = False,
+    ) -> AsyncQcogClient:
+        """Retrieve a preexisting trained model.
 
         Parameters
         ----------
-        guid : str
-            model guid
+        guid : str | None
+            trained model identifier. If you are working on a pytorch model,
+            you also need to run `preload_pt_model` to load the model architecture,
+            or you can provide `pytorch_model_name` parameter with the name
+            of the model. If no `guid` is provided and you are working with
+            a pytorch model, the client will try to load the latest trained model.
+        pytorch_model_name : str | None
+            the name of the PyTorch model. This is the identifier that you
+            used when you uploaded the model using `pytorch` method.
+            It should be provided if no model architecture is loaded.
+        force_reload : bool | None
+            If true will fetch the latest models at every request.
 
         Returns
         -------
         QcogClient
 
         """
-        await self._preloaded_model(guid)
+        # if a guid is provided, just fetch the model
+        await self._preloaded_model(
+            guid,
+            pytorch_model_name=pytorch_model_name,
+            force_reload=force_reload,
+        )
         return self
 
     async def preloaded_pt_model(self, model_name: str) -> AsyncQcogClient:
@@ -203,7 +237,7 @@ class AsyncQcogClient(BaseQcogClient):
 
     async def inference(
         self, data: pd.DataFrame, parameters: InferenceParameters | None
-    ) -> pd.DataFrame:
+    ) -> pd.DataFrame | list[Any]:
         """From a trained model query an inference.
 
         Parameters

@@ -190,7 +190,7 @@ class QcogClient(BaseQcogClient):
 
     def inference(
         self, data: pd.DataFrame, parameters: InferenceParameters
-    ) -> pd.DataFrame | list:
+    ) -> pd.DataFrame | Any:
         """From a trained model query an inference.
 
         Parameters

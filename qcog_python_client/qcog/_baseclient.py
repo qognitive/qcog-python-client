@@ -301,8 +301,7 @@ class BaseQcogClient:
 
     async def _preloaded_data(self, guid: str) -> BaseQcogClient:
         """Async method to retrieve a dataset that was previously uploaded from guid."""
-        dataset = await self.http_client.get(f"dataset/{guid}")
-        self.dataset = dataset
+        self.dataset = await self.http_client.get(f"dataset/{guid}")
         return self
 
     async def _preloaded_training_parameters(self, guid: str) -> BaseQcogClient:

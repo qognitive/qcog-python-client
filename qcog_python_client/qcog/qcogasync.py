@@ -237,7 +237,7 @@ class AsyncQcogClient(BaseQcogClient):
 
     async def inference(
         self, data: pd.DataFrame, parameters: InferenceParameters | None
-    ) -> pd.DataFrame | list[Any]:
+    ) -> pd.DataFrame | Any:
         """From a trained model query an inference.
 
         Parameters
@@ -249,8 +249,8 @@ class AsyncQcogClient(BaseQcogClient):
 
         Returns
         -------
-        pd.DataFrame
-            the predictions
+        pd.DataFrame | Any
+            the inference result
 
         """
         return await self._inference(data, parameters)

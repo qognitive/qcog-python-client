@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any, TypeAlias
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import aiohttp
 import pandas as pd
@@ -67,8 +68,34 @@ class BaseQcogClient:
         self._inference_result: dict | None = None
         self._loss: Matrix | None = None
         self._pytorch_model: dict | None = None
+        self._pytorch_trained_models: list[dict] | None = None
         self.last_status: TrainingStatus | None = None
         self.metrics: dict | None = None
+
+    @property
+    def pytorch_trained_models(self) -> list[dict]:
+        """Return the list of Pytorch trained models."""
+        if self._pytorch_trained_models is None:
+            self._pytorch_trained_models = []
+        return self._pytorch_trained_models
+
+    @pytorch_trained_models.setter
+    def pytorch_trained_models(self, fetched: list[dict]) -> None:
+        if self._pytorch_trained_models is None:
+            self._pytorch_trained_models = []
+        # Add each of the fetched trained models to the list
+        # making sure that the guid is unique
+        guids = {
+            trained_model["guid"] for trained_model in self._pytorch_trained_models
+        }
+
+        for trained_model in fetched:
+            if trained_model["guid"] not in guids:
+                # Validate the model
+                validated = AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(  # noqa: E501
+                    trained_model
+                )
+                self._pytorch_trained_models.append(validated.model_dump())
 
     @property
     def pytorch_model(self) -> dict:
@@ -299,15 +326,105 @@ class BaseQcogClient:
         )
         return self
 
-    async def _preloaded_model(self, guid: str) -> BaseQcogClient:
+    async def _preloaded_model(
+        self,
+        guid: str | None = None,
+        *,
+        pytorch_model_name: str | None = None,
+        force_reload: bool = False,
+    ) -> BaseQcogClient:
         """Retrieve preexisting model payload."""
+        # If a `pytorch_model_name` is provided,
+        # We can assume that we don't have a `model`
+        # set yet, so we will fetch the model first.
+        if pytorch_model_name:
+            await self._preloaded_pt_model(pytorch_model_name)
+
         if self.model.model_name == Model.pytorch.value:
-            pytorch_model_guid = self.pytorch_model["guid"]
+            await self._preload_trained_pt_model(
+                guid=guid,
+                force_reload=force_reload,
+            )
+        else:
+            if guid is None:
+                raise ValueError(
+                    "Model guid is required for Pauli and Ensemble models."
+                )
+            await self._preload_trained_qcog_model(guid)
+
+        return self
+
+    async def _preload_trained_pt_models(
+        self,
+        pytorch_model_guid: str,
+        *,
+        page: int = 0,
+        limit: int = 100,
+        training_status: TrainingStatus | None = None,
+    ) -> BaseQcogClient:
+        """Retrieve preexisting trained models for a PyTorch model."""
+        params: dict = {
+            "limit": limit,
+            "page": page,
+        }
+
+        if training_status:
+            params["training_status"] = training_status.value
+
+        # Compose URL with parameters
+        # TODO: refactor methods to accept parameters dictionary
+        # and move this logic to the http client
+        url = f"pytorch_model/{pytorch_model_guid}/trained_model"
+        urlparts = urlparse(url)
+        query_params = parse_qs(urlparts.query)
+        query_params.update(params)
+        new_query_string = urlencode(query_params, doseq=True)
+        new_url_parts = urlparts._replace(query=new_query_string)
+        url = urlunparse(new_url_parts)
+
+        self.pytorch_trained_models = await self.http_client.get_many(
+            url,
+        )
+        return self
+
+    async def _preload_trained_pt_model(
+        self,
+        *,
+        guid: str | None = None,
+        force_reload: bool = False,
+    ) -> BaseQcogClient:
+        # If a guid is provided, we will fetch the trained model
+
+        if guid and force_reload:
+            raise ValueError("Cannot provide both guid and force_reload.")
+
+        pytorch_model_guid = self.pytorch_model["guid"]
+
+        if guid:
             self.trained_model = await self.http_client.get(
                 f"pytorch_model/{pytorch_model_guid}/trained_model/{guid}"
             )
-        else:
-            self.trained_model = await self.http_client.get(f"model/{guid}")
+
+            return self
+        # Otherwise, check if we need to load the latest trained models
+        if force_reload:
+            await self._preload_trained_pt_models(
+                pytorch_model_guid,
+                training_status=TrainingStatus.completed,
+            )
+
+        if not self.pytorch_trained_models:
+            raise ValueError("No trained models found.")
+
+        self.trained_model = self.pytorch_trained_models[0]
+        return self
+
+    async def _preload_trained_qcog_model(
+        self,
+        guid: str,
+    ) -> BaseQcogClient:
+        """Retrieve a trained model by guid."""
+        self.trained_model = await self.http_client.get(f"model/{guid}")
         return self
 
     async def _preloaded_pt_model(self, model_name: str) -> BaseQcogClient:
@@ -362,9 +479,17 @@ class BaseQcogClient:
     async def _inference(
         self,
         data: pd.DataFrame,
-        parameters: InferenceParameters,
-    ) -> pd.DataFrame:
+        parameters: InferenceParameters | None = None,
+    ) -> pd.DataFrame | Any:
         """From a trained model query an inference."""
+        if self.model.model_name == Model.pytorch.value:
+            return await self._pt_inference(data)
+
+        if parameters is None:
+            raise ValueError(
+                "Inference parameters are required for Pauli and Ensemble models."
+            )
+
         inference_result = await self.http_client.post(
             f"model/{self.trained_model['guid']}/inference",
             {
@@ -376,6 +501,22 @@ class BaseQcogClient:
         return base642dataframe(
             inference_result["response"]["data"],
         )
+
+    async def _pt_inference(
+        self,
+        data: pd.DataFrame,
+    ) -> Any:
+        model_guid = self.pytorch_model["guid"]
+        trained_model_guid = self.trained_model["guid"]
+
+        inference_result = await self.http_client.post(
+            f"pytorch_model/{model_guid}/trained_model/{trained_model_guid}/inference",
+            {
+                "data": encode_base64(data),
+            },
+        )
+
+        return inference_result.get("data")
 
     async def _train_pytorch(
         self,

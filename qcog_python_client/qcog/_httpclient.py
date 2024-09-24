@@ -81,7 +81,7 @@ class RequestClient(_HTTPClient, ABCRequestClient):
         uri: str,
         method: HttpMethod,
         data: dict | aiohttp.FormData | None = None,
-    ) -> dict:
+    ) -> dict | list[dict]:
         """Execute the async get "aiohttp" by adding class-level settings.
 
         Parameters
@@ -144,7 +144,7 @@ class RequestClient(_HTTPClient, ABCRequestClient):
                     else:
                         raise ValueError(f"Invalid Content Type found: {type(data)}")
 
-                    retval: dict = await resp.json()
+                    retval: dict | list[dict] = await resp.json()
 
                     return retval
 
@@ -174,10 +174,41 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             dict: unpacked json dict
 
         """
-        return await self._request_retry(
+        response_data = await self._request_retry(
             f"{self.url}/{endpoint}",
             HttpMethod.get,
         )
+
+        if not isinstance(response_data, dict):
+            raise RuntimeError("Expected a single object, got a list")
+
+        return response_data
+
+    async def get_many(self, endpoint: str) -> list[dict]:
+        """Execute a get request.
+
+        Convenience wrapper around aiohttp.get (called via _get method)
+
+        Parameters
+        ----------
+        endpoint: str
+            a valid prefix to the orchestration API (including guid
+            if applicable) and will add to the dns prefix
+
+        Returns
+        -------
+            list[dict]: unpacked json dict
+
+        """
+        response_data = await self._request_retry(
+            f"{self.url}/{endpoint}",
+            HttpMethod.get,
+        )
+
+        if not isinstance(response_data, list):
+            raise RuntimeError("Expected a list of objects, got a single object")
+
+        return response_data
 
     async def post(
         self,
@@ -204,6 +235,11 @@ class RequestClient(_HTTPClient, ABCRequestClient):
             dict: unpacked json dict
 
         """
-        return await self._request_retry(
+        response_data = await self._request_retry(
             f"{self.url}/{endpoint}", HttpMethod.post, data
         )
+
+        if not isinstance(response_data, dict):
+            raise RuntimeError("Expected a single object, got a list")
+
+        return response_data

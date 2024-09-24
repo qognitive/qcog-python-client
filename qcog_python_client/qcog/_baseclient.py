@@ -394,6 +394,10 @@ class BaseQcogClient:
         force_reload: bool = False,
     ) -> BaseQcogClient:
         # If a guid is provided, we will fetch the trained model
+
+        if guid and force_reload:
+            raise ValueError("Cannot provide both guid and force_reload.")
+
         pytorch_model_guid = self.pytorch_model["guid"]
 
         if guid:

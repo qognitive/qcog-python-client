@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, TypeAlias, cast
+from typing import Any, TypeAlias
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import aiohttp
@@ -301,8 +301,7 @@ class BaseQcogClient:
 
     async def _preloaded_data(self, guid: str) -> BaseQcogClient:
         """Async method to retrieve a dataset that was previously uploaded from guid."""
-        dataset = await self.http_client.get(f"dataset/{guid}")
-        self.dataset = dataset
+        self.dataset = await self.http_client.get(f"dataset/{guid}")
         return self
 
     async def _preloaded_training_parameters(self, guid: str) -> BaseQcogClient:
@@ -477,7 +476,7 @@ class BaseQcogClient:
         self,
         data: pd.DataFrame,
         parameters: InferenceParameters | None = None,
-    ) -> pd.DataFrame | list:
+    ) -> pd.DataFrame | Any:
         """From a trained model query an inference."""
         if self.model.model_name == Model.pytorch.value:
             return await self._pt_inference(data)
@@ -502,7 +501,7 @@ class BaseQcogClient:
     async def _pt_inference(
         self,
         data: pd.DataFrame,
-    ) -> list:
+    ) -> Any:
         model_guid = self.pytorch_model["guid"]
         trained_model_guid = self.trained_model["guid"]
 
@@ -513,8 +512,7 @@ class BaseQcogClient:
             },
         )
 
-        # Return data based on the shape of the response
-        return cast(list, inference_result.get("data", []))
+        return inference_result.get("data")
 
     async def _train_pytorch(
         self,

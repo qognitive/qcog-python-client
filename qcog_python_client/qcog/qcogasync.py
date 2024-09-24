@@ -249,8 +249,8 @@ class AsyncQcogClient(BaseQcogClient):
 
         Returns
         -------
-        pd.DataFrame
-            the predictions
+        pd.DataFrame | Any
+            the inference result
 
         """
         return await self._inference(data, parameters)

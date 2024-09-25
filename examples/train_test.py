@@ -10,7 +10,10 @@ from pandas import DataFrame
 
 from qcog_python_client import AsyncQcogClient, QcogClient
 from qcog_python_client.schema import GradOptimizationParameters, GradStateParameters
-from qcog_python_client.schema.generated_schema.models import AnalyticOptimizationParameters, LOBPCGFastStateParameters
+from qcog_python_client.schema.generated_schema.models import (
+    AnalyticOptimizationParameters,
+    LOBPCGFastStateParameters,
+)
 
 API_TOKEN = os.environ["API_TOKEN"]
 
@@ -172,12 +175,7 @@ async def case_ensemble() -> None:
 
     dataset_id = "ab1aae7c-28d7-37eb-a251-1479f61818ab"
 
-    client.ensemble(
-        operators=["X", "Y", "Z"],
-        dim=4,
-        num_axes=4,
-        seed=1
-    )
+    client.ensemble(operators=["X", "Y", "Z"], dim=4, num_axes=4, seed=1)
 
     await client.preloaded_data(dataset_id)
 
@@ -185,14 +183,10 @@ async def case_ensemble() -> None:
         batch_size=1,
         num_passes=1,
         weight_optimization=AnalyticOptimizationParameters(),
-        get_states_extra=LOBPCGFastStateParameters(
-            iterations=1,
-            tol=0.05
-        )
+        get_states_extra=LOBPCGFastStateParameters(iterations=1, tol=0.05),
     )
 
     print(client.trained_model)
-
 
 
 if __name__ == "__main__":

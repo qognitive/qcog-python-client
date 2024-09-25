@@ -10,7 +10,10 @@ import pandas as pd
 from qcog_python_client.log import qcoglogger
 from qcog_python_client.qcog._base64utils import base642dataframe
 from qcog_python_client.qcog._data_uploader import encode_base64
-from qcog_python_client.qcog._interfaces import ABCDataClient, ABCRequestClient
+from qcog_python_client.qcog._interfaces import (
+    IDataClient,
+    IRequestClient,
+)
 from qcog_python_client.qcog._jsonable_parameters import (
     jsonable_inference_parameters,
     jsonable_train_parameters,
@@ -50,6 +53,7 @@ TrainingModel: TypeAlias = (
     | ModelPytorchParameters
 )
 
+
 logger = qcoglogger.getChild(__name__)
 
 
@@ -57,8 +61,8 @@ class BaseQcogClient:
     """Base Qcog Client."""
 
     def __init__(self) -> None:  # noqa: D107
-        self.http_client: ABCRequestClient
-        self.data_client: ABCDataClient
+        self.http_client: IRequestClient
+        self.data_client: IDataClient
         self._version: str = DEFAULT_QCOG_VERSION
         self._model: TrainingModel | None = None
         self._project: dict | None = None
@@ -182,7 +186,7 @@ class BaseQcogClient:
     @trained_model.setter
     def trained_model(self, value: dict) -> None:
         """Set and validate the trained model."""
-        if self.model.model_name == Model.pytorch.value:
+        if self._model and self._model.model_name == Model.pytorch.value:
             self._trained_model = (
                 AppSchemasPytorchModelPytorchTrainedModelPayloadResponse.model_validate(
                     value
@@ -299,6 +303,13 @@ class BaseQcogClient:
         self.dataset = await self.data_client.upload_data(data)
         return self
 
+    async def _upload_data(self, data: pd.DataFrame, dataset_id: str) -> BaseQcogClient:
+        """Upload Data."""
+        # Delegating the upload function to the data client
+        # So any change in the logic or service will not affect the client
+        self.dataset = await self.data_client.stream_data(data, dataset_id=dataset_id)
+        return self
+
     async def _preloaded_data(self, guid: str) -> BaseQcogClient:
         """Async method to retrieve a dataset that was previously uploaded from guid."""
         self.dataset = await self.http_client.get(f"dataset/{guid}")
@@ -340,7 +351,7 @@ class BaseQcogClient:
         if pytorch_model_name:
             await self._preloaded_pt_model(pytorch_model_name)
 
-        if self.model.model_name == Model.pytorch.value:
+        if self._model and self._model.model_name == Model.pytorch.value:
             await self._preload_trained_pt_model(
                 guid=guid,
                 force_reload=force_reload,
@@ -425,6 +436,29 @@ class BaseQcogClient:
     ) -> BaseQcogClient:
         """Retrieve a trained model by guid."""
         self.trained_model = await self.http_client.get(f"model/{guid}")
+        # Load trained parameters
+        await self._preloaded_training_parameters(
+            self.trained_model["training_parameters_guid"]
+        )
+
+        model_name = Model(self.training_parameters["model"])
+
+        model_params_validator: (
+            type[ModelPauliParameters] |
+            type[ModelEnsembleParameters] |
+            None
+        ) = None
+        if model_name == Model.pauli:
+            model_params_validator = ModelPauliParameters
+        elif model_name == Model.ensemble:
+            model_params_validator = ModelEnsembleParameters
+        else:
+            raise ValueError(f"Model {model_name} not found")
+
+        model_parameters = self.training_parameters["parameters"]["model"]
+
+        self._model = model_params_validator.model_validate(model_parameters)
+
         return self
 
     async def _preloaded_pt_model(self, model_name: str) -> BaseQcogClient:
@@ -560,7 +594,7 @@ class BaseQcogClient:
             `status` : TrainingStatus
 
         """
-        if self.model.model_name == Model.pytorch.value:
+        if self._model and self.model.model_name == Model.pytorch.value:
             logger.warning("Progress is not available for PyTorch models.")
             return {}
 
@@ -576,7 +610,7 @@ class BaseQcogClient:
 
     async def _load_trained_model(self) -> None:
         """Load the status of the current trained model."""
-        if self.model.model_name == Model.pytorch.value:
+        if self._model and self._model.model_name == Model.pytorch.value:
             raise ValueError("Load trained model is not available for PyTorch models.")
 
         self.trained_model = await self.http_client.get(
@@ -584,7 +618,7 @@ class BaseQcogClient:
         )
 
     async def _status(self) -> TrainingStatus:
-        if self.model.model_name == Model.pytorch.value:
+        if self._model and self._model.model_name == Model.pytorch.value:
             return await self._get_pt_trained_model_status()
         return await self._get_trained_model_status()
 

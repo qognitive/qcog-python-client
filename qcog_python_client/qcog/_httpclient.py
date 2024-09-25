@@ -12,7 +12,7 @@ import urllib3
 import urllib3.util
 
 from qcog_python_client.log import qcoglogger as logger
-from qcog_python_client.qcog._interfaces import ABCRequestClient
+from qcog_python_client.qcog._interfaces import IRequestClient
 
 
 class HttpMethod(Enum):
@@ -63,18 +63,28 @@ class _HTTPClient:
         self.port: int = port
         self.api_version: str = api_version
 
-        self.headers = {"Authorization": f"Bearer {self.token}"}
+        self._headers = {"Authorization": f"Bearer {self.token}"}
         protocol = "http" if hostname in {"localhost", "127.0.0.1"} else "https"
         base_url: str = f"{protocol}://{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
         self.retries: int = retries
 
 
-class RequestClient(_HTTPClient, ABCRequestClient):
+class RequestClient(_HTTPClient, IRequestClient):
     """Async API client.
 
     This class is the async implementation of the API client
     """
+
+    @property
+    def headers(self) -> dict:
+        """Get the headers."""
+        return self._headers
+
+    @property
+    def base_url(self) -> str:
+        """Get the base url of the request."""
+        return self.url
 
     async def _request_retry(
         self,

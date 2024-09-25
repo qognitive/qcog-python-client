@@ -1,6 +1,7 @@
 """Example of training a model."""
 
 import os
+import sys
 import time
 
 import numpy as np
@@ -36,11 +37,9 @@ def _get_test_df(size_mb: int) -> DataFrame:
     # Create the DataFrame
     df = DataFrame(
         {
-            "id": range(num_rows),
-            "float_col": np.random.rand(num_rows),
-            "int_col": np.random.randint(0, 100, num_rows),
-            "string_col": np.random.choice(["A", "B", "C", "D"], num_rows),
-            "bool_col": np.random.choice([True, False], num_rows),
+            "X": np.random.choice(["0", "1"], size=num_rows),
+            "Y": np.random.choice(["0", "1"], size=num_rows),
+            "Z": np.random.choice(["0", "1"], size=num_rows),
         }
     )
 
@@ -112,9 +111,9 @@ async def big_data_test() -> None:
     )
 
     if DATASET_ID is None:
-        dataset_id = "big_data_36"
+        dataset_id = os.environ["DATASET_NAME"]
 
-        big_df = _get_test_df(10000)
+        big_df = _get_test_df(100)
         size = big_df.memory_usage(deep=True).sum() / 1024**2
         print("Testing Size of big_df MB: ", size)
 
@@ -164,18 +163,14 @@ async def check_status() -> None:
 if __name__ == "__main__":
     import asyncio
 
-    # print("################################")
-    # print("# SYNC                         #")
-    # print("################################")
-    # guid = main()
-    # print("################################")
-    # print("# ASYNC                        #")
-    # print("################################")
-    # asyncio.run(async_main())
-    # print("done")
-    # print(f"\nexport TRAINED_MODEL={guid}")
-    print("################################")
-    print("# UPLOAD STREAM                #")
-    print("################################")
-    # asyncio.run(big_data_test())
-    asyncio.run(check_status())
+    cmd = sys.argv[1]
+    if cmd == "train":
+        asyncio.run(main())
+    elif cmd == "train_async":
+        asyncio.run(async_main())
+    elif cmd == "big_data":
+        asyncio.run(big_data_test())
+    elif cmd == "status":
+        asyncio.run(check_status())
+    else:
+        raise ValueError(f"Invalid command: {cmd}")

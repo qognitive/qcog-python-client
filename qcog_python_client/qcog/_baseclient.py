@@ -436,7 +436,15 @@ class BaseQcogClient:
     ) -> BaseQcogClient:
         """Retrieve a trained model by guid."""
         self.trained_model = await self.http_client.get(f"model/{guid}")
-        # Load trained parameters
+        # Load training parameters
+        # _model is actually something that doesn't exists
+        # in the database, and it's only a part of the training
+        # parameters. We need to load the training parameters
+        # to set the _model, because on the actual model there
+        # aren't information about what kind of model was used
+        # and this is necessary cause most of the properties
+        # of the client, need to know what kind of model is
+        # in order to call the correct API.
         await self._preloaded_training_parameters(
             self.trained_model["training_parameters_guid"]
         )
@@ -444,9 +452,7 @@ class BaseQcogClient:
         model_name = Model(self.training_parameters["model"])
 
         model_params_validator: (
-            type[ModelPauliParameters] |
-            type[ModelEnsembleParameters] |
-            None
+            type[ModelPauliParameters] | type[ModelEnsembleParameters] | None
         ) = None
         if model_name == Model.pauli:
             model_params_validator = ModelPauliParameters

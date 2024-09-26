@@ -190,7 +190,7 @@ async def case_ensemble() -> None:
     await client.preloaded_data(dataset_id)
 
     await client.train(
-        batch_size=1,
+        batch_size=1000,
         num_passes=1,
         weight_optimization=AnalyticOptimizationParameters(),
         get_states_extra=LOBPCGFastStateParameters(iterations=1, tol=0.05),

@@ -30,12 +30,21 @@ HOST = os.getenv("QCOG_HOST", "dev.qognitive.io")
 PORT = os.getenv("QCOG_PORT", 443)
 DATASET_ID = os.getenv("DATASET_ID", None)
 MODEL_ID = os.getenv("MODEL_ID", None)
+DATASET_NAME = os.getenv("DATASET_NAME", "test-1234")
+
+print("------------ Presets ------------")
+print("HOST: ", HOST)
+print("PORT: ", PORT)
+print("DATASET_ID: ", DATASET_ID)
+print("MODEL_ID: ", MODEL_ID)
+print("DATASET_NAME: ", DATASET_NAME)
+print("--------------------------------")
 
 
-def _get_test_df(size_mb: int) -> DataFrame:
+def _get_test_df(size_mb: int) -> tuple[DataFrame, int]:
     # Estimate the number of rows needed to reach the desired size
     # This is an approximation and may need adjustment
-    row_size_bytes = 100  # Estimated size per row in bytes
+    row_size_bytes = 160
     num_rows = (size_mb * 1024 * 1024) // row_size_bytes
 
     # Create the DataFrame
@@ -50,8 +59,9 @@ def _get_test_df(size_mb: int) -> DataFrame:
     # Check the actual size and adjust if necessary
     actual_size_mb = df.memory_usage(deep=True).sum() / (1024 * 1024)
     print(f"Actual DataFrame size: {actual_size_mb:.2f} MB")
+    print("Dataframe length: ", len(df))
 
-    return df
+    return df, len(df)
 
 
 def main():
@@ -113,17 +123,16 @@ async def big_data_test() -> None:
         hostname=HOST,
         port=PORT,
     )
+    big_df, batch_size = _get_test_df(10000)
 
     if DATASET_ID is None:
-        dataset_name = os.environ["DATASET_NAME"]
-        big_df = _get_test_df(100)
         size = big_df.memory_usage(deep=True).sum() / 1024**2
         print("Testing Size of big_df MB: ", size)
 
         print("Testing upload_data")
 
         start = time.time()
-        await client.upload_data(big_df, dataset_name)
+        await client.upload_data(big_df, DATASET_NAME)
         end = time.time()
         print(f"`upload_data` Time taken to upload {size} MB of data: ", end - start)
     else:
@@ -134,8 +143,9 @@ async def big_data_test() -> None:
     client.pauli(
         operators=["X", "Y", "Z"],
     )
+
     await client.train(
-        batch_size=1,
+        batch_size=batch_size // 3,
         num_passes=1,
         weight_optimization=GradOptimizationParameters(
             iterations=10,

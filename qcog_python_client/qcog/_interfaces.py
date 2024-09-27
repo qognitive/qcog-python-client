@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import overload
+from typing import Any, overload
 
 import aiohttp
 import pandas as pd
 
 
-class ABCRequestClient(ABC):
+class IRequestClient(ABC):
     """Interface for a request client."""
 
     @abstractmethod
@@ -37,11 +37,26 @@ class ABCRequestClient(ABC):
         """Execute a post request."""
         ...
 
+    @property
+    def headers(self) -> dict:
+        """Get the headers."""
+        raise NotImplementedError
 
-class ABCDataClient(ABC):
+    @property
+    def base_url(self) -> str:
+        """Get the base url of the request."""
+        raise NotImplementedError
+
+
+class IDataClient(ABC):
     """Interface for a data client."""
 
     @abstractmethod
     async def upload_data(self, data: pd.DataFrame) -> dict:
         """Upload a dataframe."""
+        ...
+
+    @abstractmethod
+    async def stream_data(self, data: Any, *, dataset_id: str) -> dict:
+        """Download a dataframe."""
         ...

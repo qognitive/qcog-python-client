@@ -11,8 +11,8 @@ from qcog_python_client.qcog._baseclient import BaseQcogClient
 from qcog_python_client.qcog._data_uploader import DataClient
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog._interfaces import (
-    ABCDataClient,
-    ABCRequestClient,
+    IDataClient,
+    IRequestClient,
 )
 from qcog_python_client.qcog._version import DEFAULT_QCOG_VERSION
 from qcog_python_client.schema.common import (
@@ -39,8 +39,8 @@ class QcogClient(BaseQcogClient):
         api_version: str = "v1",
         safe_mode: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
-        httpclient: ABCRequestClient | None = None,
-        dataclient: ABCDataClient | None = None,
+        httpclient: IRequestClient | None = None,
+        dataclient: IDataClient | None = None,
     ) -> QcogClient:
         """Instantiate a new Qcog client.
 

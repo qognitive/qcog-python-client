@@ -12,8 +12,8 @@ from qcog_python_client.qcog._baseclient import (
 from qcog_python_client.qcog._data_uploader import DataClient
 from qcog_python_client.qcog._httpclient import RequestClient
 from qcog_python_client.qcog._interfaces import (
-    ABCDataClient,
-    ABCRequestClient,
+    IDataClient,
+    IRequestClient,
 )
 from qcog_python_client.qcog._version import DEFAULT_QCOG_VERSION
 from qcog_python_client.schema.common import (
@@ -39,8 +39,8 @@ class AsyncQcogClient(BaseQcogClient):
         api_version: str = "v1",
         safe_mode: bool = False,
         version: str = DEFAULT_QCOG_VERSION,
-        httpclient: ABCRequestClient | None = None,
-        dataclient: ABCDataClient | None = None,
+        httpclient: IRequestClient | None = None,
+        dataclient: IDataClient | None = None,
     ) -> AsyncQcogClient:
         """Instantiate a new Qcog client.
 
@@ -100,6 +100,11 @@ class AsyncQcogClient(BaseQcogClient):
 
         """
         await self._data(data)
+        return self
+
+    async def upload_data(self, data: pd.DataFrame, dataset_id: str) -> AsyncQcogClient:
+        """Upload data as a stream."""
+        await self._upload_data(data, dataset_id)
         return self
 
     async def preloaded_data(self, guid: str) -> AsyncQcogClient:

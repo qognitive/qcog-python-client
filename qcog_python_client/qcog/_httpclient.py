@@ -120,6 +120,8 @@ class RequestClient(_HTTPClient, IRequestClient):
         is_data = isinstance(data, aiohttp.FormData)
         is_json = isinstance(data, dict)
 
+        uri += "/"
+
         logger.debug(f"Requesting {uri} with {method} method")
         logger.debug(f"is_data: {is_data}")
         logger.debug(f"is_json: {is_json}")

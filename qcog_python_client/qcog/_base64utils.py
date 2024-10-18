@@ -119,11 +119,6 @@ def compress_data(data: pd.DataFrame) -> io.BytesIO:
     indexing_csv.seek(0)
 
     data_csv: str = data.to_csv()
-
-    # raw_bytes: bytes = json.dumps(payload).encode("ascii")
-    # base64_bytes = base64.b64encode(raw_bytes)
-    # base64_string = base64_bytes.decode("ascii")
-
     buffer = io.BytesIO()
 
     with gzip.GzipFile(fileobj=buffer, mode="wb") as f:

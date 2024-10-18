@@ -62,7 +62,7 @@ class DataClient(IDataClient):
 
         form = aiohttp.FormData()
         form.add_field(
-            "file", zip_data, filename="data.csv", content_type="application/gzip"
+            "file", zip_data.read(), filename="data.csv", content_type="application/gzip"
         )
 
         try:

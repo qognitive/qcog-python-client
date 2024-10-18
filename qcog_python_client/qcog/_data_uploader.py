@@ -4,12 +4,10 @@ This is a separate class because it will be heavily modified in order
 to support multi part uploads or other types of uploads.
 """
 
-import gzip
-
 import aiohttp
 from pandas.core.api import DataFrame as DataFrame
 
-from qcog_python_client.qcog._base64utils import encode_base64
+from qcog_python_client.qcog._base64utils import compress_data, encode_base64
 from qcog_python_client.qcog._interfaces import IDataClient, IRequestClient
 from qcog_python_client.schema import DatasetPayload
 
@@ -38,7 +36,7 @@ class DataClient(IDataClient):
         data: DataFrame,
         *,
         dataset_id: str,
-        encoding: str = "gzipBase64",
+        encoding: str = "gzip",
     ) -> dict:
         """Stream data to the server.
 
@@ -60,7 +58,7 @@ class DataClient(IDataClient):
         url = f"{base_url}/dataset/upload?dataset_id={dataset_id}&format=dataframe&source=client&encoding={encoding}"  # noqa: E501
 
         # Zip gzip the data
-        zip_data = gzip.compress(encode_base64(data).encode())
+        zip_data = compress_data(data)
 
         form = aiohttp.FormData()
         form.add_field(

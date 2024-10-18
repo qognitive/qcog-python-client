@@ -4,7 +4,6 @@ This is a separate class because it will be heavily modified in order
 to support multi part uploads or other types of uploads.
 """
 
-import io
 import aiohttp
 from pandas.core.api import DataFrame as DataFrame
 

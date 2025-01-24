@@ -169,7 +169,7 @@ With our trained model loaded into the client, we can now run inference on the d
 Results
 -------
 
-Some example results for various qubit counts and Pauli weights are shown below. The mean squared error (MSE) and mean absolute percentage error (MAPE) are calculated for each case.
+Some example results for various qubit counts and Pauli weights are shown below. The accuracy score is calculated for each case.
 
 .. list-table:: Sample Results
     :header-rows: 1
@@ -179,10 +179,10 @@ Some example results for various qubit counts and Pauli weights are shown below.
       - Accuracy
     * - 5
       - 2
-      - 1.098
+      - 0.867
     * - 6
       - 2
-      - 0.983
+      - 0.894
     * - 6
       - 3
-      - 0.903
+      - 0.919

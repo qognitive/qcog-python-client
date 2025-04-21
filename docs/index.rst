@@ -59,6 +59,6 @@ If you are interested in learning more about the algorithm then we'd suggest you
 How do I get access?
 --------------------
 
-Currently to get access you should contact us at support@qognitive.io and we can provision you with an account and an API key.
+Currently to get access you should contact us via `our website <https://www.qognitive.io/api-request>`_ and we can provision you with an account and an API key.
 
 

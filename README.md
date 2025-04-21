@@ -14,7 +14,7 @@ The documentation for the API can be found at our [Read the Docs site here](http
 
 ## Getting API access
 
-Access is currently in closed Beta. Please reach out to through [this link](https://www.qognitive.io/api-request) in order to request access to our system.
+Access is currently in closed Beta. Please reach out through [this link](https://www.qognitive.io/api-request) in order to request access to our system.
 
 ## Support
 

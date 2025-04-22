@@ -25,7 +25,7 @@ from .generated_schema.models import (
     ModelGeneralParameters,
     ModelPauliParameters,
     NPEIGHStateParameters,
-    OptimizationMethodModel,
+    OptimizationMethod,
     PowerIterStateParameters,
     TrainingStatus,
 )

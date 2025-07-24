@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     out_dir: str = Field("qcog_python_client/schema/generated_schema/", alias="OUT_DIR")
     module_name: str = Field("models", alias="MODULE_NAME")
     openapi_source: Url = Field(
-        "https://dev.qognitive.io/openapi.json", alias="OPENAPI_SOURCE"
+        "https://orchestrationapi-lb-204795732.us-east-2.elb.amazonaws.com/openapi.json", alias="OPENAPI_SOURCE"
     )
     schema_name: str = Field("schema", alias="SCHEMA_NAME")
     delete_after: bool = Field(True, alias="DELETE_AFTER")
@@ -51,7 +51,7 @@ def pull_openapi_schema(from_source: str, schemafile_name: str) -> str:
 
     Generate a new schema.json file from the source at the given address.
     """
-    response = requests.get(from_source, timeout=10)
+    response = requests.get(from_source, timeout=10, verify=False)
     schema_path = os.path.join(os.getcwd(), schemafile_name)
 
     with open(schema_path, "w") as f:

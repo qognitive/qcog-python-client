@@ -35,6 +35,7 @@ class _HTTPClient:
         port: int = 443,
         api_version: str = "v1",
         retries: int = 3,
+        ssl: bool = True,
     ):
         """HTTP client constructor.
 
@@ -53,6 +54,8 @@ class _HTTPClient:
             the "vX" part of the url for the api version
         retries: int
             number of attempts in cases of bad gateway
+        ssl : bool
+            if true uses ssl for the http client
 
         """
         self.token: str = token if isinstance(token, str) else self.TOKEN
@@ -68,6 +71,7 @@ class _HTTPClient:
         base_url: str = f"{protocol}://{self.hostname}:{self.port}"
         self.url: str = f"{base_url}/api/{self.api_version}"
         self.retries: int = retries
+        self.ssl: bool = ssl
 
 
 class RequestClient(_HTTPClient, IRequestClient):
@@ -138,6 +142,7 @@ class RequestClient(_HTTPClient, IRequestClient):
                             method.value,
                             uri,
                             data=data,
+                            ssl=self.ssl,
                         )
 
                     elif is_json:
@@ -145,12 +150,14 @@ class RequestClient(_HTTPClient, IRequestClient):
                             method.value,
                             uri,
                             json=data,
+                            ssl=self.ssl,
                         )
 
                     elif data is None and method == HttpMethod.get:
                         resp = await session.request(
                             method.value,
                             uri,
+                            ssl=self.ssl,
                         )
 
                     else:

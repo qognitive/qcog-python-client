@@ -18,8 +18,9 @@ class DataClient(IDataClient):
     Current implementation that relies on a classic http post request.
     """
 
-    def __init__(self, http_client: IRequestClient) -> None:
+    def __init__(self, http_client: IRequestClient, *, ssl: bool = True) -> None:
         self.http_client = http_client
+        self.ssl = ssl
 
     async def upload_data(self, data: DataFrame) -> dict:
         data_payload = DatasetPayload(
@@ -67,7 +68,12 @@ class DataClient(IDataClient):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, headers=headers, data=form) as response:
+                async with session.post(
+                    url,
+                    headers=headers,
+                    data=form,
+                    ssl=self.ssl,
+                ) as response:
                     response.raise_for_status()
                     data_: dict = await response.json()
                     return data_

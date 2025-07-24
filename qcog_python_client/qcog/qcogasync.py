@@ -41,6 +41,7 @@ class AsyncQcogClient(BaseQcogClient):
         version: str = DEFAULT_QCOG_VERSION,
         httpclient: IRequestClient | None = None,
         dataclient: IDataClient | None = None,
+        ssl: bool = True,
     ) -> AsyncQcogClient:
         """Instantiate a new Qcog client.
 
@@ -68,6 +69,8 @@ class AsyncQcogClient(BaseQcogClient):
             an optional http client to use instead of the default
         dataclient : ABCDataClient | None
             an optional data client to use instead of the default
+        ssl : bool
+            if true uses ssl for the http client
 
         """
         client = cls()
@@ -77,9 +80,10 @@ class AsyncQcogClient(BaseQcogClient):
             hostname=hostname,
             port=port,
             api_version=api_version,
+            ssl=ssl,
         )
 
-        client.data_client = dataclient or DataClient(client.http_client)
+        client.data_client = dataclient or DataClient(client.http_client, ssl=ssl)
 
         if safe_mode:
             await client.http_client.get("status")

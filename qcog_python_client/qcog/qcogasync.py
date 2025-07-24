@@ -69,6 +69,8 @@ class AsyncQcogClient(BaseQcogClient):
             an optional http client to use instead of the default
         dataclient : ABCDataClient | None
             an optional data client to use instead of the default
+        ssl : bool
+            if true uses ssl for the http client
 
         """
         client = cls()

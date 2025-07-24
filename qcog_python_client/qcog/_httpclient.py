@@ -54,6 +54,8 @@ class _HTTPClient:
             the "vX" part of the url for the api version
         retries: int
             number of attempts in cases of bad gateway
+        ssl : bool
+            if true uses ssl for the http client
 
         """
         self.token: str = token if isinstance(token, str) else self.TOKEN
